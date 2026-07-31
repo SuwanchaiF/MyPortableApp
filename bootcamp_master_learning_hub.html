@@ -1278,10 +1278,10 @@ Document
 
             const userAns = parseInt(selected.value);
             
-            // Save user answer to state and localStorage
+            // Save user answer to state and localStorage & Firebase
             if (!quizAnswers[currentDay]) quizAnswers[currentDay] = {};
             quizAnswers[currentDay][qIdx] = userAns;
-            localStorage.setItem('bootcamp_quiz_answers', JSON.stringify(quizAnswers));
+            saveUserProgress();
 
             quizResults[qIdx] = (userAns === correctIdx);
             updateQuizScore();
@@ -1394,10 +1394,10 @@ Document
         }
 
         function resetProgress() {
+            if (!confirm('ยืนยันล้างข้อมูลความคืบหน้าของบทเรียนของคุณ?')) return;
             completedDays = [];
-            localStorage.removeItem('bootcamp_completed_days');
             quizAnswers = {};
-            localStorage.removeItem('bootcamp_quiz_answers');
+            saveUserProgress();
             updateProgressUI();
             updateCompleteButton();
             renderSidebar();
