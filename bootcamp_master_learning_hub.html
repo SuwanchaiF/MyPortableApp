@@ -193,11 +193,18 @@
                         </p>
                     </div>
 
-                    <!-- Mark as completed toggle button -->
-                    <button id="completeBtn" onclick="toggleCurrentDayComplete()" class="px-4 py-2 bg-slate-700 hover:bg-emerald-600 border border-slate-600 hover:border-emerald-500 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shadow-md">
-                        <i class="fa-regular fa-circle-check text-sm" id="completeIcon"></i>
-                        <span id="completeText">มาร์กเรียนจบแล้ว</span>
-                    </button>
+                    <!-- Action buttons -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="goToNoteForCurrentDay()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 border border-indigo-500 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shadow-md">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            <span>จดโน้ตบทเรียนนี้</span>
+                        </button>
+                        <!-- Mark as completed toggle button -->
+                        <button id="completeBtn" onclick="toggleCurrentDayComplete()" class="px-4 py-2 bg-slate-700 hover:bg-emerald-600 border border-slate-600 hover:border-emerald-500 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shadow-md">
+                            <i class="fa-regular fa-circle-check text-sm" id="completeIcon"></i>
+                            <span id="completeText">มาร์กเรียนจบแล้ว</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -1288,6 +1295,14 @@ Document
         function copyCode() {
             const code = document.getElementById('codeBlock').textContent;
             navigator.clipboard.writeText(code);
+        }
+
+        function goToNoteForCurrentDay() {
+            const dayStr = `Day ${String(currentDay).padStart(2, '0')}`;
+            const data = lessonsData[currentDay] || {};
+            const tech = data.lang || 'PHP';
+            const title = encodeURIComponent(data.title || `บทเรียนวันที่ ${currentDay}`);
+            window.location.href = `index.html?day=${encodeURIComponent(dayStr)}&tech=${encodeURIComponent(tech)}&title=${title}`;
         }
 
         function filterContent() {

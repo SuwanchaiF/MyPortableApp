@@ -1052,9 +1052,36 @@
         allNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         updateDashboardStats(allNotes);
         renderNotesList(allNotes);
+        checkUrlQueryParams();
     }, (error) => {
         console.error("Firebase Listener Error:", error);
     });
+
+    function checkUrlQueryParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const day = urlParams.get('day');
+        const tech = urlParams.get('tech');
+        const title = urlParams.get('title');
+
+        if (day) {
+            const daySelect = document.getElementById('note-day');
+            if (daySelect) daySelect.value = day;
+        }
+        if (tech) {
+            const techSelect = document.getElementById('note-tech');
+            if (techSelect) techSelect.value = tech;
+        }
+        if (title) {
+            const titleInput = document.getElementById('note-title');
+            if (titleInput && !titleInput.value) {
+                titleInput.value = `สรุปบทเรียน: ${day ? day + ' - ' : ''}${title}`;
+            }
+        }
+        if (day || tech || title) {
+            const descInput = document.getElementById('note-desc');
+            if (descInput) descInput.focus();
+        }
+    }
 
     function handleSaveNote(e) {
         e.preventDefault();
