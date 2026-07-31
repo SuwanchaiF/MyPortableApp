@@ -80,14 +80,15 @@
         }
 
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: rgba(30, 41, 59, 0.94);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 28px;
             border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--card-border);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--card-border);
             position: relative;
             margin-bottom: 24px;
+            transform: translateZ(0);
         }
 
         .card::before {
@@ -447,18 +448,20 @@
         }
 
         .note-card {
-            background: rgba(15, 23, 42, 0.45);
+            background: rgba(15, 23, 42, 0.55);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 18px;
             padding: 18px 20px;
-            transition: all 0.2s ease;
+            transition: border-color 0.15s ease, background-color 0.15s ease;
             position: relative;
+            content-visibility: auto;
+            contain-intrinsic-size: 0 150px;
         }
 
         .note-card:hover {
             border-color: rgba(99, 102, 241, 0.4);
-            background: rgba(30, 41, 59, 0.7);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+            background: rgba(30, 41, 59, 0.75);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
 
         .note-header {
@@ -722,7 +725,8 @@
 
         @media (max-width: 768px) {
             body { padding: 8px 4px; }
-            .card { padding: 16px 12px; border-radius: 20px; }
+            .card { padding: 16px 12px; border-radius: 20px; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+            .modal-card { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
             .header-title { padding-right: 50px !important; flex-direction: column; align-items: flex-start; gap: 10px; }
             .user-dropdown-wrapper { position: absolute !important; top: 14px !important; right: 14px !important; }
             .btn-profile-badge { width: 34px !important; height: 34px !important; font-size: 1.1rem !important; }
