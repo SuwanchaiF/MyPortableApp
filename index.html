@@ -785,19 +785,31 @@
                 </div>
             </div>
             
-            <div class="header-actions">
+            <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
+                <button type="button" id="btn-show-login" class="btn-nav" onclick="openLoginModal()">
+                    <i class="fa-solid fa-user-lock text-amber-400"></i> เข้าสู่ระบบ
+                </button>
+
+                <button type="button" id="btn-quota" class="btn-nav" onclick="openQuotaModal()" style="display: none;">
+                    <i class="fa-solid fa-chart-pie text-emerald-400"></i> ลิมิตระบบ
+                </button>
+                <a href="bootcamp_master_learning_hub.html" class="btn-nav">
+                    <i class="fa-solid fa-rocket text-indigo-400"></i> Roadmap 60 วัน
+                </a>
+
+                <!-- Far Right Profile Avatar Dropdown Menu -->
                 <div class="user-dropdown-wrapper">
-                    <button type="button" id="user-profile-badge" onclick="toggleUserDropdown(event)" class="btn-profile-badge" style="display: none; align-items: center; gap: 8px; background: rgba(99, 102, 241, 0.18); border: 1px solid rgba(99, 102, 241, 0.35); padding: 5px 14px; border-radius: 9999px; cursor: pointer; color: #ffffff; transition: all 0.2s;">
-                        <span id="user-avatar" style="font-size: 1.15rem;">👤</span>
+                    <button type="button" id="user-profile-badge" onclick="toggleUserDropdown(event)" class="btn-profile-badge" style="display: none; align-items: center; gap: 8px; background: rgba(99, 102, 241, 0.2); border: 1.5px solid rgba(99, 102, 241, 0.4); padding: 4px 12px 4px 6px; border-radius: 9999px; cursor: pointer; color: #ffffff; transition: all 0.2s;">
+                        <div id="user-avatar" style="width: 30px; height: 30px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);">👤</div>
                         <span id="user-name" style="font-size: 0.82rem; font-weight: 600; color: #a5b4fc;">Guest</span>
                         <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem; color: #94a3b8; margin-left: 2px;"></i>
                     </button>
 
-                    <!-- User Profile Dropdown Menu -->
-                    <div id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: calc(100% + 8px); width: 240px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); z-index: 100; overflow: hidden;">
+                    <!-- User Profile Dropdown Menu (Anchored to Far Right) -->
+                    <div id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: calc(100% + 8px); width: 240px; background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5); z-index: 100; overflow: hidden;">
                         <!-- Dropdown Header Info -->
                         <div style="padding: 14px 16px; background: rgba(30, 41, 59, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; gap: 12px;">
-                            <div id="dropdown-avatar" style="width: 42px; height: 42px; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">👨‍💻</div>
+                            <div id="dropdown-avatar" style="width: 42px; height: 42px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);">👨‍💻</div>
                             <div style="overflow: hidden;">
                                 <h4 id="dropdown-username" style="margin: 0; font-size: 0.92rem; font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Guest</h4>
                                 <span id="dropdown-role" style="font-size: 0.7rem; color: #a5b4fc; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.3); padding: 1px 8px; border-radius: 9999px; font-weight: 600; display: inline-block; margin-top: 2px;">@guest</span>
@@ -822,17 +834,6 @@
                         </div>
                     </div>
                 </div>
-
-                <button type="button" id="btn-show-login" class="btn-nav" onclick="openLoginModal()">
-                    <i class="fa-solid fa-user-lock text-amber-400"></i> เข้าสู่ระบบ
-                </button>
-
-                <button type="button" id="btn-quota" class="btn-nav" onclick="openQuotaModal()" style="display: none;">
-                    <i class="fa-solid fa-chart-pie text-emerald-400"></i> ลิมิตระบบ
-                </button>
-                <a href="bootcamp_master_learning_hub.html" class="btn-nav">
-                    <i class="fa-solid fa-rocket text-indigo-400"></i> Roadmap 60 วัน
-                </a>
             </div>
         </div>
 
