@@ -697,7 +697,15 @@
             .stats-grid { grid-template-columns: 1fr; }
             .form-row { grid-template-columns: 1fr; }
         }
-    </style>
+    <script>
+        (function() {
+            try {
+                if (localStorage.getItem('vault_auth_user')) {
+                    document.write('<style>#auth-screen-container { display: none !important; } #app-main-container { display: block !important; }</style>');
+                }
+            } catch(e) {}
+        })();
+    </script>
 </head>
 <body>
 
@@ -1452,14 +1460,27 @@
     });
 
     function loginUserSession(userObj) {
+        if (!userObj || !userObj.username) return;
         currentUser = userObj;
         localStorage.setItem('vault_auth_user', JSON.stringify(currentUser));
         
-        document.getElementById('auth-screen-container').style.display = 'none';
-        document.getElementById('app-main-container').style.display = 'block';
+        const authScreen = document.getElementById('auth-screen-container');
+        const mainContainer = document.getElementById('app-main-container');
 
-        updateHeaderUserBadge();
-        attachIsolatedUserNotesListener();
+        if (authScreen) authScreen.style.display = 'none';
+        if (mainContainer) mainContainer.style.display = 'block';
+
+        try {
+            updateHeaderUserBadge();
+        } catch(e) {
+            console.error("updateHeaderUserBadge Error:", e);
+        }
+
+        try {
+            attachIsolatedUserNotesListener();
+        } catch(e) {
+            console.error("attachIsolatedUserNotesListener Error:", e);
+        }
     }
 
     function updateHeaderUserBadge() {
@@ -1605,10 +1626,14 @@
                     loginUserSession(parsed);
                     return;
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error("Session parse error:", e);
+            }
         }
-        document.getElementById('auth-screen-container').style.display = 'flex';
-        document.getElementById('app-main-container').style.display = 'none';
+        const authScreen = document.getElementById('auth-screen-container');
+        const mainContainer = document.getElementById('app-main-container');
+        if (authScreen) authScreen.style.display = 'flex';
+        if (mainContainer) mainContainer.style.display = 'none';
     }
 
     function escapeHtml(text) {
