@@ -911,30 +911,61 @@ Document
                     if (badge) badge.classList.remove('hidden');
 
                     const cleanUser = cleanUsername(hubUser.username);
-                    completedDays = JSON.parse(localStorage.getItem('bootcamp_completed_days_' + cleanUser) || '[]');
-                    quizAnswers = JSON.parse(localStorage.getItem('bootcamp_quiz_answers_' + cleanUser) || '{}');
+                    
+                    const rawCompleted = localStorage.getItem('bootcamp_completed_days_' + cleanUser);
+                    if (rawCompleted) {
+                        try {
+                            const parsed = JSON.parse(rawCompleted);
+                            completedDays = Array.isArray(parsed) ? parsed.map(Number) : Object.values(parsed).map(Number);
+                        } catch(e) { completedDays = []; }
+                    } else {
+                        completedDays = [];
+                    }
+
+                    const rawAnswers = localStorage.getItem('bootcamp_quiz_answers_' + cleanUser);
+                    if (rawAnswers) {
+                        try { quizAnswers = JSON.parse(rawAnswers); } catch(e) { quizAnswers = {}; }
+                    } else {
+                        quizAnswers = {};
+                    }
 
                     userProgressRef = db.ref('user_progress/' + cleanUser);
                     userProgressRef.on('value', (snapshot) => {
                         const data = snapshot.val();
                         if (data) {
-                            if (data.completedDays) completedDays = data.completedDays;
+                            if (data.completedDays) {
+                                if (Array.isArray(data.completedDays)) {
+                                    completedDays = data.completedDays.map(Number);
+                                } else if (typeof data.completedDays === 'object') {
+                                    completedDays = Object.values(data.completedDays).map(Number);
+                                }
+                            }
                             if (data.quizAnswers) quizAnswers = data.quizAnswers;
                             localStorage.setItem('bootcamp_completed_days_' + cleanUser, JSON.stringify(completedDays));
                             localStorage.setItem('bootcamp_quiz_answers_' + cleanUser, JSON.stringify(quizAnswers));
                             updateProgressUI();
                             updateCompleteButton();
                             renderSidebar();
+                            renderExplanation();
                         }
                     });
                 } else {
                     if (badge) badge.classList.add('hidden');
-                    completedDays = JSON.parse(localStorage.getItem('bootcamp_completed_days_guest') || '[]');
+                    const rawGuest = localStorage.getItem('bootcamp_completed_days_guest');
+                    if (rawGuest) {
+                        try {
+                            const parsed = JSON.parse(rawGuest);
+                            completedDays = Array.isArray(parsed) ? parsed.map(Number) : Object.values(parsed).map(Number);
+                        } catch(e) { completedDays = []; }
+                    } else {
+                        completedDays = [];
+                    }
                     quizAnswers = JSON.parse(localStorage.getItem('bootcamp_quiz_answers_guest') || '{}');
                 }
             }
 
             function saveUserProgress() {
+                if (!Array.isArray(completedDays)) completedDays = [];
                 const cleanUser = hubUser ? cleanUsername(hubUser.username) : 'guest';
                 localStorage.setItem('bootcamp_completed_days_' + cleanUser, JSON.stringify(completedDays));
                 localStorage.setItem('bootcamp_quiz_answers_' + cleanUser, JSON.stringify(quizAnswers));
@@ -944,6 +975,8 @@ Document
                         completedDays: completedDays,
                         quizAnswers: quizAnswers,
                         updatedAt: new Date().toISOString()
+                    }).catch(err => {
+                        console.warn("Firebase progress save error:", err);
                     });
                 }
             }
@@ -1164,20 +1197,20 @@ Document
 
         // Toggle Day Completion Status
         function toggleCurrentDayComplete() {
-            const idx = completedDays.indexOf(currentDay);
+            if (!Array.isArray(completedDays)) completedDays = [];
+            const dayNum = Number(currentDay);
+            const idx = completedDays.indexOf(dayNum);
             if (idx > -1) {
                 completedDays.splice(idx, 1);
             } else {
-                completedDays.push(currentDay);
+                completedDays.push(dayNum);
             }
 
-            localStorage.setItem('bootcamp_completed_days', JSON.stringify(completedDays));
+            saveUserProgress();
             updateProgressUI();
             updateCompleteButton();
             renderSidebar();
-            
-            // Reload current day view to check if unlocked
-            loadDay(currentDay);
+            renderExplanation();
         }
 
         // Native Quiz Render & Logic
