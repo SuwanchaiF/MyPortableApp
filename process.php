@@ -1,5 +1,9 @@
 <?php
 ob_start();
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('X-XSS-Protection: 1; mode=block');
+
 define('DATA_FILE', __DIR__ . '/database.json');
 define('BACKUP_DIR', __DIR__ . '/backups');
 
@@ -12,7 +16,7 @@ function loadData() {
 
 function createAutoBackup() {
     if (!file_exists(DATA_FILE)) return;
-    if (!file_exists(BACKUP_DIR)) @mkdir(BACKUP_DIR, 0777, true);
+    if (!file_exists(BACKUP_DIR)) @mkdir(BACKUP_DIR, 0755, true);
     $backup_filename = BACKUP_DIR . '/backup_' . date('Y-m-d_H-i-s') . '.json';
     @copy(DATA_FILE, $backup_filename);
     $backups = glob(BACKUP_DIR . '/backup_*.json');
@@ -25,8 +29,6 @@ function createAutoBackup() {
 function saveData($data) {
     createAutoBackup();
     $json = json_encode($data, JSON_UNESCAPED_UNICODE);
-    // บนระบบปฏิบัติการ Android/SDCard จะไม่รองรับ LOCK_EX (File locking)
-    // จึงใช้ file_put_contents แบบปกติเพื่อรองรับทั้ง Windows และ Android
     $res = @file_put_contents(DATA_FILE, $json, LOCK_EX);
     if ($res === false) {
         file_put_contents(DATA_FILE, $json);
@@ -42,8 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     if ($action === 'add') {
-        $text = trim($_POST['text_input'] ?? '');
-        if (!empty($text) && strlen($text) <= 1500) {
+        $raw_text = trim($_POST['text_input'] ?? '');
+        $text = htmlspecialchars($raw_text, ENT_QUOTES, 'UTF-8');
+        if (!empty($text) && mb_strlen($text, 'UTF-8') <= 1500) {
             $data = loadData();
             $data[] = [
                 'id' => bin2hex(random_bytes(8)),

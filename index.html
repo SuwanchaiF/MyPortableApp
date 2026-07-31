@@ -1090,10 +1090,10 @@
                     <div class="note-footer">
                         <span><i class="fa-regular fa-clock mr-1"></i> ${safeTime}</span>
                         <div class="note-actions">
-                            <button type="button" class="btn-action btn-view" onclick='openDetailModal(${itemJson})'>
+                            <button type="button" class="btn-action btn-view" onclick="openDetailModal('${safeId}')">
                                 <i class="fa-regular fa-eye"></i> รายละเอียด
                             </button>
-                            <button type="button" class="btn-action btn-edit" onclick='openEditModal(${itemJson})'>
+                            <button type="button" class="btn-action btn-edit" onclick="openEditModal('${safeId}')">
                                 <i class="fa-solid fa-pen-to-square"></i> แก้ไข
                             </button>
                             <button type="button" class="btn-action btn-del" onclick="handleDeleteNote('${safeId}')">
@@ -1235,7 +1235,10 @@
         }).catch(err => alert('คัดลอกไม่สำเร็จ: ' + err));
     }
 
-    function openDetailModal(item) {
+    function openDetailModal(target) {
+        const item = typeof target === 'object' ? target : allNotes.find(n => n.id === target);
+        if (!item) return;
+
         document.getElementById('modal-title').innerText = item.title;
         document.getElementById('modal-desc').innerText = item.desc || 'ไม่มีคำอธิบายเพิ่มเติม';
         
@@ -1270,7 +1273,10 @@
         if (e.target.classList.contains('modal-overlay')) closeDetailModal();
     }
 
-    function openEditModal(item) {
+    function openEditModal(target) {
+        const item = typeof target === 'object' ? target : allNotes.find(n => n.id === target);
+        if (!item) return;
+
         document.getElementById('edit-note-id').value = item.id;
         document.getElementById('edit-note-title').value = item.title || '';
         document.getElementById('edit-note-tech').value = item.tech || 'General';
