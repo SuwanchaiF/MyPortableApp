@@ -66,21 +66,26 @@
             </div>
 
             <!-- Global Search & Stats -->
-            <div class="flex items-center gap-4">
-                <div class="relative w-48 sm:w-64">
+            <div class="flex items-center gap-3">
+                <div class="relative w-40 sm:w-56">
                     <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                     <input type="text" id="searchInput" onkeyup="filterContent()" placeholder="ค้นหาหัวข้อ / Syntax..." 
                         class="w-full bg-slate-900/80 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors">
                 </div>
                 
+                <div id="hub-user-badge" class="hidden bg-indigo-950/80 border border-indigo-500/40 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs">
+                    <span id="hub-user-avatar">👨‍💻</span>
+                    <span id="hub-user-name" class="font-bold text-indigo-300 truncate max-w-[100px]">Guest</span>
+                </div>
+
                 <a href="index.html" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition-all hover:scale-105 active:scale-95">
-                    <i class="fa-solid fa-database"></i> 📁 หน้าบันทึกข้อมูล
+                    <i class="fa-solid fa-database"></i> 📁 คลังโน้ตส่วนตัว
                 </a>
                 
                 <div class="bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-2">
                     <i class="fa-solid fa-trophy text-amber-400 text-sm"></i>
-                    <div class="text-xs">
-                        <span id="progressText" class="font-bold text-indigo-400">0/60</span> วันที่เสร็จแล้ว
+                    <div class="text-xs whitespace-nowrap">
+                        <span id="progressText" class="font-bold text-indigo-400">0/60</span> เรียนแล้ว
                     </div>
                 </div>
             </div>
@@ -708,11 +713,6 @@ Document
             },
             41: {
                 part: "Part 5",
-                lang: "Java",
-                title: "Day 41: Java Strongly Typed & OOP Core",
-                desc: "เข้าใจคุณลักษณะ Strongly Typed, โครงสร้าง Class, Object และ Method ในภาษา Java",
-                theory: "Java เป็นภาษาประเภท **Static & Strongly Typed** หมายความว่าตัวแปรทุกตัวจะต้องระบุชนิดข้อมูล (Data Type) ชัดเจนขณะประกาศ และไม่ยอมให้เปลี่ยนประเภทตัวแปรข้ามสายพันธุ์โดยไม่แปลงข้อมูลอย่างเป็นทางการ",
-                syntax: "public class Main {\n    public static void main(String[] args) {\n        String name = \"Java\";\n        System.out.println(\"Hello \" + name);\n    }\n}",
                 code: "public class Student {\n    // Attributes (Private Encapsulation)\n    private String name;\n    private double gpa;\n\n    // Constructor\n    public Student(String name, double gpa) {\n        this.name = name;\n        this.gpa = gpa;\n    }\n\n    // Method\n    public void displayInfo() {\n        System.out.println(\"Student: \" + this.name + \" | GPA: \" + this.gpa);\n    }\n}",
                 explanation: [
                     "บรรทัดที่ 3-4: ประกาศ Field คุณลักษณะของ Class เป็น `private` เพื่อทำ Encapsulation",
@@ -797,80 +797,160 @@ Document
                 `
             }
         };
+    </script>
 
-        // Dynamic fallback data for days not explicitly detailed above
-        function getFallbackData(dayNum) {
-            const partMap = { 1: 'Part 1', 2: 'Part 2', 3: 'Part 3', 4: 'Part 4', 5: 'Part 5', 6: 'Part 6' };
-            const partNo = Math.ceil(dayNum / 10);
-            const langMap = { 1: 'PHP', 2: 'PHP', 3: 'PHP', 4: 'JavaScript', 5: 'Java', 6: 'Full Stack' };
-            
-            const topicTitles = {
-                2: "Data Types & Type Juggling", 3: "Operators & Precedence", 4: "Conditional Statements (if/else, switch)", 5: "Loops (for, while, foreach)", 6: "Arrays & Associative Arrays", 7: "Functions & Scope", 8: "String Manipulation Functions", 9: "Include & Require", 10: "Form Handling Basics",
-                12: "Form Validation & Sanitization", 13: "Sessions & Cookies", 14: "File I/O Handling", 15: "Date & Time Functions", 16: "Exception Handling", 17: "Regex Pattern Matching", 18: "Array Functions (map/filter)", 19: "Code Architecture & Patterns", 20: "JSON & cURL API Requests",
-                22: "OOP Classes & Objects", 23: "OOP Inheritance", 24: "Encapsulation & Access Modifiers", 25: "Abstract Classes & Interfaces", 26: "Static Members & Constants", 27: "Namespaces & Autoloading", 28: "Traits Concept", 29: "Design Patterns (Singleton/Factory)", 30: "OOP CRUD Mini Application",
-                32: "JS Arrow Functions & Lexical This", 33: "JS Array Methods (map, filter, reduce)", 34: "JS Objects & Destructuring", 35: "DOM Events & Manipulation", 36: "Async JS & Promises", 37: "Async/Await & Fetch API", 38: "ES6 Modules & Imports", 39: "Error Handling & Debugging", 40: "Web Storage (LocalStorage)",
-                42: "Java Data Types & Casting", 43: "Java Control Flow", 44: "Java Arrays & ArrayList", 45: "Java Method Overloading", 46: "Java Constructors & 'this'", 47: "Java OOP Inheritance & Super", 48: "Java Interfaces & Polymorphism", 49: "Java Exception Handling", 50: "Java Collections (List, Set, Map)",
-                52: "DB Design & Normalization", 53: "SQL Queries (SELECT, WHERE, GROUP BY)", 54: "SQL JOINs (INNER, LEFT, RIGHT)", 55: "SQL Transactions (ACID)", 56: "REST API Endpoint Design", 57: "Authentication & Password Security", 58: "Web Security (SQLi, XSS, CSRF)", 59: "Full Stack Integration", 60: "Capstone Project & Deployment"
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+                apiKey: "AIzaSyCC5-cJOhKeDpDu0YSEkE73OxlyOJ3srUM",
+                authDomain: "testprod-69c21.firebaseapp.com",
+                databaseURL: "https://testprod-69c21-default-rtdb.firebaseio.com",
+                projectId: "testprod-69c21",
+                storageBucket: "testprod-69c21.firebasestorage.app",
+                messagingSenderId: "674297674388",
+                appId: "1:674297674388:web:832dd59730e6561aab5281",
+                measurementId: "G-XLK9TQPTVX"
             };
 
-            const lang = langMap[partNo] || 'Programming';
-            const topic = topicTitles[dayNum] || `บทเรียนประจำวัน Day ${dayNum}`;
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            const db = firebase.database();
 
-            return {
-                part: partMap[partNo] || 'Part ?',
-                lang: lang,
-                title: `Day ${dayNum < 10 ? '0' + dayNum : dayNum}: ${topic}`,
-                desc: `เรียนรู้แนวคิด การใช้งาน และหลักปฏิบัติของ ${topic} ในภาษา ${lang}`,
-                theory: `ในบทเรียนนี้เราจะศึกษาโครงสร้างและแนวคิดสำคัญของ <b>${topic}</b> ในภาษา ${lang} เพื่อสร้างรากฐานที่มั่นคงสำหรับพัฒนาแอปพลิเคชัน`,
-                syntax: `// ${lang} Syntax Structure for Day ${dayNum}\n// ${topic}\n$example = "Demonstration of ${topic}";`,
-                code: `// ${lang} Code Sample for Day ${dayNum}\n// Focus: ${topic}\nfunction executeDay${dayNum}() {\n    // Implementation logic here\n    return "${topic} Executed Successfully";\n}`,
-                explanation: [
-                    `บรรทัดที่ 1-2: คอมเมนต์อธิบายหัวข้อ ${topic}`,
-                    `บรรทัดที่ 3: ประกาศฟังก์ชันตัวอย่างสำหรับประมวลผล ${topic}`,
-                    `บรรทัดที่ 4-5: ดำเนินการคืนค่าผลลัพธ์การทำงานของโปรแกรม`
-                ],
-                memory: `\n[Execution Context Day ${dayNum}: ${topic}]\nStack Memory ──► Heap Memory Reference\nGlobal Scope ──► Local Variable Binding\n`,
-                mistakes: `1. ลืมตรวจสอบประเภทข้อมูลก่อนประมวลผล ${topic}<br>2. เขียน Syntax ไม่ตรงตามมาตรฐานหลักภาษา`,
-                bestPractice: `1. ทำความเข้าใจการทำงานในระดับ Memory และจัดการ Resource อย่างถูกต้อง<br>2. ใช้การตรวจสอบตัวแปรและการจัดการ Error Handling เสมอ`,
-                exercise: `1. เขียนโค้ดฝึกปฏิบัติสร้างฟังก์ชันจัดการกับ ${topic}<br>2. ทดสอบผลลัพธ์และจัดการกรณี edge cases`,
-                challenge: `<b>Mini-Challenge:</b> นำเรื่อง ${topic} ไปประยุกต์ร่วมกับสถาปัตยกรรมระบบที่เรียนมาก่อนหน้า`,
-                quiz: [
-                    {
-                        q: `แนวคิดหลักเรื่อง ${topic} ในภาษา ${lang} เกี่ยวข้องกับข้อใดมากที่สุด?`,
-                        options: [
-                            `การเพิ่มประสิทธิภาพและโครงสร้างไวยากรณ์ของ ${topic}`,
-                            "การเขียนไฟล์โค้ดโดยไม่ใช้ตัวแปร",
-                            "การรันโปรแกรมฝั่ง Client อย่างเดียว",
-                            "การยกเลิกการทำงานของเซิร์ฟเวอร์"
-                        ],
-                        answer: 0,
-                        explain: `เนื้อหาของ Day ${dayNum} เน้นการทำความเข้าใจโครงสร้างไวยากรณ์และการประยุกต์ใช้ ${topic} อย่างถูกต้อง`
-                    },
-                    {
-                        q: `ข้อผิดพลาดทั่วไปที่ควรระวังเกี่ยวกับ ${topic} คืออะไร?`,
-                        options: [
-                            "การแสดงผลในหน้าจอ HTML",
-                            "การลืมทำความสะอาดข้อมูล (Validation/Sanitization) หรือการข้าม Error Handling",
-                            "การตั้งชื่อไฟล์ด้วยตัวอักษรภาษาอังกฤษ",
-                            "การใช้คำสั่ง echo หรือ console.log"
-                        ],
-                        answer: 1,
-                        explain: "การพัฒนาซอฟต์แวร์ที่ดีต้องระวังเรื่อง Validation, Security และการรับมือข้อผิดพลาดเสมอ"
-                    }
-                ],
-                cheatSheet: `<div class="bg-slate-900 p-3 rounded border border-slate-700 text-slate-300"><strong class="text-indigo-400">CheatSheet Day ${dayNum}:</strong><br>ทบทวน ${topic} ใน ${lang}</div>`
-            };
-        }
+            // State Management
+            let currentDay = 1;
+            let completedDays = [];
+            let currentQuizData = [];
+            let quizResults = {};
+            let quizAnswers = {};
+            let hubUser = null;
+            let userProgressRef = null;
 
-        // State Management
-        let currentDay = 1;
-        let completedDays = JSON.parse(localStorage.getItem('bootcamp_completed_days') || '[]');
-        let currentQuizData = [];
-        let quizResults = {};
-        let quizAnswers = JSON.parse(localStorage.getItem('bootcamp_quiz_answers') || '{}');
+            function cleanUsername(name) {
+                return (name || '').toLowerCase().replace(/[^a-z0-9_]/g, '');
+            }
+
+            function getFallbackData(dayNum) {
+                const partMap = { 1: 'Part 1', 2: 'Part 2', 3: 'Part 3', 4: 'Part 4', 5: 'Part 5', 6: 'Part 6' };
+                const partNo = Math.ceil(dayNum / 10);
+                const langMap = { 1: 'PHP', 2: 'PHP', 3: 'PHP', 4: 'JavaScript', 5: 'Java', 6: 'Full Stack' };
+                
+                const topicTitles = {
+                    2: "Data Types & Type Juggling", 3: "Operators & Precedence", 4: "Conditional Statements (if/else, switch)", 5: "Loops (for, while, foreach)", 6: "Arrays & Associative Arrays", 7: "Functions & Scope", 8: "String Manipulation Functions", 9: "Include & Require", 10: "Form Handling Basics",
+                    12: "Form Validation & Sanitization", 13: "Sessions & Cookies", 14: "File I/O Handling", 15: "Date & Time Functions", 16: "Exception Handling", 17: "Regex Pattern Matching", 18: "Array Functions (map/filter)", 19: "Code Architecture & Patterns", 20: "JSON & cURL API Requests",
+                    22: "OOP Classes & Objects", 23: "OOP Inheritance", 24: "Encapsulation & Access Modifiers", 25: "Abstract Classes & Interfaces", 26: "Static Members & Constants", 27: "Namespaces & Autoloading", 28: "Traits Concept", 29: "Design Patterns (Singleton/Factory)", 30: "OOP CRUD Mini Application",
+                    32: "JS Arrow Functions & Lexical This", 33: "JS Array Methods (map, filter, reduce)", 34: "JS Objects & Destructuring", 35: "DOM Events & Manipulation", 36: "Async JS & Promises", 37: "Async/Await & Fetch API", 38: "ES6 Modules & Imports", 39: "Error Handling & Debugging", 40: "Web Storage (LocalStorage)",
+                    42: "Java Data Types & Casting", 43: "Java Control Flow", 44: "Java Arrays & ArrayList", 45: "Java Method Overloading", 46: "Java Constructors & 'this'", 47: "Java OOP Inheritance & Super", 48: "Java Interfaces & Polymorphism", 49: "Java Exception Handling", 50: "Java Collections (List, Set, Map)",
+                    52: "DB Design & Normalization", 53: "SQL Queries (SELECT, WHERE, GROUP BY)", 54: "SQL JOINs (INNER, LEFT, RIGHT)", 55: "SQL Transactions (ACID)", 56: "REST API Endpoint Design", 57: "Authentication & Password Security", 58: "Web Security (SQLi, XSS, CSRF)", 59: "Full Stack Integration", 60: "Capstone Project & Deployment"
+                };
+
+                const lang = langMap[partNo] || 'Programming';
+                const topic = topicTitles[dayNum] || `บทเรียนประจำวัน Day ${dayNum}`;
+
+                return {
+                    part: partMap[partNo] || 'Part ?',
+                    lang: lang,
+                    title: `Day ${dayNum < 10 ? '0' + dayNum : dayNum}: ${topic}`,
+                    desc: `เรียนรู้แนวคิด การใช้งาน และหลักปฏิบัติของ ${topic} ในภาษา ${lang}`,
+                    theory: `ในบทเรียนนี้เราจะศึกษาโครงสร้างและแนวคิดสำคัญของ <b>${topic}</b> ในภาษา ${lang} เพื่อสร้างรากฐานที่มั่นคงสำหรับพัฒนาแอปพลิเคชัน`,
+                    syntax: `// ${lang} Syntax Structure for Day ${dayNum}\n// ${topic}\n$example = "Demonstration of ${topic}";`,
+                    code: `// ${lang} Code Sample for Day ${dayNum}\n// Focus: ${topic}\nfunction executeDay${dayNum}() {\n    // Implementation logic here\n    return "${topic} Executed Successfully";\n}`,
+                    explanation: [
+                        `บรรทัดที่ 1-2: คอมเมนต์อธิบายหัวข้อ ${topic}`,
+                        `บรรทัดที่ 3: ประกาศฟังก์ชันตัวอย่างสำหรับประมวลผล ${topic}`,
+                        `บรรทัดที่ 4-5: ดำเนินการคืนค่าผลลัพธ์การทำงานของโปรแกรม`
+                    ],
+                    memory: `\n[Execution Context Day ${dayNum}: ${topic}]\nStack Memory ──► Heap Memory Reference\nGlobal Scope ──► Local Variable Binding\n`,
+                    mistakes: `1. ลืมตรวจสอบประเภทข้อมูลก่อนประมวลผล ${topic}<br>2. เขียน Syntax ไม่ตรงตามมาตรฐานหลักภาษา`,
+                    bestPractice: `1. ทำความเข้าใจการทำงานในระดับ Memory และจัดการ Resource อย่างถูกต้อง<br>2. ใช้การตรวจสอบตัวแปรและการจัดการ Error Handling เสมอ`,
+                    exercise: `1. เขียนโค้ดฝึกปฏิบัติสร้างฟังก์ชันจัดการกับ ${topic}<br>2. ทดสอบผลลัพธ์และจัดการกรณี edge cases`,
+                    challenge: `<b>Mini-Challenge:</b> นำเรื่อง ${topic} ไปประยุกต์ร่วมกับสถาปัตยกรรมระบบที่เรียนมาก่อนหน้า`,
+                    quiz: [
+                        {
+                            q: `แนวคิดหลักเรื่อง ${topic} ในภาษา ${lang} เกี่ยวข้องกับข้อใดมากที่สุด?`,
+                            options: [
+                                `การเพิ่มประสิทธิภาพและโครงสร้างไวยากรณ์ของ ${topic}`,
+                                "การเขียนไฟล์โค้ดโดยไม่ใช้ตัวแปร",
+                                "การรันโปรแกรมฝั่ง Client อย่างเดียว",
+                                "การยกเลิกการทำงานของเซิร์ฟเวอร์"
+                            ],
+                            answer: 0,
+                            explain: `เนื้อหาของ Day ${dayNum} เน้นการทำความเข้าใจโครงสร้างไวยากรณ์และการประยุกต์ใช้ ${topic} อย่างถูกต้อง`
+                        },
+                        {
+                            q: `ข้อผิดพลาดทั่วไปที่ควรระวังเกี่ยวกับ ${topic} คืออะไร?`,
+                            options: [
+                                "การแสดงผลในหน้าจอ HTML",
+                                "การลืมทำความสะอาดข้อมูล (Validation/Sanitization) หรือการข้าม Error Handling",
+                                "การตั้งชื่อไฟล์ด้วยตัวอักษรภาษาอังกฤษ",
+                                "การใช้คำสั่ง echo หรือ console.log"
+                            ],
+                            answer: 1,
+                            explain: "การพัฒนาซอฟต์แวร์ที่ดีต้องระวังเรื่อง Validation, Security และการรับมือข้อผิดพลาดเสมอ"
+                        }
+                    ],
+                    cheatSheet: `<div class="bg-slate-900 p-3 rounded border border-slate-700 text-slate-300"><strong class="text-indigo-400">CheatSheet Day ${dayNum}:</strong><br>ทบทวน ${topic} ใน ${lang}</div>`
+                };
+            }
+
+            function initHubUserSession() {
+                const savedUser = localStorage.getItem('vault_auth_user');
+                if (savedUser) {
+                    try {
+                        hubUser = JSON.parse(savedUser);
+                    } catch(e) { hubUser = null; }
+                }
+
+                const badge = document.getElementById('hub-user-badge');
+                if (hubUser && hubUser.username) {
+                    document.getElementById('hub-user-name').innerText = hubUser.username;
+                    document.getElementById('hub-user-avatar').innerText = hubUser.avatar || '👨‍💻';
+                    if (badge) badge.classList.remove('hidden');
+
+                    const cleanUser = cleanUsername(hubUser.username);
+                    completedDays = JSON.parse(localStorage.getItem('bootcamp_completed_days_' + cleanUser) || '[]');
+                    quizAnswers = JSON.parse(localStorage.getItem('bootcamp_quiz_answers_' + cleanUser) || '{}');
+
+                    userProgressRef = db.ref('user_progress/' + cleanUser);
+                    userProgressRef.on('value', (snapshot) => {
+                        const data = snapshot.val();
+                        if (data) {
+                            if (data.completedDays) completedDays = data.completedDays;
+                            if (data.quizAnswers) quizAnswers = data.quizAnswers;
+                            localStorage.setItem('bootcamp_completed_days_' + cleanUser, JSON.stringify(completedDays));
+                            localStorage.setItem('bootcamp_quiz_answers_' + cleanUser, JSON.stringify(quizAnswers));
+                            updateProgressUI();
+                            updateCompleteButton();
+                            renderSidebar();
+                        }
+                    });
+                } else {
+                    if (badge) badge.classList.add('hidden');
+                    completedDays = JSON.parse(localStorage.getItem('bootcamp_completed_days_guest') || '[]');
+                    quizAnswers = JSON.parse(localStorage.getItem('bootcamp_quiz_answers_guest') || '{}');
+                }
+            }
+
+            function saveUserProgress() {
+                const cleanUser = hubUser ? cleanUsername(hubUser.username) : 'guest';
+                localStorage.setItem('bootcamp_completed_days_' + cleanUser, JSON.stringify(completedDays));
+                localStorage.setItem('bootcamp_quiz_answers_' + cleanUser, JSON.stringify(quizAnswers));
+
+                if (hubUser && userProgressRef) {
+                    userProgressRef.set({
+                        completedDays: completedDays,
+                        quizAnswers: quizAnswers,
+                        updatedAt: new Date().toISOString()
+                    });
+                }
+            }
 
         // Initialize UI
         document.addEventListener('DOMContentLoaded', () => {
+            initHubUserSession();
             renderSidebar();
             loadDay(1);
             updateProgressUI();
@@ -887,7 +967,6 @@ Document
             const answeredQuizCount = Object.keys(savedDayAnswers).length;
             const isQuizDone = totalQuizCount > 0 && answeredQuizCount >= totalQuizCount;
 
-            // OR CONDITION: ปลดล็อกเมื่อทำอย่างใดอย่างหนึ่งสำเร็จ (มาร์กเรียนจบ OR ทำแบบทดสอบครบทุกข้อ)
             return isMarked || isQuizDone;
         }
 
