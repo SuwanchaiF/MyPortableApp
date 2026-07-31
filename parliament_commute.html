@@ -433,38 +433,101 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
 
-        /* Printable / PDF Export View Styling */
+        /* Printable / PDF Export View Styling (รายงานฉบับทางการ) */
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 12mm 12mm 12mm 12mm;
+            }
             body {
-                background: white !important;
-                color: black !important;
+                background: #ffffff !important;
+                color: #0f172a !important;
                 padding: 0 !important;
+                margin: 0 !important;
             }
             body::before { display: none !important; }
-            .header-actions, .form-box, .btn-action, .btn-export-docx, .btn-export-pdf, .btn-nav { display: none !important; }
+            
+            /* Hide ALL Web UI controls, search bar, inputs, and buttons */
+            .header-title, 
+            .form-box, 
+            .header-actions, 
+            #filter-search, 
+            #records-count-badge, 
+            button, 
+            .modal-overlay,
+            .live-status,
+            .btn-remove-img { 
+                display: none !important; 
+            }
+
+            /* Show Official Printable Document Header */
+            .print-only-header {
+                display: block !important;
+            }
+
+            .container {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
             .card {
-                background: white !important;
+                background: #ffffff !important;
                 box-shadow: none !important;
                 border: none !important;
                 padding: 0 !important;
+                margin: 0 !important;
             }
+
             .date-card {
-                background: white !important;
-                border: 1px solid #cbd5e1 !important;
-                color: black !important;
+                background: #ffffff !important;
+                border: 1.5px solid #cbd5e1 !important;
+                border-radius: 12px !important;
+                color: #0f172a !important;
+                padding: 14px !important;
                 page-break-inside: avoid;
                 margin-bottom: 20px !important;
+                box-shadow: none !important;
             }
+
+            .date-header {
+                border-bottom: 2px solid #1e293b !important;
+                padding-bottom: 8px !important;
+                margin-bottom: 12px !important;
+            }
+
             .date-badge {
                 background: #1e293b !important;
-                color: white !important;
+                color: #ffffff !important;
+                box-shadow: none !important;
+                font-size: 0.95rem !important;
+                padding: 4px 14px !important;
             }
+
+            .map-images-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+            }
+
             .map-image-wrapper {
                 height: 220px !important;
-                border: 1px solid #cbd5e1 !important;
+                border: 1px solid #94a3b8 !important;
+                border-radius: 8px !important;
+                background: #f8fafc !important;
+                page-break-inside: avoid;
             }
-            .map-images-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
+
+            .image-caption {
+                background: #f1f5f9 !important;
+                color: #0f172a !important;
+                border-top: 1px solid #cbd5e1 !important;
+                backdrop-filter: none !important;
+                font-size: 0.8rem !important;
+                font-weight: 600 !important;
+                padding: 4px 8px !important;
+            }
+            .image-caption span {
+                color: #0f172a !important;
             }
         }
 
@@ -483,6 +546,12 @@
 
 <div class="container">
     <div class="card" id="printable-report-area">
+        <!-- Printable Official Document Header (แสดงเฉพาะตอนพิมพ์/ออก PDF) -->
+        <div class="print-only-header" style="display: none; text-align: center; margin-bottom: 24px; border-bottom: 2px solid #0f172a; padding-bottom: 12px;">
+            <h1 style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 700; color: #0f172a;">รายงานภาพแผนที่การเดินทาง ไป-กลับ สภา</h1>
+            <p style="margin: 0; font-size: 0.9rem; color: #475569;" id="print-date-range">เอกสารสรุปบันทึกภาพเส้นทางแผนที่การเดินทางฉบับทางการ</p>
+        </div>
+
         <!-- Top Header Navigation -->
         <div class="header-title">
             <div class="header-left">
