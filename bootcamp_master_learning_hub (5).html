@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 PHP + JavaScript + Java Bootcamp 60-Day Learning Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        php: '#777BB4',
+                        js: '#F7DF1E',
+                        java: '#007396',
+                        sql: '#4479A1',
+                        darkbg: '#0f172a',
+                        cardbg: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        .code-block {
+            font-family: 'Fira Code', monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                    ⚡
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-white leading-tight">PHP + JS + Java Bootcamp</h1>
+                    <p class="text-xs text-slate-400">60-Day Master Learning Hub & Roadmap</p>
+                </div>
+            </div>
+
+            <!-- Global Search & Stats -->
+            <div class="flex items-center gap-4">
+                <div class="relative w-48 sm:w-64">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="searchInput" onkeyup="filterContent()" placeholder="ค้นหาหัวข้อ / Syntax..." 
+                        class="w-full bg-slate-900/80 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors">
+                </div>
+                
+                <a href="index.html" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition-all hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-database"></i> 📁 หน้าบันทึกข้อมูล
+                </a>
+                
+                <div class="bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-400 text-sm"></i>
+                    <div class="text-xs">
+                        <span id="progressText" class="font-bold text-indigo-400">0/60</span> วันที่เสร็จแล้ว
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full flex flex-col md:flex-row gap-6">
+
+        <!-- Sidebar Navigation (Day 1 - 60) -->
+        <aside class="w-full md:w-80 flex-shrink-0 space-y-4">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-4 sticky top-20 shadow-xl">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-700">
+                    <h2 class="font-semibold text-slate-200 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-map text-indigo-400"></i> แผนการเรียน 60 วัน
+                    </h2>
+                    <button onclick="resetProgress()" class="text-xs text-slate-400 hover:text-rose-400 transition-colors" title="รีเซ็ตความก้าวหน้า">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
+
+                <!-- Course Parts Accordion -->
+                <div class="space-y-3 max-h-[calc(100vh-220px)] overflow-y-auto pr-1" id="partsList">
+                    <!-- Part 1 -->
+                    <div class="part-item border border-slate-700/60 rounded-lg overflow-hidden bg-slate-900/40">
+                        <button onclick="togglePart('part1')" class="w-full px-3 py-2.5 text-left text-xs font-semibold bg-slate-800/80 hover:bg-slate-800 flex items-center justify-between text-indigo-300">
+                            <span>📦 Part 1: PHP Basic (Day 1 - 10)</span>
+                            <i class="fa-solid fa-chevron-down text-[10px]" id="part1-icon"></i>
+                        </button>
+                        <div id="part1" class="p-2 space-y-1 text-xs">
+                            <!-- Days populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Part 2 -->
+                    <div class="part-item border border-slate-700/60 rounded-lg overflow-hidden bg-slate-900/40">
+                        <button onclick="togglePart('part2')" class="w-full px-3 py-2.5 text-left text-xs font-semibold bg-slate-800/80 hover:bg-slate-800 flex items-center justify-between text-purple-300">
+                            <span>📦 Part 2: PHP Intermediate (Day 11 - 20)</span>
+                            <i class="fa-solid fa-chevron-down text-[10px]" id="part2-icon"></i>
+                        </button>
+                        <div id="part2" class="p-2 space-y-1 text-xs hidden">
+                            <!-- Days populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Part 3 -->
+                    <div class="part-item border border-slate-700/60 rounded-lg overflow-hidden bg-slate-900/40">
+                        <button onclick="togglePart('part3')" class="w-full px-3 py-2.5 text-left text-xs font-semibold bg-slate-800/80 hover:bg-slate-800 flex items-center justify-between text-blue-300">
+                            <span>📦 Part 3: PHP Advanced & OOP (Day 21 - 30)</span>
+                            <i class="fa-solid fa-chevron-down text-[10px]" id="part3-icon"></i>
+                        </button>
+                        <div id="part3" class="p-2 space-y-1 text-xs hidden">
+                            <!-- Days populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Part 4 -->
+                    <div class="part-item border border-slate-700/60 rounded-lg overflow-hidden bg-slate-900/40">
+                        <button onclick="togglePart('part4')" class="w-full px-3 py-2.5 text-left text-xs font-semibold bg-slate-800/80 hover:bg-slate-800 flex items-center justify-between text-amber-300">
+                            <span>📦 Part 4: JavaScript Dynamic (Day 31 - 40)</span>
+                            <i class="fa-solid fa-chevron-down text-[10px]" id="part4-icon"></i>
+                        </button>
+                        <div id="part4" class="p-2 space-y-1 text-xs hidden">
+                            <!-- Days populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Part 5 -->
+                    <div class="part-item border border-slate-700/60 rounded-lg overflow-hidden bg-slate-900/40">
+                        <button onclick="togglePart('part5')" class="w-full px-3 py-2.5 text-left text-xs font-semibold bg-slate-800/80 hover:bg-slate-800 flex items-center justify-between text-cyan-300">
+                            <span>📦 Part 5: Java Foundation (Day 41 - 50)</span>
+                            <i class="fa-solid fa-chevron-down text-[10px]" id="part5-icon"></i>
+                        </button>
+                        <div id="part5" class="p-2 space-y-1 text-xs hidden">
+                            <!-- Days populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Part 6 -->
+                    <div class="part-item border border-slate-700/60 rounded-lg overflow-hidden bg-slate-900/40">
+                        <button onclick="togglePart('part6')" class="w-full px-3 py-2.5 text-left text-xs font-semibold bg-slate-800/80 hover:bg-slate-800 flex items-center justify-between text-emerald-300">
+                            <span>📦 Part 6: Database & Full Project (Day 51 - 60)</span>
+                            <i class="fa-solid fa-chevron-down text-[10px]" id="part6-icon"></i>
+                        </button>
+                        <div id="part6" class="p-2 space-y-1 text-xs hidden">
+                            <!-- Days populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Lesson View Panel -->
+        <main class="flex-grow space-y-6 min-w-0">
+            <!-- Day Header Banner -->
+            <div class="bg-gradient-to-r from-slate-800 via-slate-800 to-indigo-950/80 rounded-xl border border-slate-700 p-6 shadow-xl relative overflow-hidden">
+                <div class="flex flex-wrap items-center justify-between gap-4 relative z-10">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span id="lessonTag" class="px-2.5 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 rounded-md text-xs font-semibold">
+                                Day 01
+                            </span>
+                            <span id="lessonLang" class="px-2.5 py-1 bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-md text-xs font-semibold">
+                                PHP
+                            </span>
+                        </div>
+                        <h2 id="lessonTitle" class="text-2xl font-bold text-white">PHP Syntax & Variables พื้นฐาน</h2>
+                        <p id="lessonDesc" class="text-xs sm:text-sm text-slate-300 mt-1">
+                            ทำความเข้าใจโครงสร้างไวยากรณ์ การประกาศตัวแปร และประเภทข้อมูลเริ่มต้นในภาษา PHP
+                        </p>
+                    </div>
+
+                    <!-- Mark as completed toggle button -->
+                    <button id="completeBtn" onclick="toggleCurrentDayComplete()" class="px-4 py-2 bg-slate-700 hover:bg-emerald-600 border border-slate-600 hover:border-emerald-500 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shadow-md">
+                        <i class="fa-regular fa-circle-check text-sm" id="completeIcon"></i>
+                        <span id="completeText">มาร์กเรียนจบแล้ว</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Navigation Bar -->
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-1.5 flex flex-wrap gap-1 shadow-md text-xs font-medium">
+                <button onclick="switchTab('theory')" id="tab-theory" class="tab-btn px-3.5 py-2 rounded-lg bg-indigo-600 text-white shadow-sm flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-book-open"></i> ทฤษฎี & ไวยากรณ์
+                </button>
+                <button onclick="switchTab('code')" id="tab-code" class="tab-btn px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-code"></i> ตัวอย่างโค้ด & คำอธิบาย
+                </button>
+                <button onclick="switchTab('memory')" id="tab-memory" class="tab-btn px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-brain"></i> การทำงานในหน่วยความจำ
+                </button>
+                <button onclick="switchTab('mistakes')" id="tab-mistakes" class="tab-btn px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-triangle-exclamation"></i> ข้อผิดพลาดประจำ
+                </button>
+                <button onclick="switchTab('exercise')" id="tab-exercise" class="tab-btn px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-dumbbell"></i> แบบฝึกหัด & Challenge
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-list-check text-amber-400"></i> แบบทดสอบ & Google Form
+                </button>
+                <button onclick="switchTab('cheatsheet')" id="tab-cheatsheet" class="tab-btn px-3.5 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-bolt"></i> CheatSheet สรุป
+                </button>
+            </div>
+
+            <!-- Tab Content 1: Theory & Syntax -->
+            <div id="content-theory" class="tab-content space-y-4">
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 space-y-4">
+                    <h3 class="text-base font-bold text-indigo-300 flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb"></i> แนวคิดและทฤษฎีสำคัญ (Theory)
+                    </h3>
+                    <div id="theoryText" class="text-sm text-slate-300 leading-relaxed space-y-3">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 space-y-4">
+                    <h3 class="text-base font-bold text-purple-300 flex items-center gap-2">
+                        <i class="fa-solid fa-file-code"></i> ไวยากรณ์คำสั่ง (Syntax Rule)
+                    </h3>
+                    <div class="bg-slate-950 border border-slate-700/80 rounded-lg p-4 font-mono text-xs overflow-x-auto flex gap-3">
+                        <div id="syntaxLineNumbers" class="select-none text-slate-600 text-right pr-2 border-r border-slate-800 font-mono leading-relaxed whitespace-pre"></div>
+                        <pre class="text-emerald-400 font-mono leading-relaxed"><code id="syntaxBlock">// Syntax structure will appear here</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 2: Code Example & Line by Line -->
+            <div id="content-code" class="tab-content hidden space-y-4">
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-emerald-400 flex items-center gap-2">
+                            <i class="fa-solid fa-laptop-code"></i> โค้ดตัวอย่างสมบูรณ์ (Code Example)
+                        </h3>
+                        <button onclick="copyCode()" class="text-xs px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded border border-slate-600 flex items-center gap-1.5 transition-colors">
+                            <i class="fa-solid fa-copy"></i> คัดลอกโค้ด
+                        </button>
+                    </div>
+                    <!-- Code block with Line Numbers -->
+                    <div class="bg-slate-950 border border-slate-700/80 rounded-lg p-4 font-mono text-xs overflow-x-auto flex gap-3">
+                        <div id="codeLineNumbers" class="select-none text-slate-600 text-right pr-2 border-r border-slate-800 font-mono leading-relaxed whitespace-pre"></div>
+                        <pre class="text-slate-200 font-mono leading-relaxed"><code id="codeBlock">// Code example</code></pre>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-list-ol"></i> คำอธิบายการทำงานทีละบรรทัด (Line-by-Line Explanation)
+                        </h3>
+                        <span id="lockBadgeExplanation" class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            🔒 ยังไม่ปลดล็อก
+                        </span>
+                    </div>
+                    <div id="explanationList" class="space-y-2 text-xs text-slate-300">
+                        <!-- Dynamic lines or Lock prompt -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 3: Memory Diagram -->
+            <div id="content-memory" class="tab-content hidden space-y-4">
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 space-y-4">
+                    <h3 class="text-base font-bold text-cyan-300 flex items-center gap-2">
+                        <i class="fa-solid fa-microchip"></i> สภาพแวดล้อมและการทำงานในหน่วยความจำ (RAM & Execution Flow)
+                    </h3>
+                    <p class="text-xs text-slate-400">แผนภาพจำลองว่าคอมพิวเตอร์จัดเก็บและประมวลผลตัวแปรอย่างไรขณะโปรแกรมทำงาน</p>
+                    
+                    <div id="memoryVisual" class="bg-slate-950 border border-slate-700 p-4 rounded-xl font-mono text-xs text-slate-200 space-y-3">
+                        <!-- Memory visual blocks -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 4: Common Mistakes & Best Practice -->
+            <div id="content-mistakes" class="tab-content hidden space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Common Mistakes -->
+                    <div class="bg-rose-950/30 border border-rose-800/60 rounded-xl p-5 space-y-3">
+                        <h4 class="text-sm font-bold text-rose-300 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-xmark"></i> ข้อผิดพลาดที่พบประจำ (Common Mistakes)
+                        </h4>
+                        <div id="mistakesText" class="text-xs text-rose-200/90 leading-relaxed space-y-2">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+
+                    <!-- Best Practice -->
+                    <div class="bg-emerald-950/30 border border-emerald-800/60 rounded-xl p-5 space-y-3">
+                        <h4 class="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i> แนวทางปฏิบัติที่ดีที่สุด (Best Practice)
+                        </h4>
+                        <div id="bestPracticeText" class="text-xs text-emerald-200/90 leading-relaxed space-y-2">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 5: Exercise, Quiz & Mini-Project -->
+            <div id="content-exercise" class="tab-content hidden space-y-4">
+                <!-- Exercise -->
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 space-y-3">
+                    <h4 class="text-sm font-bold text-indigo-300 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> แบบฝึกหัดทบทวน (Exercise)
+                    </h4>
+                    <div id="exerciseText" class="text-xs text-slate-300 space-y-2">
+                        <!-- Dynamic Exercise -->
+                    </div>
+                </div>
+
+                <!-- Challenge & Mini Project -->
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 space-y-3">
+                    <h4 class="text-sm font-bold text-amber-300 flex items-center gap-2">
+                        <i class="fa-solid fa-rocket"></i> โจทย์ท้าทาย & มินิโปรเจกต์ (Challenge & Mini-Project)
+                    </h4>
+                    <div id="challengeText" class="text-xs text-slate-300 space-y-2">
+                        <!-- Dynamic Challenge -->
+                    </div>
+                </div>
+
+                <!-- เงื่อนไขการปลดล็อกเฉลย -->
+                <div class="bg-gradient-to-r from-indigo-950/60 to-slate-800 rounded-xl border border-indigo-700/40 p-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="text-xs text-center sm:text-left">
+                        <p class="font-semibold text-indigo-300 mb-0.5">เงื่อนไขการปลดล็อกคำอธิบาย &amp; เฉลย (อย่างใดอย่างหนึ่ง):</p>
+                        <p class="text-slate-400">1. กดมาร์กเรียนจบหลังฝึกปฏิบัติ &nbsp;OR&nbsp; 2. ตอบแบบทดสอบประจำวันให้ครบทุกข้อ</p>
+                    </div>
+                    <button id="exerciseCompleteBtn" onclick="toggleCurrentDayComplete()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 border border-emerald-500 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shadow-md shrink-0">
+                        <i class="fa-solid fa-circle-check"></i> <span id="exerciseCompleteText">มาร์กเรียนจบแล้ว</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tab Content 5.5: Native Quiz & Embedded Google Form -->
+            <div id="content-quiz" class="tab-content hidden space-y-4">
+                <!-- Mode Switcher (Native Quiz vs Google Form) -->
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-square-poll-vertical text-amber-400"></i> ระบบทดสอบความรู้ประจำวัน
+                        </h3>
+                        <p class="text-xs text-slate-400">ตอบคำถามให้ครบทุกข้อ หรือกดมาร์กเรียนจบ เพื่อปลดล็อกเฉลยและคำอธิบายทีละบรรทัด</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="toggleQuizMode('native')" id="btnQuizNative" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold shadow transition-all">
+                            <i class="fa-solid fa-bolt mr-1"></i> ทำแบบทดสอบในแอป
+                        </button>
+                        <button onclick="toggleQuizMode('gform')" id="btnQuizGForm" class="px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 text-xs font-semibold transition-all">
+                            <i class="fa-brands fa-google mr-1"></i> ฝัง Google Form
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Native Interactive Quiz Engine Container -->
+                <div id="nativeQuizContainer" class="bg-slate-800 rounded-xl border border-slate-700 p-6 space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                        <h4 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-question"></i> แบบทดสอบทบทวนประจำวัน (Interactive Quiz)
+                        </h4>
+                        <span id="quizScoreBadge" class="text-xs px-2.5 py-1 bg-slate-900 text-amber-400 border border-amber-500/30 rounded-lg font-mono">
+                            คะแนน: 0/0
+                        </span>
+                    </div>
+
+                    <div id="quizQuestionsList" class="space-y-6">
+                        <!-- Questions dynamically rendered -->
+                    </div>
+                </div>
+
+                <!-- Google Form Embedded Container -->
+                <div id="gformContainer" class="hidden bg-slate-800 rounded-xl border border-slate-700 p-4 space-y-4">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-slate-900/80 p-3 rounded-lg border border-slate-700 text-xs">
+                        <div class="flex items-center gap-2 text-slate-300">
+                            <i class="fa-brands fa-google text-amber-400 text-base"></i>
+                            <span>ลิงก์ Google Form ปัจจุบัน:</span>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <input type="text" id="gformUrlInput" value="https://docs.google.com/forms/d/e/1FAIpQLSfQ1wDnFo3uAjw1ZVDkmQnAoOmddg6bbA-mYVZMigLFoONYkw/viewform?embedded=true" 
+                                class="bg-slate-950 border border-slate-700 rounded px-2.5 py-1 text-xs text-slate-200 w-full sm:w-96 focus:outline-none focus:border-indigo-500">
+                            <button onclick="updateGoogleFormIframe()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs transition-colors shrink-0">
+                                โหลดฟอร์ม
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Iframe Wrapper -->
+                    <div class="relative w-full rounded-xl overflow-hidden border border-slate-700 bg-white" style="height: 700px;">
+                        <iframe id="gformIframe" src="https://docs.google.com/forms/d/e/1FAIpQLSfQ1wDnFo3uAjw1ZVDkmQnAoOmddg6bbA-mYVZMigLFoONYkw/viewform?embedded=true" 
+                            width="100%" height="100%" frameborder="0" marginheight="0" marginwidth="0" class="w-full h-full">กำลังโหลด Google Form...</iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content 6: CheatSheet -->
+            <div id="content-cheatsheet" class="tab-content hidden space-y-4">
+                <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 space-y-4">
+                    <h3 class="text-base font-bold text-indigo-300 flex items-center gap-2">
+                        <i class="fa-solid fa-bookmark"></i> Quick Reference & Syntax CheatSheet
+                    </h3>
+                    <div id="cheatSheetContent" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <!-- CheatSheet blocks -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 border-t border-slate-700 py-4 mt-auto text-center text-xs text-slate-400">
+        <p>🚀 PHP + JavaScript + Java 60-Day Master Bootcamp • สรุปและจัดทำคู่มือการเรียนรู้ฉบับสมบูรณ์</p>
+    </footer>
+
+    <script>
+        // Database of lessons for 60 Days
+        const lessonsData = {
+            1: {
+                part: "Part 1",
+                lang: "PHP",
+                title: "Day 01: PHP Basic Syntax & Variables",
+                desc: "เรียนรู้โครงสร้างการเริ่มต้นไฟล์ PHP, การประกาศตัวแปรด้วย $, Data Types และคำสั่งแสดงผล",
+                theory: "PHP (Hypertext Preprocessor) เป็นภาษา Scripting ฝั่ง Server โค้ด PHP จะเริ่มต้นด้วยการเปิดแท็ก <code>&lt;?php</code> และปิดด้วย <code>?&gt;</code> เสมอ ตัวแปรใน PHP จะต้องขึ้นต้นด้วยเครื่องหมายดอลลาร์ (<code>$</code>) เสมอ และไม่จำเป็นต้องระบุ Data Type ล่วงหน้า (Loosely Typed)",
+                syntax: "<?php\n  $variableName = value; // ตัวแปรต้องขึ้นต้นด้วย $\n  echo $variableName;    // แสดงผลข้อมูลไปยัง Browser\n?>",
+                code: "<?php\n  // 1. ประกาศตัวแปรชนิดต่างๆ\n  $userName = \"John Doe\";   // String\n  $userAge = 25;             // Integer\n  $isStudent = true;         // Boolean\n  $price = 199.50;           // Float\n\n  // 2. แสดงผลด้วย echo\n  echo \"Name: \" . $userName . \"<br>\";\n  echo \"Age: $userAge years old\";\n?>",
+                explanation: [
+                    "บรรทัดที่ 1: เปิดบล็อกแท็ก <code>&lt;?php</code> เพื่อบอก Server ให้เริ่มประมวลผลโค้ด PHP",
+                    "บรรทัดที่ 3: ประกาศตัวแปร <code>$userName</code> เก็บข้อความสตริง \"John Doe\"",
+                    "บรรทัดที่ 4: ประกาศตัวแปร <code>$userAge</code> เก็บตัวเลขจำนวนเต็ม 25",
+                    "บรรทัดที่ 5: ประกาศตัวแปร <code>$isStudent</code> เก็บค่าความจริง true",
+                    "บรรทัดที่ 9: ใช้คำสั่ง <code>echo</code> ร่วมกับตัวดำเนินการต่อข้อความจุด (<code>.</code>)",
+                    "บรรทัดที่ 10: ใช้ String Interpolation ในอัญประกาศคู่ <code>\"$userAge\"</code> PHP จะแทนค่าตัวแปรให้อัตโนมัติ"
+                ],
+                memory: `
+[RAM Stack Memory]                [RAM Heap Memory]
++--------------------------+      +---------------------------+
+| $userName --------------|----> | "John Doe" (String)       |
+| $userAge   : 25          |      |                           |
+| $isStudent : true        |      |                           |
+| $price     : 199.50      |      |                           |
++--------------------------+      +---------------------------+
+* หมายเหตุ: ตัวแปร Primitive เก็บค่าโดยตรงบน Stack ส่วน String/Array ชี้ไปที่ Heap
+                `,
+                mistakes: "1. ลืมใส่เครื่องหมาย <code>$</code> หน้าชื่อตัวแปร<br>2. ลืมปิดท้ายคำสั่งด้วยเครื่องหมายเซมิโคลอน <code>;</code><br>3. สับสนตัวดำเนินการต่อ String ใน PHP ใช้จุด (<code>.</code>) ไม่ใช่เครื่องหมายบวก (<code>+</code>)",
+                bestPractice: "1. ตั้งชื่อตัวแปรด้วยรูปแบบ camelCase เช่น <code>$userScore</code><br>2. ปิดไฟล์ PHP เพียวๆ โดยไม่ต้องใส่แท็กปิด <code>?&gt;</code> เพื่อป้องกันปัญหา Unexpected Whitespace Output",
+                exercise: "1. สร้างตัวแปรเก็บชื่อ สินค้า, ราคา, และจำนวนสินค้า แล้วคำนวณหาราคารวม<br>2. แสดงผลข้อความสรุปด้วยคำสั่ง echo",
+                challenge: "<b>Mini-Challenge:</b> เขียนโปรแกรมคำนวณใบเสร็จรับเงินภาษี VAT 7% โดยให้แสดงผลราคาเรียบร้อยผ่าน HTML Formatting",
+                quiz: [
+                    {
+                        q: "การประกาศตัวแปรข้อใดใน PHP สมบูรณ์และถูกต้องตามหลักไวยากรณ์?",
+                        options: ["var name = 'John';", "$name = 'John';", "string name = 'John';", "name := 'John';"],
+                        answer: 1,
+                        explain: "ตัวแปรใน PHP จำเป็นต้องขึ้นต้นด้วยสัญลักษณ์ $ เสมอ"
+                    },
+                    {
+                        q: "ตัวดำเนินการใดใน PHP ใช้สำหรับเชื่อมต่อข้อความ (String Concatenation)?",
+                        options: ["เครื่องหมาย +", "เครื่องหมาย &", "เครื่องหมาย . (จุด)", "เครื่องหมาย ->"],
+                        answer: 2,
+                        explain: "PHP ใช้จุด (.) ในการต่อข้อความ เช่น 'Hello ' . $name"
+                    }
+                ],
+                cheatSheet: `
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <strong class="text-indigo-400">PHP Variable Rules:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-300">
+                            <li>ขึ้นต้นด้วย $ เสมอ</li>
+                            <li>ห้ามขึ้นต้นด้วยตัวเลข</li>
+                            <li>Case-sensitive ($name != $NAME)</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <strong class="text-purple-400">Output Functions:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-300">
+                            <li>echo: พิมพ์ได้หลายค่า ไม่คืนค่า</li>
+                            <li>print: พิมพ์ค่าเดียว คืนค่า 1</li>
+                            <li>var_dump(): แสดง Type & Value</li>
+                        </ul>
+                    </div>
+                `
+            },
+            2: {
+                part: "Part 1",
+                lang: "PHP",
+                title: "Day 02: Data Types & Type Juggling",
+                desc: "ชนิดข้อมูล 8 ประเภทของ PHP และกลไกการแปลงชนิดอัตโนมัติ (Type Juggling) พร้อมการตรวจสอบชนิด",
+                theory: "PHP มีชนิดข้อมูล 8 ประเภท แบ่งเป็น 3 กลุ่ม: <b>Scalar</b> (<code>int</code>, <code>float</code>, <code>string</code>, <code>bool</code>), <b>Compound</b> (<code>array</code>, <code>object</code>), และ <b>Special</b> (<code>null</code>, <code>resource</code>) เนื่องจาก PHP เป็น Dynamically Typed จึงกำหนดชนิดตามค่าที่ใส่ให้อัตโนมัติ และทำ <b>Type Juggling</b> คือแปลงชนิดให้เองเมื่อนำไปคำนวณ เช่น <code>\"5\" + 3</code> จะได้ <code>8</code> เราตรวจชนิดได้ด้วย <code>gettype()</code> / <code>var_dump()</code> และแปลงชนิดตรงๆ ด้วย Type Casting <code>(int)</code>, <code>(string)</code>",
+                syntax: "$int   = 42;        // Integer\n$float = 3.14;      // Float / Double\n$str   = \"PHP\";     // String\n$bool  = true;      // Boolean\n$arr   = [1, 2, 3]; // Array\n$empty = null;      // Null\n\nvar_dump($int);     // int(42)\necho gettype($float); // double",
+                code: "<?php\n  // 1. Type Juggling: PHP แปลงชนิดให้อัตโนมัติ\n  $result = \"5  books\" + 10;   // 15 (ดึงเฉพาะตัวเลขนำหน้า)\n  var_dump($result);            // int(15)\n\n  // 2. Type Casting: บังคับแปลงชนิดเอง\n  $price = \"199.50\";\n  $priceFloat = (float) $price; // 199.5 (float)\n  $priceInt   = (int) $price;   // 199 (int)\n\n  // 3. ตรวจสอบชนิดข้อมูล\n  var_dump(is_int(42));         // bool(true)\n  var_dump(is_string(\"42\"));    // bool(true)\n\n  // 4. เปรียบเทียบแบบหลวม vs เข้ม\n  var_dump(0 == \"abc\");  // bool(false) ตั้งแต่ PHP 8\n  var_dump(\"1\" === 1);   // bool(false) คนละชนิด\n?>",
+                explanation: [
+                    "บรรทัดที่ 3: <code>\"5 books\" + 10</code> PHP ดึงเลข 5 นำหน้าออกมาบวก ได้ 15 (Type Juggling)",
+                    "บรรทัดที่ 8: <code>(float)</code> บังคับแปลง String ให้เป็นทศนิยม ได้ 199.5",
+                    "บรรทัดที่ 9: <code>(int)</code> ตัดทศนิยมทิ้ง เหลือ 199",
+                    "บรรทัดที่ 12: <code>is_int()</code> คืน true เมื่อค่าเป็นจำนวนเต็มจริงๆ",
+                    "บรรทัดที่ 16: <code>===</code> เทียบทั้ง <b>ค่า</b> และ <b>ชนิด</b> \"1\" (string) จึงไม่เท่ากับ 1 (int)"
+                ],
+                memory: `
+[Symbol Table ในหน่วยความจำ]
++-----------+----------+------------------+
+| ชื่อตัวแปร | ชนิด     | ค่า (Value)       |
++-----------+----------+------------------+
+| $int      | integer  | 42               |
+| $float    | double   | 3.14             |
+| $str      | string   | "PHP" (len 3)    |
+| $bool     | boolean  | 1 (true)         |
++-----------+----------+------------------+
+* PHP เก็บทั้ง "ชนิด" และ "ค่า" ไว้ในโครงสร้าง zval เดียวกัน
+  จึงเปลี่ยนชนิดตัวแปรระหว่างทางได้ (Dynamic Typing)
+                `,
+                mistakes: "1. ใช้ <code>==</code> เทียบข้อมูลที่คนละชนิด แล้วได้ผลลัพธ์ไม่คาดคิด (เช่นก่อน PHP 8 <code>0 == \"abc\"</code> เป็น true)<br>2. คำนวณ Float แล้วคาดหวังความแม่นยำเป๊ะ เช่น <code>0.1 + 0.2 != 0.3</code> เพราะ Floating Point<br>3. ลืมว่า <code>null</code>, <code>0</code>, <code>\"\"</code>, <code>\"0\"</code>, <code>[]</code> ล้วนถือเป็น falsy",
+                bestPractice: "1. ใช้ <code>===</code> (Strict Comparison) เป็นค่าเริ่มต้นเสมอเพื่อกันบั๊กจาก Type Juggling<br>2. เทียบ Float ด้วยช่วงความคลาดเคลื่อน เช่น <code>abs($a - $b) < 0.00001</code><br>3. ใช้ <code>var_dump()</code> ตอน Debug เพราะบอกทั้งชนิดและค่า ต่างจาก <code>echo</code>",
+                exercise: "1. สร้างตัวแปร 4 ชนิด (int, float, string, bool) แล้วใช้ <code>var_dump()</code> แสดงชนิดของแต่ละตัว<br>2. ทดลองบวก String กับตัวเลข แล้วสังเกตผลลัพธ์",
+                challenge: "<b>Mini-Challenge:</b> เขียนฟังก์ชันรับค่าใดก็ได้ แล้วรายงานเป็นข้อความว่า \"ค่านี้คือชนิด X มีค่า Y\" โดยจัดรูปแบบ bool ให้แสดงเป็น true/false และ null ให้แสดงเป็น NULL",
+                quiz: [
+                    {
+                        q: "ผลลัพธ์ของ <code>var_dump(\"10 cats\" + 5)</code> ใน PHP คือข้อใด?",
+                        options: ["string(7) \"10 cats5\"", "int(15)", "Error", "int(10)"],
+                        answer: 1,
+                        explain: "PHP ทำ Type Juggling ดึงเลข 10 นำหน้าออกมาบวกกับ 5 ได้ int(15)"
+                    },
+                    {
+                        q: "ตัวดำเนินการใดเปรียบเทียบทั้ง 'ค่า' และ 'ชนิดข้อมูล' พร้อมกัน?",
+                        options: ["== (สองเท่า)", "=== (สามเท่า)", "= (หนึ่งตัว)", "<=>"],
+                        answer: 1,
+                        explain: "=== คือ Strict Comparison ต้องตรงกันทั้งค่าและชนิดจึงจะเป็น true"
+                    },
+                    {
+                        q: "ข้อใด NOT ใช่ค่า falsy ใน PHP?",
+                        options: ["0", "\"\" (สตริงว่าง)", "\"0\"", "\"false\" (สตริงคำว่า false)"],
+                        answer: 3,
+                        explain: "สตริง \"false\" ที่มีตัวอักษรถือเป็น truthy เพราะไม่ใช่สตริงว่างและไม่ใช่ \"0\""
+                    }
+                ],
+                cheatSheet: `
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <strong class="text-indigo-400">Type Checking Functions:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-300">
+                            <li>gettype($x) → คืนชื่อชนิด</li>
+                            <li>is_int / is_string / is_array / is_bool</li>
+                            <li>var_dump($x) → ชนิด + ค่า</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <strong class="text-purple-400">Falsy Values:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-300">
+                            <li>false, 0, 0.0</li>
+                            <li>"" และ "0"</li>
+                            <li>null และ [] (array ว่าง)</li>
+                        </ul>
+                    </div>
+                `
+            },
+            11: {
+                part: "Part 2",
+                lang: "PHP",
+                title: "Day 11: Superglobals $_GET & $_POST",
+                desc: "การรับและจัดการข้อมูลจาก HTML Form ด้วย Superglobal Arrays ใน PHP",
+                theory: "Superglobals ใน PHP คือ Built-in Global Arrays ที่สามารถเข้าถึงได้จากทุกขอบเขต (Scope) โดย <code>$_GET</code> จะรับข้อมูลผ่าน URL Query Strings ส่วน <code>$_POST</code> จะรับข้อมูลผ่าน HTTP Request Body ซึ่งปลอดภัยกว่าสำหรับข้อมูลสำคัญ",
+                syntax: "// การดึงค่าจากฟอร์ม POST\n$username = $_POST['username'] ?? '';\n\n// การดึงค่าจาก URL GET\n$searchKey = $_GET['q'] ?? '';",
+                code: "<?php\n  // ตรวจสอบว่ามีการส่งฟอร์มมาด้วย POST หรือไม่\n  if ($_SERVER['REQUEST_METHOD'] === 'POST') {\n      $email = trim($_POST['email'] ?? '');\n      $password = $_POST['password'] ?? '';\n      \n      if (!empty($email) && !empty($password)) {\n          echo \"เข้าสู่ระบบสำเร็จสำหรับ: \" . htmlspecialchars($email);\n      } else {\n          echo \"กรุณากรอกข้อมูลให้ครบถ้วน\";\n      }\n  }\n?>",
+                explanation: [
+                    "บรรทัดที่ 3: ตรวจสอบ HTTP Method โดยใช้ <code>$_SERVER['REQUEST_METHOD']</code>",
+                    "บรรทัดที่ 4: ดึงค่าจาก <code>$_POST['email']</code> พร้อมใช้ <code>trim()</code> ตัดสเปซหน้าหลัง",
+                    "บรรทัดที่ 7: ใช้ <code>htmlspecialchars()</code> เพื่อป้องกันการโจมตีแบบ XSS ก่อนพ่นออกหน้าเว็บ"
+                ],
+                memory: `
+[Browser Frontend] ------------(HTTP POST Body)------------> [PHP Web Server]
+Form: { email, pass }                                        $_POST Array:
+                                                            ['email'] => "user@email.com"
+                                                            ['password'] => "secret123"
+                `,
+                mistakes: "1. เข้าถึงค่าใน <code>$_POST</code> โดยไม่ได้เช็ค <code>isset()</code> หรือ Null Coalescing ส่งผลให้เกิด Notice Warning<br>2. ส่งข้อมูลรหัสผ่านผ่าน Method GET ทำให้รหัสผ่านโชว์บน URL Bar",
+                bestPractice: "1. ใช้ <code>$_POST</code> สำหรับฟอร์มที่มีความละเอียดอ่อนเสมอ<br>2. ครอบด้วย <code>htmlspecialchars()</code> เสมอเมื่อนำข้อมูลจากแบบฟอร์มไปแสดงผลบน HTML",
+                exercise: "สร้างฟอร์ม Login แบบ HTML และเขียนไฟล์ PHP รับค่าไปตรวจสอบความถูกต้อง",
+                challenge: "<b>Mini-Challenge:</b> สร้างฟอร์มคำนวณเกรด รับคะแนนเต็ม 100 แล้วคำนวณเกรด A-F ตอบกลับไปยังผู้ใช้โดยไม่ต้องเปลี่ยนหน้า",
+                quiz: [
+                    {
+                        q: "Superglobal ใดใน PHP ใช้รับข้อมูลฟอร์มที่ส่งด้วย Method แบบ POST?",
+                        options: ["$_GET", "$_POST", "$_REQUEST", "$_SERVER"],
+                        answer: 1,
+                        explain: "$_POST เป็น Array อัตโนมัติที่เก็บข้อมูลที่ถูกส่งมาจาก HTTP POST"
+                    }
+                ],
+                cheatSheet: `
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <strong class="text-indigo-400">Superglobals CheatSheet:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-300">
+                            <li>$_GET: รับค่าจาก URL Parameters</li>
+                            <li>$_POST: รับค่าจาก Form Body</li>
+                            <li>$_SERVER: ข้อมูล Server & Request</li>
+                        </ul>
+                    </div>
+                `
+            },
+            21: {
+                part: "Part 3",
+                lang: "PHP",
+                title: "Day 21: PHP PDO & Database Security",
+                desc: "การเชื่อมต่อฐานข้อมูล MySQL อย่างปลอดภัยด้วย PHP Data Objects (PDO) และ Prepared Statements",
+                theory: "PDO เป็น Class มาตรฐานใน PHP สำหรับติดต่อฐานข้อมูลหลากหลายชนิดอย่างปลอดภัย ข้อดีหลักของ PDO คือการรองรับ **Prepared Statements** ซึ่งแยกส่วน SQL Command ออกจาก Data Parameter ช่วยป้องกันการโจมตีแบบ **SQL Injection** ได้อย่างสมบูรณ์แบบ",
+                syntax: "$dsn = \"mysql:host=localhost;dbname=mydb;charset=utf8mb4\";\n$pdo = new PDO($dsn, $user, $pass);\n$stmt = $pdo->prepare(\"SELECT * FROM users WHERE id = :id\");\n$stmt->execute(['id' => $userId]);",
+                code: "<?php\n  try {\n      $pdo = new PDO(\"mysql:host=localhost;dbname=shop_db;charset=utf8mb4\", \"root\", \"\");\n      $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);\n      \n      // Safe query with Prepared Statement\n      $sql = \"SELECT id, username, email FROM users WHERE status = :status\";\n      $stmt = $pdo->prepare($sql);\n      $stmt->execute(['status' => 'active']);\n      $users = $stmt->fetchAll(PDO::FETCH_ASSOC);\n      \n      print_r($users);\n  } catch (PDOException $e) {\n      echo \"Connection failed: \" . $e->getMessage();\n  }\n?>",
+                explanation: [
+                    "บรรทัดที่ 3: สร้าง Instance ของ PDO เชื่อมต่อไปยัง MySQL Database",
+                    "บรรทัดที่ 4: ตั้งค่าให้แสดง Exception ทันทีเมื่อเกิด Database Error",
+                    "บรรทัดที่ 7: เขียน SQL Template โดยใส่ Named Parameter <code>:status</code> แทนการต่อสตริง",
+                    "บรรทัดที่ 8: ทำการ <code>prepare()</code> เพื่อให้ DB Compile โครงสร้าง SQL ล่วงหน้า",
+                    "บรรทัดที่ 9: ส่งตัวแปรเข้าไปใน <code>execute()</code> ป้องกัน SQL Injection 100%"
+                ],
+                memory: `
+[PHP Script] --(1. Prepare Template: "SELECT ... WHERE status = ?")--> [Database Server]
+[PHP Script] --(2. Send Parameters Only: status = "active")--------> [Database Server]
+* ป้องกัน SQL Injection เพราะ DB มอง Parameter เป็นแค่ Literal Data เท่านั้น ไม่ใช่อัลกอริทึมคำสั่ง
+                `,
+                mistakes: "1. เขียน SQL แบบเอาตัวแปรมาต่อสตริงโดยตรง เช่น <code>\"SELECT * FROM users WHERE name = '$name'\"</code> (เสี่ยง SQL Injection)<br>2. ไม่ใช้บล็อก try-catch ในการครอบ PDO Connection",
+                bestPractice: "1. ใช้ Prepared Statements ทุกครั้งที่มีการ Query ข้อมูลจาก User Input<br>2. กำหนด `charset=utf8mb4` ใน DSN เพื่อรองรับภาษาไทยและ Emoji อย่างสมบูรณ์",
+                exercise: "เขียนระบบเพิ่มข้อมูลสมาชิกใหม่ (Insert User) ลงในตาราง MySQL ผ่าน PDO พร้อมใช้ Prepared Statement",
+                challenge: "<b>Mini-Challenge:</b> สร้าง Class DBConnection แบบ Singleton Pattern เพื่อจัดการการเชื่อมต่อฐานข้อมูลทั้งแอปพลิเคชัน",
+                quiz: [
+                    {
+                        q: "ในการจัดการฐานข้อมูลด้วย PHP PDO ข้อใดคือประโยชน์หลักของ Prepared Statements?",
+                        options: ["ทำให้คำสั่ง SQL รันเร็วขึ้น 10 เท่า", "ป้องกันการโจมตีแบบ SQL Injection", "ย่อขนาดฐานข้อมูลอัตโนมัติ", "เปลี่ยน SQL ให้เป็น JSON อัตโนมัติ"],
+                        answer: 1,
+                        explain: "Prepared Statements แยกส่วนคำสั่ง SQL กับ Parameters ป้องกัน SQL Injection"
+                    }
+                ],
+                cheatSheet: `
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <strong class="text-indigo-400">PDO Fetch Modes:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-300">
+                            <li>PDO::FETCH_ASSOC -> Array Key ตามชื่อคอลัมน์</li>
+                            <li>PDO::FETCH_OBJ -> ส่งกลับเป็น Anonymous Object</li>
+                            <li>PDO::FETCH_ALL -> ดึงข้อมูลทั้งหมดในรอบเดียว</li>
+                        </ul>
+                    </div>
+                `
+            },
+            31: {
+                part: "Part 4",
+                lang: "JavaScript",
+                title: "Day 31: Modern JS (let, const, ES6+ & DOM)",
+                desc: "ไวยากรณ์ JavaScript ยุคใหม่ บล็อกสกูป (Block Scope) และการควบคุมหน้าเว็บผ่าน DOM Manipulation",
+                theory: "JavaScript ในปัจจุบันใช้ <code>let</code> และ <code>const</code> ในการประกาศตัวแปรแทน <code>var</code> เพื่อขจัดปัญหา Scope Hoisting โดย <code>let</code> สามารถเปลี่ยนค่าได้ ส่วน <code>const</code> เป็นค่าคงที่ที่ไม่สามารถ Re-assign อ้างอิงใหม่ได้",
+                syntax: "const title = document.querySelector('#title');\nlet score = 0;\nscore += 10;\ntitle.textContent = `Score: ${score}`;",
+                code: "// 1. เลือก HTML Element\nconst btn = document.querySelector('#submitBtn');\nconst output = document.querySelector('#outputBox');\n\n// 2. ผูก Event Listener\nbtn.addEventListener('click', () => {\n    const nameInput = document.querySelector('#userName').value;\n    if (nameInput.trim() !== '') {\n        output.textContent = `ยินดีต้อนรับคุณ, ${nameInput}!`;\n        output.classList.add('text-emerald-400');\n    }\n});",
+                explanation: [
+                    "บรรทัดที่ 2: ใช้ <code>document.querySelector()</code> อ้างอิง Element ตาม ID selector",
+                    "บรรทัดที่ 6: ใช้ Arrow Function <code>() => {}</code> เป็น Callback Function",
+                    "บรรทัดที่ 9: ใช้ Template Literals <code>\`...\${var}\`</code> ในการแทรกตัวแปรลงในสตริง"
+                ],
+                memory: `
+[DOM Tree Structure in Memory]
+Document
+ └── body
+      ├── input#userName (value: "Alice")
+      ├── button#submitBtn (EventListener: click)
+      └── div#outputBox (textContent: "ยินดีต้อนรับคุณ, Alice!")
+                `,
+                mistakes: "1. ประกาศตัวแปรด้วย `const` แล้วพยายามเปลี่ยนค่าใหม่ (Re-assignment Error)<br>2. เรียกใช้ `querySelector` ก่อนที่ HTML DOM จะโหลดเสร็จ",
+                bestPractice: "1. ให้เริ่มต้นด้วย `const` เสมอ หากจำเป็นต้องเปลี่ยนค่าภายหลังค่อยเปลี่ยนเป็น `let`<br>2. วางแท็ก `<script>` ไว้ท้ายไฟล์ HTML ก่อน `</body>` หรือใส่ Attribute `defer`",
+                exercise: "สร้างปุ่มเพิ่ม-ลดตัวเลข (Counter App) เมื่อกดปุ่มตัวเลขจะเปลี่ยนสีตามค่าน้อยกว่าหรือมากกว่า 0",
+                challenge: "<b>Mini-Challenge:</b> สร้าง To-Do List อย่างง่าย ที่กดเพิ่มรายการ ลบรายการ และติ๊กทำเสร็จแล้วผ่าน DOM ได้",
+                quiz: [
+                    {
+                        q: "ข้อใดคือความแตกต่างหลักระหว่างการประกาศตัวแปรด้วย let และ const ใน JavaScript?",
+                        options: ["let ใช้กับตัวเลข const ใช้กับข้อความ", "let เปลี่ยนค่าได้ แต่ const ไม่สามารถ Re-assign ค่าใหม่ได้", "let เป็น Global เสมอ แต่ const เป็น Local", "ไม่มีความแตกต่างกัน"],
+                        answer: 1,
+                        explain: "const ใช้ประกาศตัวแปรอ่านอย่างเดียว ไม่สามารถเปลี่ยนการอ้างอิงค่าใหม่ได้"
+                    }
+                ],
+                cheatSheet: `
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <strong class="text-amber-400">JS Variable Scope:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-300">
+                            <li>var: Function Scope (Hoisted)</li>
+                            <li>let: Block Scope (Re-assignable)</li>
+                            <li>const: Block Scope (Read-only)</li>
+                        </ul>
+                    </div>
+                `
+            },
+            41: {
+                part: "Part 5",
+                lang: "Java",
+                title: "Day 41: Java Strongly Typed & OOP Core",
+                desc: "เข้าใจคุณลักษณะ Strongly Typed, โครงสร้าง Class, Object และ Method ในภาษา Java",
+                theory: "Java เป็นภาษาประเภท **Static & Strongly Typed** หมายความว่าตัวแปรทุกตัวจะต้องระบุชนิดข้อมูล (Data Type) ชัดเจนขณะประกาศ และไม่ยอมให้เปลี่ยนประเภทตัวแปรข้ามสายพันธุ์โดยไม่แปลงข้อมูลอย่างเป็นทางการ",
+                syntax: "public class Main {\n    public static void main(String[] args) {\n        String name = \"Java\";\n        System.out.println(\"Hello \" + name);\n    }\n}",
+                code: "public class Student {\n    // Attributes (Private Encapsulation)\n    private String name;\n    private double gpa;\n\n    // Constructor\n    public Student(String name, double gpa) {\n        this.name = name;\n        this.gpa = gpa;\n    }\n\n    // Method\n    public void displayInfo() {\n        System.out.println(\"Student: \" + this.name + \" | GPA: \" + this.gpa);\n    }\n}",
+                explanation: [
+                    "บรรทัดที่ 3-4: ประกาศ Field คุณลักษณะของ Class เป็น `private` เพื่อทำ Encapsulation",
+                    "บรรทัดที่ 7: Constructor สำหรับกำหนดค่าเริ่มต้นเมื่อสร้าง Object ใหม่ผ่านคีย์เวิร์ด `new`",
+                    "บรรทัดที่ 13: `this` อ้างอิงถึง Instance ปัจจุบันของ Class"
+                ],
+                memory: `
+[Stack Memory]                  [Heap Memory]
++--------------------+          +----------------------------------+
+| studentRef --------|--------> | Object Student                   |
+|                    |          |  ├── name: "John" (String Ref)   |
+|                    |          |  └── gpa: 3.85 (double)          |
++--------------------+          +----------------------------------+
+                `,
+                mistakes: "1. พยายามสลับ Type ข้ามสายพันธุ์โดยไม่ทำ Explicit Casting เช่น เอา String ไปใส่ใน int<br>2. เปรียบเทียบ String สองตัวด้วยเครื่องหมาย `==` แทนการใช้เมธอด `.equals()`",
+                bestPractice: "1. ใช้ Access Modifier `private` กับตัวแปรฟิลด์ แล้วสร้าง Getter/Setter เมธอดเสมอ<br>2. ตั้งชื่อ Class ขึ้นต้นด้วยตัวใหญ่ (PascalCase) และ Method เป็น camelCase",
+                exercise: "สร้าง Class `BankAccount` ที่มีฟิลด์ balance และเมธอด `deposit()`, `withdraw()`",
+                challenge: "<b>Mini-Challenge:</b> สร้างระบบบริหารจัดการพนักงานด้วยหลัก Inheritance โดยมี Class แม่เป็น `Employee` และ Class ลูกเป็น `Manager`",
+                quiz: [
+                    {
+                        q: "คุณลักษณะ Strongly Typed ในภาษา Java หมายถึงข้อใด?",
+                        options: [
+                            "ต้องระบุชนิดข้อมูลชัดเจนขณะประกาศตัวแปร และไม่ยินยอมให้เปลี่ยนประเภทตัวแปรข้ามสายพันธุ์โดยไม่แปลงข้อมูล",
+                            "ตัวแปรทุกตัวสามารถปรับเปลี่ยนชนิดข้อมูลได้อิสระตลอดเวลา",
+                            "รองรับการเขียนแบบสคริปต์ไม่ต้องผ่านการคอมไพล์",
+                            "ห้ามใช้ตัวเลขในการตั้งชื่อตัวแปรเด็ดขาด"
+                        ],
+                        answer: 0,
+                        explain: "Java เป็น Static & Strongly Typed Language ต้องระบุ Type ชัดเจน"
+                    }
+                ],
+                cheatSheet: `
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <strong class="text-cyan-400">Java Primitive Types:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-300">
+                            <li>int (32-bit), long (64-bit)</li>
+                            <li>float (32-bit), double (64-bit)</li>
+                            <li>boolean (true/false), char (16-bit)</li>
+                        </ul>
+                    </div>
+                `
+            },
+            51: {
+                part: "Part 6",
+                lang: "Full Stack",
+                title: "Day 51: SQL Relational DB, JOIN & REST API",
+                desc: "การออกแบบฐานข้อมูลเชิงสัมพันธ์ คำสั่ง SQL JOIN และการออกแบบโครงสร้าง RESTful API",
+                theory: "REST API เป็นสถาปัตยกรรมแลกเปลี่ยนข้อมูลผ่าน HTTP Protocol โดยใช้ HTTP Method (GET, POST, PUT, PATCH, DELETE) สื่อสารความต้องการกับ Server และส่งผลลัพธ์กลับในรูปแบบมาตรฐาน JSON",
+                syntax: "-- SQL INNER JOIN Example\nSELECT u.name, o.total_amount \nFROM users u \nINNER JOIN orders o ON u.id = o.user_id\nWHERE o.status = 'COMPLETED';",
+                code: "<?php\n  // REST API Endpoint: GET /api/users.php\n  header(\"Content-Type: application/json; charset=UTF-8\");\n  header(\"Access-Control-Allow-Origin: *\");\n\n  $response = [\n      \"status\" => 200,\n      \"message\" => \"Success\",\n      \"data\" => [\n          [\"id\" => 1, \"name\" => \"Alice\", \"role\" => \"Admin\"],\n          [\"id\" => 2, \"name\" => \"Bob\", \"role\" => \"Developer\"]\n      ]\n  ];\n\n  http_response_code(200);\n  echo json_encode($response, JSON_UNESCAPED_UNICODE);\n?>",
+                explanation: [
+                    "บรรทัดที่ 3: ส่ง Header บอก Client ว่าขอบอกรับ Response แบบ `application/json`",
+                    "บรรทัดที่ 14: กำหนด HTTP Status Code 200 OK ให้กับ Client Header",
+                    "บรรทัดที่ 15: แปลงโครงสร้าง Array ใน PHP ให้กลายเป็น JSON String ด้วย `json_encode()`"
+                ],
+                memory: `
+[Client Frontend App]  ======(HTTP GET /api/users)======> [Backend REST API]
+[Client Frontend App]  <=====(200 OK + JSON Response)==== [Backend REST API]
+                `,
+                mistakes: "1. ส่ง HTTP Method ผิด เช่น ใช้ GET สำหรับการสร้างข้อมูลใหม่ (ควรใช้ POST)<br>2. ตอบกลับ Status Code 200 OK ทั้งๆ ที่เกิด Internal Error ในระบบ",
+                bestPractice: "1. เลือกใช้ Status Code ให้ตรงกับสถานะจริง (200 Success, 201 Created, 400 Bad Request, 401 Unauthorized, 404 Not Found)<br>2. ป้องกัน XSS และ SQL Injection ในส่วนของ API Controller เสมอ",
+                exercise: "ออกแบบตาราง MySQL จำนวน 2 ตาราง (Users และ Orders) และเขียน SQL JOIN เพื่อสรุปยอดซื้อรายบุคคล",
+                challenge: "<b>Mini-Project:</b> สร้าง Full Stack CRUD Application แบบง่าย ที่ใช้ PHP Backend API + Fetch API ใน JavaScript + SQL Database",
+                quiz: [
+                    {
+                        q: "คำสั่ง SQL ข้อใดใช้รวมข้อมูลจากสองตารางเข้าด้วยกัน โดยคืนค่าเฉพาะแถวที่มีข้อมูลแมตช์กันทั้งสองตาราง?",
+                        options: ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"],
+                        answer: 0,
+                        explain: "INNER JOIN ดึงเฉพาะข้อมูลที่มีค่าตรงกันในเงื่อนไขการเชื่อมตารางทั้งสองฝั่ง"
+                    }
+                ],
+                cheatSheet: `
+                    <div class="bg-slate-900 p-3 rounded border border-slate-700">
+                        <strong class="text-emerald-400">HTTP Status Codes:</strong>
+                        <ul class="list-disc list-inside mt-1 space-y-1 text-slate-300">
+                            <li>200 OK / 201 Created</li>
+                            <li>400 Bad Request / 401 Unauthorized</li>
+                            <li>403 Forbidden / 404 Not Found</li>
+                            <li>500 Internal Server Error</li>
+                        </ul>
+                    </div>
+                `
+            }
+        };
+
+        // Dynamic fallback data for days not explicitly detailed above
+        function getFallbackData(dayNum) {
+            const partMap = { 1: 'Part 1', 2: 'Part 2', 3: 'Part 3', 4: 'Part 4', 5: 'Part 5', 6: 'Part 6' };
+            const partNo = Math.ceil(dayNum / 10);
+            const langMap = { 1: 'PHP', 2: 'PHP', 3: 'PHP', 4: 'JavaScript', 5: 'Java', 6: 'Full Stack' };
+            
+            const topicTitles = {
+                2: "Data Types & Type Juggling", 3: "Operators & Precedence", 4: "Conditional Statements (if/else, switch)", 5: "Loops (for, while, foreach)", 6: "Arrays & Associative Arrays", 7: "Functions & Scope", 8: "String Manipulation Functions", 9: "Include & Require", 10: "Form Handling Basics",
+                12: "Form Validation & Sanitization", 13: "Sessions & Cookies", 14: "File I/O Handling", 15: "Date & Time Functions", 16: "Exception Handling", 17: "Regex Pattern Matching", 18: "Array Functions (map/filter)", 19: "Code Architecture & Patterns", 20: "JSON & cURL API Requests",
+                22: "OOP Classes & Objects", 23: "OOP Inheritance", 24: "Encapsulation & Access Modifiers", 25: "Abstract Classes & Interfaces", 26: "Static Members & Constants", 27: "Namespaces & Autoloading", 28: "Traits Concept", 29: "Design Patterns (Singleton/Factory)", 30: "OOP CRUD Mini Application",
+                32: "JS Arrow Functions & Lexical This", 33: "JS Array Methods (map, filter, reduce)", 34: "JS Objects & Destructuring", 35: "DOM Events & Manipulation", 36: "Async JS & Promises", 37: "Async/Await & Fetch API", 38: "ES6 Modules & Imports", 39: "Error Handling & Debugging", 40: "Web Storage (LocalStorage)",
+                42: "Java Data Types & Casting", 43: "Java Control Flow", 44: "Java Arrays & ArrayList", 45: "Java Method Overloading", 46: "Java Constructors & 'this'", 47: "Java OOP Inheritance & Super", 48: "Java Interfaces & Polymorphism", 49: "Java Exception Handling", 50: "Java Collections (List, Set, Map)",
+                52: "DB Design & Normalization", 53: "SQL Queries (SELECT, WHERE, GROUP BY)", 54: "SQL JOINs (INNER, LEFT, RIGHT)", 55: "SQL Transactions (ACID)", 56: "REST API Endpoint Design", 57: "Authentication & Password Security", 58: "Web Security (SQLi, XSS, CSRF)", 59: "Full Stack Integration", 60: "Capstone Project & Deployment"
+            };
+
+            const lang = langMap[partNo] || 'Programming';
+            const topic = topicTitles[dayNum] || `บทเรียนประจำวัน Day ${dayNum}`;
+
+            return {
+                part: partMap[partNo] || 'Part ?',
+                lang: lang,
+                title: `Day ${dayNum < 10 ? '0' + dayNum : dayNum}: ${topic}`,
+                desc: `เรียนรู้แนวคิด การใช้งาน และหลักปฏิบัติของ ${topic} ในภาษา ${lang}`,
+                theory: `ในบทเรียนนี้เราจะศึกษาโครงสร้างและแนวคิดสำคัญของ <b>${topic}</b> ในภาษา ${lang} เพื่อสร้างรากฐานที่มั่นคงสำหรับพัฒนาแอปพลิเคชัน`,
+                syntax: `// ${lang} Syntax Structure for Day ${dayNum}\n// ${topic}\n$example = "Demonstration of ${topic}";`,
+                code: `// ${lang} Code Sample for Day ${dayNum}\n// Focus: ${topic}\nfunction executeDay${dayNum}() {\n    // Implementation logic here\n    return "${topic} Executed Successfully";\n}`,
+                explanation: [
+                    `บรรทัดที่ 1-2: คอมเมนต์อธิบายหัวข้อ ${topic}`,
+                    `บรรทัดที่ 3: ประกาศฟังก์ชันตัวอย่างสำหรับประมวลผล ${topic}`,
+                    `บรรทัดที่ 4-5: ดำเนินการคืนค่าผลลัพธ์การทำงานของโปรแกรม`
+                ],
+                memory: `\n[Execution Context Day ${dayNum}: ${topic}]\nStack Memory ──► Heap Memory Reference\nGlobal Scope ──► Local Variable Binding\n`,
+                mistakes: `1. ลืมตรวจสอบประเภทข้อมูลก่อนประมวลผล ${topic}<br>2. เขียน Syntax ไม่ตรงตามมาตรฐานหลักภาษา`,
+                bestPractice: `1. ทำความเข้าใจการทำงานในระดับ Memory และจัดการ Resource อย่างถูกต้อง<br>2. ใช้การตรวจสอบตัวแปรและการจัดการ Error Handling เสมอ`,
+                exercise: `1. เขียนโค้ดฝึกปฏิบัติสร้างฟังก์ชันจัดการกับ ${topic}<br>2. ทดสอบผลลัพธ์และจัดการกรณี edge cases`,
+                challenge: `<b>Mini-Challenge:</b> นำเรื่อง ${topic} ไปประยุกต์ร่วมกับสถาปัตยกรรมระบบที่เรียนมาก่อนหน้า`,
+                quiz: [
+                    {
+                        q: `แนวคิดหลักเรื่อง ${topic} ในภาษา ${lang} เกี่ยวข้องกับข้อใดมากที่สุด?`,
+                        options: [
+                            `การเพิ่มประสิทธิภาพและโครงสร้างไวยากรณ์ของ ${topic}`,
+                            "การเขียนไฟล์โค้ดโดยไม่ใช้ตัวแปร",
+                            "การรันโปรแกรมฝั่ง Client อย่างเดียว",
+                            "การยกเลิกการทำงานของเซิร์ฟเวอร์"
+                        ],
+                        answer: 0,
+                        explain: `เนื้อหาของ Day ${dayNum} เน้นการทำความเข้าใจโครงสร้างไวยากรณ์และการประยุกต์ใช้ ${topic} อย่างถูกต้อง`
+                    },
+                    {
+                        q: `ข้อผิดพลาดทั่วไปที่ควรระวังเกี่ยวกับ ${topic} คืออะไร?`,
+                        options: [
+                            "การแสดงผลในหน้าจอ HTML",
+                            "การลืมทำความสะอาดข้อมูล (Validation/Sanitization) หรือการข้าม Error Handling",
+                            "การตั้งชื่อไฟล์ด้วยตัวอักษรภาษาอังกฤษ",
+                            "การใช้คำสั่ง echo หรือ console.log"
+                        ],
+                        answer: 1,
+                        explain: "การพัฒนาซอฟต์แวร์ที่ดีต้องระวังเรื่อง Validation, Security และการรับมือข้อผิดพลาดเสมอ"
+                    }
+                ],
+                cheatSheet: `<div class="bg-slate-900 p-3 rounded border border-slate-700 text-slate-300"><strong class="text-indigo-400">CheatSheet Day ${dayNum}:</strong><br>ทบทวน ${topic} ใน ${lang}</div>`
+            };
+        }
+
+        // State Management
+        let currentDay = 1;
+        let completedDays = JSON.parse(localStorage.getItem('bootcamp_completed_days') || '[]');
+        let currentQuizData = [];
+        let quizResults = {};
+        let quizAnswers = JSON.parse(localStorage.getItem('bootcamp_quiz_answers') || '{}');
+
+        // Initialize UI
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSidebar();
+            loadDay(1);
+            updateProgressUI();
+        });
+
+        // Check if current day conditions are met to unlock explanations & quiz answers
+        function isDayUnlocked(dayNum) {
+            const isMarked = completedDays.includes(dayNum);
+            const data = lessonsData[dayNum] || getFallbackData(dayNum);
+            const quizArr = data.quiz || [];
+            
+            const savedDayAnswers = quizAnswers[dayNum] || {};
+            const totalQuizCount = quizArr.length;
+            const answeredQuizCount = Object.keys(savedDayAnswers).length;
+            const isQuizDone = totalQuizCount > 0 && answeredQuizCount >= totalQuizCount;
+
+            // OR CONDITION: ปลดล็อกเมื่อทำอย่างใดอย่างหนึ่งสำเร็จ (มาร์กเรียนจบ OR ทำแบบทดสอบครบทุกข้อ)
+            return isMarked || isQuizDone;
+        }
+
+        // Toggle Accordion
+        function togglePart(partId) {
+            const el = document.getElementById(partId);
+            const icon = document.getElementById(`${partId}-icon`);
+            if (!el) return;
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                if (icon) icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+            } else {
+                el.classList.add('hidden');
+                if (icon) icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+            }
+        }
+
+        // Render Sidebar List
+        function renderSidebar() {
+            const partsMapping = {
+                part1: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                part2: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+                part3: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+                part4: [31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
+                part5: [41, 42, 43, 44, 45, 46, 47, 48, 49, 50],
+                part6: [51, 52, 53, 54, 55, 56, 57, 58, 59, 60]
+            };
+
+            for (const [partId, days] of Object.entries(partsMapping)) {
+                const container = document.getElementById(partId);
+                if (!container) continue;
+                container.innerHTML = days.map(d => {
+                    const isDone = completedDays.includes(d);
+                    const dayLabel = d < 10 ? `0${d}` : d;
+
+                    return `
+                        <button onclick="loadDay(${d})" id="dayBtn-${d}" class="w-full px-2.5 py-1.5 rounded flex items-center justify-between transition-colors ${d === currentDay ? 'bg-indigo-600/30 text-indigo-200 font-medium border border-indigo-500/40' : 'hover:bg-slate-800 text-slate-400'}">
+                            <span class="truncate pr-2"><i class="fa-regular fa-file-code text-[10px] mr-1.5"></i>Day ${dayLabel}</span>
+                            ${isDone ? '<i class="fa-solid fa-circle-check text-emerald-400 text-xs"></i>' : '<i class="fa-regular fa-circle text-slate-600 text-xs"></i>'}
+                        </button>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Load Lesson Day Content
+        function loadDay(dayNum) {
+            currentDay = dayNum;
+            const data = lessonsData[dayNum] || getFallbackData(dayNum);
+
+            // Update Header Tags & Title
+            document.getElementById('lessonTag').textContent = `Day ${dayNum < 10 ? '0' + dayNum : dayNum}`;
+            document.getElementById('lessonLang').textContent = data.lang;
+            document.getElementById('lessonTitle').textContent = data.title;
+            document.getElementById('lessonDesc').textContent = data.desc;
+
+            // Populate Theory
+            document.getElementById('theoryText').innerHTML = data.theory;
+            
+            // Populate Syntax with Line Numbers
+            renderCodeWithLineNumbers('syntaxBlock', 'syntaxLineNumbers', data.syntax);
+
+            // Populate Code with Line Numbers
+            renderCodeWithLineNumbers('codeBlock', 'codeLineNumbers', data.code);
+            
+            // Populate Explanation
+            renderExplanation();
+
+            // Memory Visual
+            document.getElementById('memoryVisual').innerHTML = `<pre class="text-xs text-cyan-300 overflow-x-auto">${data.memory}</pre>`;
+
+            // Mistakes & Best Practices
+            document.getElementById('mistakesText').innerHTML = data.mistakes;
+            document.getElementById('bestPracticeText').innerHTML = data.bestPractice;
+
+            // Exercise & Challenge
+            document.getElementById('exerciseText').innerHTML = data.exercise;
+            document.getElementById('challengeText').innerHTML = data.challenge;
+
+            // Render Native Quiz
+            renderNativeQuiz(data.quiz || []);
+
+            // CheatSheet
+            document.getElementById('cheatSheetContent').innerHTML = data.cheatSheet;
+
+            // Update Completion Button Status
+            updateCompleteButton();
+
+            // Highlight Active Day in Sidebar
+            document.querySelectorAll('[id^="dayBtn-"]').forEach(btn => {
+                btn.classList.remove('bg-indigo-600/30', 'text-indigo-200', 'font-medium', 'border', 'border-indigo-500/40');
+            });
+            const activeBtn = document.getElementById(`dayBtn-${dayNum}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-indigo-600/30', 'text-indigo-200', 'font-medium', 'border', 'border-indigo-500/40');
+            }
+
+            // Reset active tab to theory
+            switchTab('theory');
+        }
+
+        // Render Explanation Tab Content & Lock Status
+        function renderExplanation() {
+            const data = lessonsData[currentDay] || getFallbackData(currentDay);
+            const expContainer = document.getElementById('explanationList');
+            const lockBadge = document.getElementById('lockBadgeExplanation');
+            if (!expContainer) return;
+
+            const isMarked = completedDays.includes(currentDay);
+            const quizArr = data.quiz || [];
+            const savedDayAnswers = quizAnswers[currentDay] || {};
+            const totalQuizCount = quizArr.length;
+            const answeredQuizCount = Object.keys(savedDayAnswers).length;
+            const isQuizDone = totalQuizCount > 0 && answeredQuizCount >= totalQuizCount;
+
+            const unlocked = isDayUnlocked(currentDay);
+
+            if (unlocked) {
+                if (lockBadge) {
+                    lockBadge.className = "text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                    lockBadge.innerHTML = "🔓 ปลดล็อกคำอธิบายสำเร็จ";
+                }
+
+                expContainer.innerHTML = data.explanation.map(line => `
+                    <div class="p-2.5 bg-slate-900/80 rounded-lg border border-slate-700/60 leading-relaxed text-slate-200">
+                        ${line}
+                    </div>
+                `).join('');
+            } else {
+                if (lockBadge) {
+                    lockBadge.className = "text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                    lockBadge.innerHTML = "🔒 ยังไม่ปลดล็อกเฉลย";
+                }
+
+                expContainer.innerHTML = `
+                    <div class="p-6 bg-slate-900/90 border border-slate-700/80 rounded-xl text-center space-y-3">
+                        <div class="w-10 h-10 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-200">คำอธิบายทีละบรรทัดและเฉลยถูกซ่อนอยู่</h4>
+                        <p class="text-xs text-amber-300 font-semibold mb-1">เลือกทำอย่างใดอย่างหนึ่งเพื่อปลดล็อกเฉลย:</p>
+                        <div class="flex flex-col gap-1.5 text-xs text-slate-300 max-w-sm mx-auto text-left mb-4 bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+                            <div class="flex items-center justify-between">
+                                <span class="flex items-center gap-2"><i class="fa-regular ${isMarked ? 'fa-square-check text-emerald-400' : 'fa-square text-amber-400'}"></i> 1. กดมาร์กเรียนจบ (หรือทำแบบฝึกหัดเสร็จ)</span>
+                                ${isMarked ? '<span class="text-emerald-400 text-[11px] font-bold">ทำแล้ว ✓</span>' : ''}
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="flex items-center gap-2"><i class="fa-regular ${isQuizDone ? 'fa-square-check text-emerald-400' : 'fa-square text-amber-400'}"></i> 2. ทำแบบทดสอบประจำวันให้ครบทุกข้อ</span>
+                                <span class="${isQuizDone ? 'text-emerald-400 font-bold' : 'text-amber-400'} text-[11px]">(${answeredQuizCount}/${totalQuizCount})</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
+                            <button onclick="switchTab('quiz')" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold transition-all shadow flex items-center gap-2">
+                                <i class="fa-solid fa-list-check"></i> ไปทำแบบทดสอบ (${answeredQuizCount}/${totalQuizCount})
+                            </button>
+                            <button onclick="switchTab('exercise')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition-all shadow flex items-center gap-2">
+                                <i class="fa-solid fa-dumbbell"></i> ไปทำแบบฝึกหัด
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Helper function to render code and line numbers
+        function renderCodeWithLineNumbers(codeElemId, numElemId, codeText) {
+            const codeElem = document.getElementById(codeElemId);
+            const numElem = document.getElementById(numElemId);
+            
+            if (!codeElem || !numElem) return;
+
+            codeElem.textContent = codeText;
+            const lines = codeText.split('\n');
+            const lineNumsHtml = lines.map((_, idx) => idx + 1).join('\n');
+            numElem.textContent = lineNumsHtml;
+        }
+
+        // Switch Active Content Tab
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+                btn.classList.add('text-slate-400');
+            });
+
+            const contentEl = document.getElementById(`content-${tabName}`);
+            if (contentEl) contentEl.classList.remove('hidden');
+
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-400');
+                activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+            }
+        }
+
+        // Toggle Day Completion Status
+        function toggleCurrentDayComplete() {
+            const idx = completedDays.indexOf(currentDay);
+            if (idx > -1) {
+                completedDays.splice(idx, 1);
+            } else {
+                completedDays.push(currentDay);
+            }
+
+            localStorage.setItem('bootcamp_completed_days', JSON.stringify(completedDays));
+            updateProgressUI();
+            updateCompleteButton();
+            renderSidebar();
+            
+            // Reload current day view to check if unlocked
+            loadDay(currentDay);
+        }
+
+        // Native Quiz Render & Logic
+        function renderNativeQuiz(quizArr) {
+            const container = document.getElementById('quizQuestionsList');
+            const scoreBadge = document.getElementById('quizScoreBadge');
+            currentQuizData = quizArr || [];
+            quizResults = {};
+
+            if (!quizArr || quizArr.length === 0) {
+                container.innerHTML = `<div class="text-xs text-slate-400 py-4 text-center">ไม่มีคำถามทดสอบสำหรับวันนี้</div>`;
+                scoreBadge.textContent = "คะแนน: -";
+                return;
+            }
+
+            scoreBadge.textContent = `คะแนน: 0/${quizArr.length}`;
+
+            container.innerHTML = quizArr.map((item, idx) => `
+                <div class="bg-slate-900/90 border border-slate-700 p-4 rounded-xl space-y-3" id="quizCard-${idx}">
+                    <p class="text-xs font-semibold text-slate-200">${idx + 1}. ${item.q}</p>
+                    <div class="space-y-2 text-xs">
+                        ${item.options.map((opt, oIdx) => `
+                            <label class="flex items-center gap-2 p-2 rounded-lg bg-slate-800 hover:bg-slate-700/80 cursor-pointer border border-slate-700/60 transition-colors">
+                                <input type="radio" name="quizOpt-${idx}" value="${oIdx}" onchange="checkAnswer(${idx})" class="text-indigo-500 focus:ring-0">
+                                <span class="text-slate-300">${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div id="quizFeedback-${idx}" class="hidden p-3 rounded-lg text-xs leading-relaxed"></div>
+                </div>
+            `).join('') + `
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-700">
+                    <span class="text-[11px] text-slate-400">เลือกคำตอบให้ครบทุกข้อ หรือกดมาร์กเรียนจบเพื่อดูเฉลยรายละเอียด</span>
+                    <button onclick="checkAllAnswers()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 shadow-md">
+                        <i class="fa-solid fa-list-check"></i> ตรวจคำตอบทั้งหมด
+                    </button>
+                </div>
+            `;
+
+            // Reload saved answers for this day
+            const savedAnswers = quizAnswers[currentDay] || {};
+            Object.keys(savedAnswers).forEach(qIdx => {
+                const radio = document.querySelector(`input[name="quizOpt-${qIdx}"][value="${savedAnswers[qIdx]}"]`);
+                if (radio) {
+                    radio.checked = true;
+                    checkAnswer(Number(qIdx));
+                }
+            });
+        }
+
+        function checkAnswer(qIdx) {
+            const item = currentQuizData[qIdx];
+            if (!item) return;
+            const correctIdx = item.answer;
+            const explain = item.explain;
+            const selected = document.querySelector(`input[name="quizOpt-${qIdx}"]:checked`);
+            const feedbackEl = document.getElementById(`quizFeedback-${qIdx}`);
+
+            if (!selected) {
+                feedbackEl.className = "p-3 rounded-lg text-xs bg-amber-950/40 text-amber-300 border border-amber-800/60";
+                feedbackEl.innerHTML = "⚠️ กรุณาเลือกคำตอบก่อนกดตรวจ";
+                feedbackEl.classList.remove('hidden');
+                return;
+            }
+
+            const userAns = parseInt(selected.value);
+            
+            // Save user answer to state and localStorage
+            if (!quizAnswers[currentDay]) quizAnswers[currentDay] = {};
+            quizAnswers[currentDay][qIdx] = userAns;
+            localStorage.setItem('bootcamp_quiz_answers', JSON.stringify(quizAnswers));
+
+            quizResults[qIdx] = (userAns === correctIdx);
+            updateQuizScore();
+
+            // Check if user unlocked explanations now
+            const unlocked = isDayUnlocked(currentDay);
+
+            let explanationContent = '';
+            if (unlocked) {
+                explanationContent = `<br><span class="text-slate-300 mt-1 block">💡 <strong>คำอธิบาย:</strong> ${explain}</span>`;
+            } else {
+                const data = lessonsData[currentDay] || getFallbackData(currentDay);
+                const totalQuizCount = (data.quiz || []).length;
+                const answeredQuizCount = Object.keys(quizAnswers[currentDay] || {}).length;
+                explanationContent = `<br><span class="text-amber-400/90 mt-1 block text-[11px]">🔒 ตอบแบบทดสอบให้ครบทุกข้อ (${answeredQuizCount}/${totalQuizCount}) หรือกดมาร์กเรียนจบ เพื่อปลดล็อกคำอธิบายเฉลย</span>`;
+            }
+
+            if (userAns === correctIdx) {
+                feedbackEl.className = "p-3 rounded-lg text-xs bg-emerald-950/40 text-emerald-300 border border-emerald-800/60";
+                feedbackEl.innerHTML = `✅ <strong>ถูกต้อง!</strong> ${explanationContent}`;
+            } else {
+                feedbackEl.className = "p-3 rounded-lg text-xs bg-rose-950/40 text-rose-300 border border-rose-800/60";
+                feedbackEl.innerHTML = `❌ <strong>ยังไม่ถูกต้อง</strong> ${explanationContent}`;
+            }
+            feedbackEl.classList.remove('hidden');
+
+            // อัปเดตแท็บคำอธิบายเฉลยแบบเรียลไทม์ทันทีเมื่อมีการตอบ
+            renderExplanation();
+
+            // หากเพิ่งตอบครบทุกข้อและปลดล็อก ให้รีเฟรชการแสดงผลฟีดแบ็กทุกข้อในควิซเพื่อให้คำอธิบายเฉลยโผล่ออกมา
+            if (unlocked) {
+                Object.keys(quizAnswers[currentDay] || {}).forEach(idx => {
+                    const el = document.getElementById(`quizFeedback-${idx}`);
+                    if (el && !el.classList.contains('hidden')) {
+                        const itemData = currentQuizData[idx];
+                        if (itemData) {
+                            const isCorrect = quizResults[idx];
+                            el.innerHTML = `${isCorrect ? '✅ <strong>ถูกต้อง!</strong>' : '❌ <strong>ยังไม่ถูกต้อง</strong>'}<br><span class="text-slate-300 mt-1 block">💡 <strong>คำอธิบาย:</strong> ${itemData.explain}</span>`;
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateQuizScore() {
+            const scoreBadge = document.getElementById('quizScoreBadge');
+            if (!scoreBadge) return;
+            const correct = Object.values(quizResults).filter(Boolean).length;
+            scoreBadge.textContent = `คะแนน: ${correct}/${currentQuizData.length}`;
+        }
+
+        function checkAllAnswers() {
+            if (!currentQuizData.length) return;
+            for (let i = 0; i < currentQuizData.length; i++) {
+                checkAnswer(i);
+            }
+        }
+
+        function toggleQuizMode(mode) {
+            const nativeCont = document.getElementById('nativeQuizContainer');
+            const gformCont = document.getElementById('gformContainer');
+            const btnNative = document.getElementById('btnQuizNative');
+            const btnGForm = document.getElementById('btnQuizGForm');
+
+            if (!nativeCont || !gformCont) return;
+
+            if (mode === 'native') {
+                nativeCont.classList.remove('hidden');
+                gformCont.classList.add('hidden');
+                if (btnNative) btnNative.className = "px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold shadow transition-all";
+                if (btnGForm) btnGForm.className = "px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 text-xs font-semibold transition-all";
+            } else {
+                nativeCont.classList.add('hidden');
+                gformCont.classList.remove('hidden');
+                if (btnGForm) btnGForm.className = "px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold shadow transition-all";
+                if (btnNative) btnNative.className = "px-3 py-1.5 rounded-lg bg-slate-700 text-slate-300 hover:bg-slate-600 text-xs font-semibold transition-all";
+            }
+        }
+
+        function updateGoogleFormIframe() {
+            const url = document.getElementById('gformUrlInput').value;
+            const iframe = document.getElementById('gformIframe');
+            if (iframe) iframe.src = url;
+        }
+
+        function updateCompleteButton() {
+            const isDone = completedDays.includes(currentDay);
+            const btn = document.getElementById('completeBtn');
+            const text = document.getElementById('completeText');
+
+            if (!btn || !text) return;
+
+            if (isDone) {
+                btn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-500 border border-emerald-500 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shadow-md";
+                text.textContent = 'เรียนบทนี้เสร็จแล้ว!';
+            } else {
+                btn.className = "px-4 py-2 bg-slate-700 hover:bg-emerald-600 border border-slate-600 hover:border-emerald-500 text-slate-200 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shadow-md";
+                text.textContent = 'มาร์กเรียนจบแล้ว';
+            }
+
+            const exText = document.getElementById('exerciseCompleteText');
+            if (exText) {
+                exText.textContent = isDone ? 'เรียนบทนี้เสร็จแล้ว ✓ (กดเพื่อยกเลิก)' : 'มาร์กเรียนจบแล้ว';
+            }
+        }
+
+        function updateProgressUI() {
+            const progressEl = document.getElementById('progressText');
+            if (progressEl) progressEl.textContent = `${completedDays.length}/60`;
+        }
+
+        function resetProgress() {
+            completedDays = [];
+            localStorage.removeItem('bootcamp_completed_days');
+            quizAnswers = {};
+            localStorage.removeItem('bootcamp_quiz_answers');
+            updateProgressUI();
+            updateCompleteButton();
+            renderSidebar();
+            loadDay(currentDay);
+        }
+
+        function copyCode() {
+            const code = document.getElementById('codeBlock').textContent;
+            navigator.clipboard.writeText(code);
+        }
+
+        function filterContent() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('[id^="dayBtn-"]').forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    btn.classList.remove('hidden');
+                } else {
+                    btn.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
