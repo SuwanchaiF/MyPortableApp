@@ -517,7 +517,7 @@
             }
 
             .map-image-wrapper {
-                height: 235px !important; /* Enlarged map preview for clear PDF output! */
+                height: 275px !important; /* Enlarged map preview (4 images / 2 days per A4 page) */
                 border: 1px solid #cbd5e1 !important;
                 border-radius: 8px !important;
                 background: #ffffff !important;
@@ -955,16 +955,59 @@
         };
     }
 
+    function parseThaiDateForSort(dateStr) {
+        if (!dateStr) return 0;
+        if (dateStr.includes('/')) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                const day = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const year = parseInt(parts[2], 10) - 543;
+                return new Date(year, month, day).getTime() || 0;
+            }
+        }
+        return new Date(dateStr).getTime() || 0;
+    }
+
+    function groupImagesByRealDate(records) {
+        const dateMap = new Map();
+
+        records.forEach(item => {
+            const defaultDateStr = item.titleThai || formatThaiDateString(item.date);
+            const rawImgs = item.images || (item.image ? [item.image] : []);
+
+            rawImgs.forEach((imgRaw, idx) => {
+                const img = normalizeImageObj(imgRaw, defaultDateStr, idx);
+                const realDateKey = img.date || defaultDateStr;
+
+                if (!dateMap.has(realDateKey)) {
+                    dateMap.set(realDateKey, {
+                        dateDisplay: realDateKey,
+                        recordId: item.id,
+                        images: []
+                    });
+                }
+                dateMap.get(realDateKey).images.push(img);
+            });
+        });
+
+        const groupedSections = Array.from(dateMap.values());
+        groupedSections.sort((a, b) => parseThaiDateForSort(a.dateDisplay) - parseThaiDateForSort(b.dateDisplay));
+        return groupedSections;
+    }
+
     function renderCommuteRecords() {
         const container = document.getElementById('commute-records-list');
         const countBadge = document.getElementById('records-count-badge');
         const query = (document.getElementById('filter-search').value || '').toLowerCase().trim();
 
-        const filtered = allRecords.filter(r => {
-            return !query || (r.titleThai || '').toLowerCase().includes(query) || (r.date || '').includes(query);
+        const grouped = groupImagesByRealDate(allRecords);
+
+        const filtered = grouped.filter(g => {
+            return !query || (g.dateDisplay || '').toLowerCase().includes(query);
         });
 
-        countBadge.innerText = `${filtered.length} รายการ`;
+        countBadge.innerText = `${filtered.length} รายการ (วันที่)`;
 
         if (filtered.length === 0) {
             container.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8; background: rgba(15,23,42,0.4); border-radius: 16px;">ไม่พบรายการภาพแผนที่การเดินทาง สามารถเพิ่มบันทึกใหม่ได้จากช่องด้านบน</div>';
@@ -972,12 +1015,11 @@
         }
 
         let html = '';
-        filtered.forEach(item => {
-            const dateDisplay = item.titleThai || formatThaiDateString(item.date);
+        filtered.forEach(section => {
+            const dateDisplay = section.dateDisplay;
             
             let imgsHtml = '';
-            (item.images || []).forEach((imgRaw, imgIdx) => {
-                const img = normalizeImageObj(imgRaw, dateDisplay, imgIdx);
+            section.images.forEach((img, imgIdx) => {
                 const safeUrl = img.url;
                 const safeTime = img.time;
                 const safeLabel = img.label;
@@ -1000,7 +1042,7 @@
                         <div class="date-badge">
                             <i class="fa-solid fa-calendar-day"></i> ${dateDisplay}
                         </div>
-                        <button type="button" onclick="deleteRecord('${item.id}')" style="background: rgba(244,63,94,0.15); color: #fda4af; border: 1px solid rgba(244,63,94,0.3); padding: 4px 10px; border-radius: 8px; font-size: 0.76rem; cursor: pointer;">
+                        <button type="button" onclick="deleteRecord('${section.recordId}')" style="background: rgba(244,63,94,0.15); color: #fda4af; border: 1px solid rgba(244,63,94,0.3); padding: 4px 10px; border-radius: 8px; font-size: 0.76rem; cursor: pointer;">
                             <i class="fa-solid fa-trash-can"></i> ลบ
                         </button>
                     </div>
@@ -1074,10 +1116,10 @@
         const { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, AlignmentType, HeadingLevel, WidthType, BorderStyle } = docx;
 
         const noBorders = {
-            top: { style: BorderStyle.NONE, size: 0, color: "AUTO" },
-            bottom: { style: BorderStyle.NONE, size: 0, color: "AUTO" },
-            left: { style: BorderStyle.NONE, size: 0, color: "AUTO" },
-            right: { style: BorderStyle.NONE, size: 0, color: "AUTO" }
+            top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+            bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+            left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+            right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }
         };
 
         const children = [
@@ -1089,33 +1131,35 @@
             })
         ];
 
-        for (const item of allRecords) {
-            const dateTitle = item.titleThai || formatThaiDateString(item.date);
+        const grouped = groupImagesByRealDate(allRecords);
+
+        for (const section of grouped) {
+            const dateTitle = section.dateDisplay;
             
             // Add Date Header Paragraph
             children.push(
                 new Paragraph({
                     children: [
                         new TextRun({
-                            text: dateTitle,
+                            text: `วันที่ ${dateTitle}`,
                             bold: true,
                             size: 24,
                             color: "1E293B"
                         })
                     ],
-                    spacing: { before: 180, after: 100 }
+                    spacing: { before: 200, after: 100 }
                 })
             );
 
             // Construct 2-column image table for Word DOCX layout (2 or 4 images per page)
-            const rawImgs = item.images || (item.image ? [item.image] : []);
+            const rawImgs = section.images;
             const tableRows = [];
 
             for (let i = 0; i < rawImgs.length; i += 2) {
                 const rowCells = [];
                 
                 // Cell 1
-                const imgObj1 = normalizeImageObj(rawImgs[i], dateTitle, i);
+                const imgObj1 = rawImgs[i];
                 const imgRun1 = getDocxImageRun(imgObj1.url, 255, 170);
 
                 rowCells.push(
@@ -1133,7 +1177,7 @@
 
                 // Cell 2 (if present)
                 if (i + 1 < rawImgs.length) {
-                    const imgObj2 = normalizeImageObj(rawImgs[i+1], dateTitle, i+1);
+                    const imgObj2 = rawImgs[i+1];
                     const imgRun2 = getDocxImageRun(imgObj2.url, 255, 170);
 
                     rowCells.push(
