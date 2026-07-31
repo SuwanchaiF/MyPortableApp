@@ -504,27 +504,38 @@
             }
 
             .map-images-grid {
-                display: grid !important;
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 12px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 16px !important;
             }
 
             .map-image-wrapper {
-                height: 220px !important;
-                border: 1px solid #94a3b8 !important;
-                border-radius: 8px !important;
-                background: #f8fafc !important;
+                height: auto !important;
+                max-height: 500px !important;
+                border: 1.5px solid #94a3b8 !important;
+                border-radius: 10px !important;
+                background: #ffffff !important;
                 page-break-inside: avoid;
+                overflow: hidden !important;
+            }
+
+            .map-image-wrapper img {
+                width: 100% !important;
+                height: auto !important;
+                max-height: 450px !important;
+                object-fit: contain !important;
+                display: block !important;
             }
 
             .image-caption {
+                position: relative !important;
                 background: #f1f5f9 !important;
                 color: #0f172a !important;
-                border-top: 1px solid #cbd5e1 !important;
+                border-top: 1.5px solid #cbd5e1 !important;
                 backdrop-filter: none !important;
-                font-size: 0.8rem !important;
+                font-size: 0.85rem !important;
                 font-weight: 600 !important;
-                padding: 4px 8px !important;
+                padding: 6px 12px !important;
             }
             .image-caption span {
                 color: #0f172a !important;
@@ -1082,8 +1093,8 @@
                                 new ImageRun({
                                     data: bytes,
                                     transformation: {
-                                        width: 260,
-                                        height: 180
+                                        width: 520,
+                                        height: 330
                                     }
                                 })
                             ],
