@@ -1224,12 +1224,34 @@
         });
 
         Packer.toBlob(doc).then(blob => {
-            saveAs(blob, `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.docx`);
+            const fileName = `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.docx`;
+            
+            // Standard Desktop saveAs
+            if (typeof saveAs !== 'undefined') {
+                saveAs(blob, fileName);
+            }
+
+            // Mobile Browser (iOS Safari / Android Chrome) Fallback Download Link
+            try {
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileName;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    if (document.body.contains(a)) document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                }, 2500);
+            } catch(e) {
+                console.error("Mobile DOCX download fallback error:", e);
+            }
         });
     }
 
     // ==========================================
-    // EXPORT TO PDF
+    // EXPORT TO PDF (รองรับทั้งมือถือและคอมพิวเตอร์)
     // ==========================================
     function exportToPDF() {
         if (!allRecords.length) {
@@ -1237,8 +1259,23 @@
             return;
         }
 
-        // Print native window print for pristine PDF rendering
-        window.print();
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile && typeof html2pdf !== 'undefined') {
+            alert('กำลังสร้างไฟล์ PDF บนมือถือ กรุณารอสักครู่...');
+            const element = document.getElementById('printable-report-area');
+            const opt = {
+                margin:       [6, 6, 6, 6],
+                filename:     `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.pdf`,
+                image:        { type: 'jpeg', quality: 0.92 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        } else {
+            // Desktop Native Print Dialog
+            window.print();
+        }
     }
 </script>
 
