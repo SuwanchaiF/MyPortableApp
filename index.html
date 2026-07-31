@@ -723,11 +723,9 @@
         @media (max-width: 768px) {
             body { padding: 8px 4px; }
             .card { padding: 16px 12px; border-radius: 20px; }
-            .header-title { padding-right: 100px !important; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .header-title { padding-right: 50px !important; flex-direction: column; align-items: flex-start; gap: 10px; }
             .user-dropdown-wrapper { position: absolute !important; top: 14px !important; right: 14px !important; }
-            .btn-profile-badge { padding: 3px 10px 3px 4px !important; }
-            #user-avatar { width: 26px !important; height: 26px !important; font-size: 0.85rem !important; }
-            #user-name { font-size: 0.76rem !important; }
+            .btn-profile-badge { width: 34px !important; height: 34px !important; font-size: 1.1rem !important; }
             .user-dropdown-menu { right: 0 !important; width: 220px !important; }
             .header-actions { width: 100%; justify-content: space-between; }
             .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -737,6 +735,23 @@
             .stat-card .stat-info label { font-size: 0.68rem !important; }
             .form-row { grid-template-columns: 1fr; gap: 10px; }
             
+            /* Responsive Note Card Footer & Compact Buttons */
+            .note-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .note-actions {
+                width: 100%;
+                justify-content: flex-end;
+                gap: 4px;
+            }
+            .btn-action {
+                padding: 4px 8px !important;
+                font-size: 0.72rem !important;
+                border-radius: 8px !important;
+            }
+
             #admin-view-switcher {
                 flex-direction: column;
                 align-items: stretch !important;
@@ -871,12 +886,10 @@
                     <i class="fa-solid fa-user-lock text-amber-400"></i> เข้าสู่ระบบ
                 </button>
 
-                <!-- Far Right Profile Avatar Dropdown Menu -->
+                <!-- Far Right Profile Avatar Circle (แสดงแค่อีโมจิกลมๆ พอกดค่อยแสดงชื่อใน Dropdown) -->
                 <div class="user-dropdown-wrapper">
-                    <button type="button" id="user-profile-badge" onclick="toggleUserDropdown(event)" class="btn-profile-badge" style="display: none; align-items: center; gap: 8px; background: rgba(99, 102, 241, 0.2); border: 1.5px solid rgba(99, 102, 241, 0.4); padding: 4px 12px 4px 6px; border-radius: 9999px; cursor: pointer; color: #ffffff; transition: all 0.2s;">
-                        <div id="user-avatar" style="width: 30px; height: 30px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);">👤</div>
-                        <span id="user-name" style="font-size: 0.82rem; font-weight: 600; color: #a5b4fc;">Guest</span>
-                        <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem; color: #94a3b8; margin-left: 2px;"></i>
+                    <button type="button" id="user-profile-badge" onclick="toggleUserDropdown(event)" class="btn-profile-badge" style="display: none; width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: 2px solid rgba(255, 255, 255, 0.25); cursor: pointer; align-items: center; justify-content: center; font-size: 1.25rem; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); padding: 0; transition: all 0.2s;" title="โปรไฟล์ผู้ใช้">
+                        <span id="user-avatar">👤</span>
                     </button>
 
                     <!-- User Profile Dropdown Menu (Anchored to Far Right) -->
@@ -1561,9 +1574,8 @@
 
         if (currentUser) {
             const adminState = isAdminUser(currentUser);
-            const roleBadge = adminState ? ' 👑 (Admin)' : ' (คลังส่วนตัว)';
-            document.getElementById('user-name').innerText = `${currentUser.username}${roleBadge}`;
-            document.getElementById('user-avatar').innerText = currentUser.avatar || '👨‍💻';
+            const userAvatar = document.getElementById('user-avatar');
+            if (userAvatar) userAvatar.innerText = currentUser.avatar || '👨‍💻';
             
             // Dropdown Menu Info
             const dropAvatar = document.getElementById('dropdown-avatar');
