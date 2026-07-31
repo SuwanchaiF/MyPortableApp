@@ -504,16 +504,15 @@
             }
 
             .map-images-grid {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 16px !important;
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px !important;
             }
 
             .map-image-wrapper {
-                height: auto !important;
-                max-height: 500px !important;
-                border: 1.5px solid #94a3b8 !important;
-                border-radius: 10px !important;
+                height: 185px !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 8px !important;
                 background: #ffffff !important;
                 page-break-inside: avoid;
                 overflow: hidden !important;
@@ -521,24 +520,13 @@
 
             .map-image-wrapper img {
                 width: 100% !important;
-                height: auto !important;
-                max-height: 450px !important;
+                height: 100% !important;
                 object-fit: contain !important;
                 display: block !important;
             }
 
             .image-caption {
-                position: relative !important;
-                background: #f1f5f9 !important;
-                color: #0f172a !important;
-                border-top: 1.5px solid #cbd5e1 !important;
-                backdrop-filter: none !important;
-                font-size: 0.85rem !important;
-                font-weight: 600 !important;
-                padding: 6px 12px !important;
-            }
-            .image-caption span {
-                color: #0f172a !important;
+                display: none !important; /* Hide captions/timestamps on PDF printed report */
             }
         }
 
@@ -1046,14 +1034,21 @@
             return;
         }
 
-        const { Document, Packer, Paragraph, TextRun, ImageRun, AlignmentType, HeadingLevel } = docx;
+        const { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, AlignmentType, HeadingLevel, WidthType, BorderStyle } = docx;
+
+        const noBorders = {
+            top: { style: BorderStyle.NONE, size: 0, color: "AUTO" },
+            bottom: { style: BorderStyle.NONE, size: 0, color: "AUTO" },
+            left: { style: BorderStyle.NONE, size: 0, color: "AUTO" },
+            right: { style: BorderStyle.NONE, size: 0, color: "AUTO" }
+        };
 
         const children = [
             new Paragraph({
                 text: "รายงานภาพแผนที่การเดินทาง ไป-กลับ สภา",
                 heading: HeadingLevel.HEADING_1,
                 alignment: AlignmentType.CENTER,
-                spacing: { after: 300 }
+                spacing: { after: 250 }
             })
         ];
 
@@ -1071,56 +1066,99 @@
                             color: "1E293B"
                         })
                     ],
-                    spacing: { before: 200, after: 100 }
+                    spacing: { before: 180, after: 100 }
                 })
             );
 
-            // Add Images associated with this date
-            (item.images || []).forEach((imgRaw, imgIdx) => {
-                const imgObj = normalizeImageObj(imgRaw, dateTitle, imgIdx);
+            // Construct 2-column image table for Word DOCX layout (2 or 4 images per page)
+            const rawImgs = item.images || [];
+            const tableRows = [];
+
+            for (let i = 0; i < rawImgs.length; i += 2) {
+                const rowCells = [];
+                
+                // Cell 1
+                const imgObj1 = normalizeImageObj(rawImgs[i], dateTitle, i);
                 try {
-                    const base64Data = imgObj.url.split(',')[1];
-                    const binaryStr = atob(base64Data);
-                    const len = binaryStr.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryStr.charCodeAt(i);
-                    }
+                    const base64Data1 = imgObj1.url.split(',')[1];
+                    const binaryStr1 = atob(base64Data1);
+                    const len1 = binaryStr1.length;
+                    const bytes1 = new Uint8Array(len1);
+                    for (let k = 0; k < len1; k++) bytes1[k] = binaryStr1.charCodeAt(k);
 
-                    children.push(
-                        new Paragraph({
+                    rowCells.push(
+                        new TableCell({
                             children: [
-                                new ImageRun({
-                                    data: bytes,
-                                    transformation: {
-                                        width: 520,
-                                        height: 330
-                                    }
+                                new Paragraph({
+                                    children: [
+                                        new ImageRun({
+                                            data: bytes1,
+                                            transformation: { width: 250, height: 165 }
+                                        })
+                                    ],
+                                    alignment: AlignmentType.CENTER
                                 })
                             ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 60 }
-                        })
-                    );
-
-                    children.push(
-                        new Paragraph({
-                            children: [
-                                new TextRun({
-                                    text: `${imgObj.label} • เวลา: ${imgObj.time}`,
-                                    italics: true,
-                                    size: 18,
-                                    color: "64748B"
-                                })
-                            ],
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 180 }
+                            width: { size: 50, type: WidthType.PERCENTAGE },
+                            borders: noBorders
                         })
                     );
                 } catch(e) {
-                    console.error("Error processing image for docx:", e);
+                    console.error("Error processing image 1 for docx:", e);
                 }
-            });
+
+                // Cell 2 (if present)
+                if (i + 1 < rawImgs.length) {
+                    const imgObj2 = normalizeImageObj(rawImgs[i+1], dateTitle, i+1);
+                    try {
+                        const base64Data2 = imgObj2.url.split(',')[1];
+                        const binaryStr2 = atob(base64Data2);
+                        const len2 = binaryStr2.length;
+                        const bytes2 = new Uint8Array(len2);
+                        for (let k = 0; k < len2; k++) bytes2[k] = binaryStr2.charCodeAt(k);
+
+                        rowCells.push(
+                            new TableCell({
+                                children: [
+                                    new Paragraph({
+                                        children: [
+                                            new ImageRun({
+                                                data: bytes2,
+                                                transformation: { width: 250, height: 165 }
+                                            })
+                                        ],
+                                        alignment: AlignmentType.CENTER
+                                    })
+                                ],
+                                width: { size: 50, type: WidthType.PERCENTAGE },
+                                borders: noBorders
+                            })
+                        );
+                    } catch(e) {
+                        console.error("Error processing image 2 for docx:", e);
+                    }
+                } else {
+                    // Empty cell to maintain 2-column grid alignment
+                    rowCells.push(
+                        new TableCell({
+                            children: [new Paragraph({ text: "" })],
+                            width: { size: 50, type: WidthType.PERCENTAGE },
+                            borders: noBorders
+                        })
+                    );
+                }
+
+                tableRows.push(new TableRow({ children: rowCells }));
+            }
+
+            if (tableRows.length > 0) {
+                children.push(
+                    new Table({
+                        rows: tableRows,
+                        width: { size: 100, type: WidthType.PERCENTAGE }
+                    })
+                );
+            }
         }
 
         const doc = new Document({
