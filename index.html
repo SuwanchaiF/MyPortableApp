@@ -3,20 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portable Data App - 5 Elements Design UI System</title>
+    <title>⚡ Bootcamp Study Note & Code Vault</title>
+    <!-- Google Fonts: Prompt & Fira Code -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* 
-          DESIGN SYSTEM BASED ON 5 CORE ELEMENTS:
-          1. จุด & เส้น (Dot & Line): Pulse indicators, leading borders, crisp dividers
-          2. รูปร่าง & รูปทรง (Shape & Form): Rounded-2xl cards, pill badges, geometric buttons
-          3. พื้นที่ว่าง (Negative Space): Breathable layout, generous gaps, 1.6 line height
-          4. สี & น้ำหนัก (Color & Value): Slate dark mesh gradient, Electric Indigo (#6366f1), High contrast
-          5. พื้นผิว (Texture): Glassmorphism backdrop-blur, soft depth shadows, micro-interactions
-        */
         :root {
             --primary: #6366f1;
             --primary-hover: #4f46e5;
@@ -24,6 +19,8 @@
             --emerald: #10b981;
             --rose: #f43f5e;
             --amber: #f59e0b;
+            --purple: #a855f7;
+            --blue: #3b82f6;
             --bg-dark: #0f172a;
             --card-bg: rgba(30, 41, 59, 0.85);
             --card-border: rgba(255, 255, 255, 0.1);
@@ -38,7 +35,7 @@
             font-family: 'Prompt', system-ui, -apple-system, sans-serif;
             background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 70%);
             color: var(--text-main);
-            padding: 40px 16px;
+            padding: 24px 16px;
             margin: 0;
             min-height: 100vh;
             display: flex;
@@ -46,23 +43,37 @@
             align-items: center;
         }
 
-        /* 3. พื้นที่ว่าง (Negative Space) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
         .container {
             width: 100%;
-            max-width: 640px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
-        /* 5. พื้นผิว (Texture - Glassmorphism & Depth Shadows) */
         .card {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            padding: 32px;
+            padding: 28px;
             border-radius: 24px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--card-border);
             position: relative;
             overflow: hidden;
+            margin-bottom: 24px;
         }
 
         .card::before {
@@ -70,42 +81,77 @@
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+            background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #10b981);
         }
 
-        /* 1. จุด & เส้น (Dot & Line) */
+        /* Top Header */
         .header-title {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-            padding-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 18px;
             border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
         }
 
-        .header-title h2 {
-            margin: 0;
-            font-size: 1.45rem;
-            font-weight: 700;
-            color: #ffffff;
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: white;
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.35);
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
             letter-spacing: -0.02em;
         }
 
-        /* 2. รูปร่าง & รูปทรง (Shape & Form - Pill Badges) */
-        .badge-pill {
-            background: rgba(99, 102, 241, 0.15);
-            color: #a5b4fc;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            font-size: 0.8rem;
-            padding: 5px 14px;
-            border-radius: 9999px;
+        .live-status {
+            font-size: 0.76rem;
+            color: #34d399;
             font-weight: 500;
-            display: inline-flex;
+            margin-top: 2px;
+            display: flex;
             align-items: center;
             gap: 6px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--emerald);
+            animation: pulse-dot 1.8s infinite ease-in-out;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .btn-nav {
@@ -113,7 +159,7 @@
             background: rgba(255, 255, 255, 0.08);
             color: #e2e8f0;
             font-size: 0.8rem;
-            padding: 6px 14px;
+            padding: 8px 14px;
             border-radius: 12px;
             font-weight: 500;
             display: inline-flex;
@@ -123,6 +169,7 @@
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
         }
+
         .btn-nav:hover {
             background: rgba(99, 102, 241, 0.3);
             border-color: rgba(99, 102, 241, 0.5);
@@ -130,181 +177,392 @@
             transform: translateY(-1px);
         }
 
-        .form-group {
-            display: flex;
+        /* Stats Grid Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 12px;
             margin-bottom: 24px;
         }
 
-        /* 4. สี & น้ำหนัก (Color & Value - Input Contrast & Focus Rings) */
-        input[type="text"] {
-            flex: 1;
-            padding: 14px 18px;
+        .stat-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: border-color 0.2s;
+        }
+        .stat-card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            shrink: 0;
+        }
+        .stat-icon.indigo { background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); }
+        .stat-icon.emerald { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .stat-icon.amber { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+        .stat-info div:first-child {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .stat-info div:last-child {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Note Add Form */
+        .form-container {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-group-full {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+
+        input[type="text"], select, textarea {
+            width: 100%;
+            padding: 10px 14px;
             background: var(--input-bg);
             border: 1.5px solid rgba(255, 255, 255, 0.12);
-            border-radius: 14px;
+            border-radius: 12px;
             outline: none;
             font-family: inherit;
-            font-size: 0.98rem;
+            font-size: 0.88rem;
             color: #ffffff;
             transition: all 0.2s ease;
         }
 
-        input[type="text"]::placeholder {
+        input[type="text"]::placeholder, textarea::placeholder {
             color: #64748b;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus, select:focus, textarea:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--primary-glow);
+            box-shadow: 0 0 0 3px var(--primary-glow);
             background: rgba(15, 23, 42, 0.9);
         }
 
-        button.btn-add {
+        textarea.code-area {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            background: rgba(2, 6, 23, 0.8);
+            color: #e2e8f0;
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .btn-submit {
             background: linear-gradient(135deg, #6366f1, #4f46e5);
             color: white;
             border: none;
-            padding: 14px 24px;
-            border-radius: 14px;
+            padding: 12px 24px;
+            border-radius: 12px;
             cursor: pointer;
             font-family: inherit;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
-            white-space: nowrap;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
+            width: 100%;
         }
 
-        button.btn-add:hover {
+        .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
         }
-        button.btn-add:active { transform: translateY(0); }
+        .btn-submit:active { transform: translateY(0); }
 
-        .search-box {
+        /* Filter Controls */
+        .filters-wrapper {
             margin-bottom: 20px;
-            position: relative;
-        }
-
-        .search-box i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px 16px 12px 44px;
-            font-size: 0.9rem;
-            border-radius: 12px;
-            background: rgba(15, 23, 42, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #ffffff;
-        }
-
-        .item-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
-        .item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            background: rgba(15, 23, 42, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            transition: all 0.2s ease;
+        .search-box {
+            position: relative;
         }
 
-        .item:hover {
-            border-color: rgba(99, 102, 241, 0.4);
-            background: rgba(30, 41, 59, 0.7);
-            transform: translateX(3px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .item-content {
-            flex: 1;
-            min-width: 0;
-            padding-right: 16px;
-        }
-
-        .item-text {
-            display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 0.98rem;
-            color: #f1f5f9;
-            font-weight: 400;
-        }
-
-        .item-time {
-            font-size: 0.8rem;
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
             color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+            font-size: 0.85rem;
+        }
+
+        .pills-bar {
             display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: thin;
+        }
+
+        .pill-btn {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            font-size: 0.76rem;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: inline-flex;
             align-items: center;
             gap: 4px;
-            margin-top: 4px;
         }
 
-        .item-actions {
+        .pill-btn:hover {
+            color: #ffffff;
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .pill-btn.active {
+            background: #6366f1;
+            color: #ffffff;
+            border-color: #6366f1;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Note Items List */
+        .notes-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
             display: flex;
-            gap: 8px;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .note-card {
+            background: rgba(15, 23, 42, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
+            padding: 18px 20px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .note-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(30, 41, 59, 0.7);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .note-header {
+            display: flex;
             align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tags-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .badge-day {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .badge-tech {
+            font-size: 0.72rem;
+            padding: 2px 9px;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+        .tech-php { background: rgba(119, 123, 180, 0.2); color: #a5b4fc; border: 1px solid rgba(119, 123, 180, 0.4); }
+        .tech-js { background: rgba(247, 223, 30, 0.18); color: #fef08a; border: 1px solid rgba(247, 223, 30, 0.35); }
+        .tech-java { background: rgba(0, 115, 150, 0.2); color: #7dd3fc; border: 1px solid rgba(0, 115, 150, 0.4); }
+        .tech-sql { background: rgba(68, 121, 161, 0.2); color: #93c5fd; border: 1px solid rgba(68, 121, 161, 0.4); }
+        .tech-git { background: rgba(244, 63, 94, 0.2); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.35); }
+        .tech-css { background: rgba(168, 85, 247, 0.2); color: #e9d5ff; border: 1px solid rgba(168, 85, 247, 0.35); }
+        .tech-gen { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+        .badge-status {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .status-mastered { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-review { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .status-struggling { background: rgba(244, 63, 94, 0.15); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+        .note-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0 0 6px 0;
+            line-height: 1.4;
+        }
+
+        .note-desc {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+        }
+
+        /* Snippet Preview Block */
+        .snippet-box {
+            background: #020617;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: #38bdf8;
+            position: relative;
+            overflow-x: auto;
+            margin-bottom: 12px;
+        }
+
+        .snippet-box pre {
+            margin: 0;
+            white-space: pre;
+        }
+
+        .btn-copy-code {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            font-size: 0.72rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-copy-code:hover {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+
+        .note-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            pt-2: 8px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08);
+            margin-top: 10px;
+            padding-top: 10px;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 6px;
         }
 
         .btn-action {
             border: none;
-            padding: 8px 14px;
-            border-radius: 10px;
+            padding: 6px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             font-family: inherit;
             font-weight: 500;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
-        .btn-view {
-            background: rgba(255, 255, 255, 0.08);
-            color: #cbd5e1;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .btn-view:hover {
-            background: rgba(255, 255, 255, 0.18);
-            color: #ffffff;
-        }
+        .btn-view { background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-view:hover { background: rgba(99, 102, 241, 0.3); color: #ffffff; border-color: rgba(99, 102, 241, 0.5); }
 
-        .btn-del {
-            background: rgba(244, 63, 94, 0.12);
-            color: #fda4af;
-            border: 1px solid rgba(244, 63, 94, 0.25);
-        }
-        .btn-del:hover {
-            background: #f43f5e;
-            color: white;
+        .btn-del { background: rgba(244, 63, 94, 0.12); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.25); }
+        .btn-del:hover { background: #f43f5e; color: white; }
+
+        .empty-state {
+            text-align: center;
+            padding: 44px 16px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
         }
 
         /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(8px);
             display: flex;
             justify-content: center;
@@ -325,7 +583,7 @@
             background: #1e293b;
             border: 1px solid rgba(255, 255, 255, 0.12);
             width: 100%;
-            max-width: 540px;
+            max-width: 640px;
             border-radius: 24px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             overflow: hidden;
@@ -339,7 +597,7 @@
         }
 
         .modal-header {
-            padding: 20px 24px;
+            padding: 18px 24px;
             background: rgba(15, 23, 42, 0.6);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
@@ -349,7 +607,7 @@
 
         .modal-header h3 {
             margin: 0;
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             color: #ffffff;
             font-weight: 600;
         }
@@ -368,38 +626,8 @@
 
         .modal-body {
             padding: 24px;
-        }
-
-        .detail-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 16px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            background: rgba(15, 23, 42, 0.6);
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .detail-meta code {
-            font-family: 'Fira Code', monospace;
-            color: #a5b4fc;
-        }
-
-        .detail-text-box {
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            padding: 18px;
-            font-size: 0.98rem;
-            line-height: 1.65;
-            white-space: pre-wrap;
-            word-break: break-word;
-            max-height: 320px;
+            max-height: 70vh;
             overflow-y: auto;
-            color: #f1f5f9;
         }
 
         .modal-footer {
@@ -411,50 +639,13 @@
             gap: 10px;
         }
 
-        .btn-copy {
-            background: var(--primary);
-            color: white;
-        }
-        .btn-copy:hover { background: var(--primary-hover); }
-
-        .empty-state {
-            text-align: center;
-            padding: 44px 16px;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
-        }
-
-        .live-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--emerald);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--emerald);
-            animation: pulse-dot 1.8s infinite ease-in-out;
-        }
-
-        /* Mobile Responsiveness */
         @media (max-width: 640px) {
-            body { padding: 16px 12px; }
+            body { padding: 16px 10px; }
             .card { padding: 20px 16px; border-radius: 20px; }
-            .header-title { flex-direction: column; gap: 14px; }
-            .header-title > div:last-child { width: 100%; justify-content: space-between; }
-            .form-group { flex-direction: row; gap: 8px; }
-            input[type="text"] { padding: 12px 14px; font-size: 0.92rem; }
-            button.btn-add { padding: 12px 16px; font-size: 0.9rem; }
-            .item { padding: 14px; }
-            .item-text { font-size: 0.92rem; }
-        }
-
-        @media (max-width: 400px) {
-            .item { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .item-content { width: 100%; padding-right: 0; }
-            .item-actions { width: 100%; justify-content: flex-end; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; margin-top: 4px; }
+            .header-title { flex-direction: column; align-items: flex-start; }
+            .header-actions { width: 100%; justify-content: space-between; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -462,64 +653,186 @@
 
 <div class="container">
     <div class="card">
-        <!-- Header Section -->
+        <!-- Top Header Navigation -->
         <div class="header-title">
-            <div>
-                <h2><i class="fa-solid fa-layer-group text-indigo-400"></i> บันทึกข้อมูล</h2>
-                <div style="font-size: 0.78rem; color: #34d399; font-weight: 500; margin-top: 4px; display: flex; align-items: center; gap: 6px;">
-                    <span class="live-dot"></span>
-                    <span>Firebase Real-Time Cloud (ซิงค์ตรงกันทุกเครื่อง)</span>
+            <div class="header-left">
+                <div class="header-logo">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+                <div>
+                    <h1>Bootcamp Study Note & Code Vault</h1>
+                    <div class="live-status">
+                        <span class="live-dot"></span>
+                        <span>Firebase Realtime Database (ซิงค์ตรงกันทุกเครื่อง)</span>
+                    </div>
                 </div>
             </div>
-            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            
+            <div class="header-actions">
                 <button type="button" class="btn-nav" onclick="openQuotaModal()">
                     <i class="fa-solid fa-chart-pie text-emerald-400"></i> ลิมิตระบบ
                 </button>
                 <a href="bootcamp_master_learning_hub.html" class="btn-nav">
-                    <i class="fa-solid fa-rocket text-indigo-400"></i> Bootcamp Hub
+                    <i class="fa-solid fa-rocket text-indigo-400"></i> Roadmap 60 วัน
                 </a>
-                <span class="badge-pill" id="count-badge">ทั้งหมด 0 รายการ</span>
             </div>
         </div>
 
-        <!-- Add Form -->
-        <form class="form-group" id="add-form" onsubmit="handleAddSubmit(event)">
-            <input type="text" name="text_input" id="text_input" placeholder="พิมพ์ข้อความที่ต้องการเก็บบันทึก..." required autocomplete="off">
-            <button type="submit" class="btn-add"><i class="fa-solid fa-plus"></i> บันทึก</button>
-        </form>
+        <!-- Dashboard Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon indigo">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <div class="stat-info">
+                    <div>โน้ตทั้งหมด</div>
+                    <div id="stat-total-count">0 รายการ</div>
+                </div>
+            </div>
 
-        <!-- Search Input -->
-        <div class="search-box" id="search-box-container" style="display:none;">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="search-input" placeholder="ค้นหาข้อมูล..." oninput="filterItems()">
+            <div class="stat-card">
+                <div class="stat-icon emerald">
+                    <i class="fa-solid fa-laptop-code"></i>
+                </div>
+                <div class="stat-info">
+                    <div>คลังโค้ด (Snippets)</div>
+                    <div id="stat-code-count">0 ชุด</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon amber">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <div class="stat-info">
+                    <div>ระดับความเข้าใจ</div>
+                    <div id="stat-mastery-pct">0%</div>
+                </div>
+            </div>
         </div>
 
-        <!-- Data Items List -->
-        <ul class="item-list" id="item-list">
-            <div class="empty-state" id="empty-state">กำลังโหลดข้อมูลจาก Cloud...</div>
+        <!-- Note Input Form -->
+        <form class="form-container" id="note-form" onsubmit="handleSaveNote(event)">
+            <div class="form-row">
+                <div>
+                    <label><i class="fa-solid fa-heading text-indigo-400 mr-1"></i> หัวข้อเรื่อง / สรุปความรู้ *</label>
+                    <input type="text" id="note-title" placeholder="เช่น การประกาศตัวแปร & Array ใน PHP" required autocomplete="off">
+                </div>
+                <div>
+                    <label><i class="fa-solid fa-tags text-purple-400 mr-1"></i> หมวดหมู่ภาษา/เทคโนโลยี</label>
+                    <select id="note-tech">
+                        <option value="PHP">PHP</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="Java">Java</option>
+                        <option value="SQL">SQL</option>
+                        <option value="Git">Git</option>
+                        <option value="HTML/CSS">HTML / CSS</option>
+                        <option value="General">ทั่วไป (General)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <label><i class="fa-solid fa-gauge-high text-emerald-400 mr-1"></i> ระดับความเข้าใจ</label>
+                    <select id="note-status">
+                        <option value="mastered">🟢 เข้าใจแล้ว (Mastered)</option>
+                        <option value="review">🟡 ต้องทบทวนเพิ่ม (Review)</option>
+                        <option value="struggling">🔴 ยังติดขัด (Struggling)</option>
+                    </select>
+                </div>
+                <div>
+                    <label><i class="fa-solid fa-calendar-day text-blue-400 mr-1"></i> อ้างอิงบทเรียน Bootcamp (ถ้ามี)</label>
+                    <select id="note-day">
+                        <option value="General">ทั่วไป / นอกเหนือบทเรียน</option>
+                        <script>
+                            for(let i=1; i<=60; i++) {
+                                document.write(`<option value="Day ${String(i).padStart(2, '0')}">Day ${String(i).padStart(2, '0')}</option>`);
+                            }
+                        </script>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group-full">
+                <label><i class="fa-solid fa-align-left text-slate-400 mr-1"></i> คำอธิบายรายละเอียด / สรุปแนวคิด</label>
+                <textarea id="note-desc" rows="2" placeholder="พิมพ์คำอธิบาย หรือโน้ตเตือนความจำย่อ..."></textarea>
+            </div>
+
+            <div class="form-group-full">
+                <label><i class="fa-solid fa-code text-cyan-400 mr-1"></i> บล็อกโค้ดตัวอย่าง (Code Snippet - ถ้ามี)</label>
+                <textarea id="note-code" class="code-area" placeholder="// พิมพ์โค้ดตัวอย่างที่ต้องการจัดเก็บที่นี่..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-cloud-arrow-up"></i> บันทึกโน้ตลง คลังข้อมูล Real-Time
+            </button>
+        </form>
+
+        <!-- Search & Filter Controls -->
+        <div class="filters-wrapper">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="search-input" placeholder="ค้นหาตามชื่อ, เนื้อหา, เทคโนโลยี หรือคำสั่งโค้ด..." oninput="filterNotes()">
+            </div>
+
+            <!-- Tech Pills Filter -->
+            <div class="pills-bar" id="tech-pills">
+                <button type="button" class="pill-btn active" onclick="setTechFilter('ALL', this)"><i class="fa-solid fa-layer-group"></i> ทั้งหมด</button>
+                <button type="button" class="pill-btn" onclick="setTechFilter('PHP', this)">#PHP</button>
+                <button type="button" class="pill-btn" onclick="setTechFilter('JavaScript', this)">#JavaScript</button>
+                <button type="button" class="pill-btn" onclick="setTechFilter('Java', this)">#Java</button>
+                <button type="button" class="pill-btn" onclick="setTechFilter('SQL', this)">#SQL</button>
+                <button type="button" class="pill-btn" onclick="setTechFilter('Git', this)">#Git</button>
+                <button type="button" class="pill-btn" onclick="setTechFilter('HTML/CSS', this)">#HTML/CSS</button>
+                <button type="button" class="pill-btn" onclick="setTechFilter('General', this)">#General</button>
+            </div>
+
+            <!-- Status Pills Filter -->
+            <div class="pills-bar" id="status-pills">
+                <button type="button" class="pill-btn active" onclick="setStatusFilter('ALL', this)">ทุกสถานะ</button>
+                <button type="button" class="pill-btn" onclick="setStatusFilter('mastered', this)">🟢 เข้าใจแล้ว</button>
+                <button type="button" class="pill-btn" onclick="setStatusFilter('review', this)">🟡 ต้องทบทวน</button>
+                <button type="button" class="pill-btn" onclick="setStatusFilter('struggling', this)">🔴 ยังติดขัด</button>
+            </div>
+        </div>
+
+        <!-- Notes List Container -->
+        <ul class="notes-list" id="notes-list">
+            <div class="empty-state">กำลังเชื่อมต่อและโหลดข้อมูลจาก Firebase Real-Time Cloud...</div>
         </ul>
     </div>
 </div>
 
-<!-- Modal สำหรับดูรายละเอียดข้อมูล -->
+<!-- Modal สำหรับดูรายละเอียดแบบเต็ม -->
 <div class="modal-overlay" id="detailModal" onclick="closeDetailModalOnOverlay(event)">
     <div class="modal-card">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-circle-info text-indigo-400 mr-2"></i> รายละเอียดข้อมูล</h3>
+            <h3><i class="fa-solid fa-file-code text-indigo-400 mr-2"></i> รายละเอียดโน้ต & Code Snippet</h3>
             <button class="modal-close" onclick="closeDetailModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <div class="detail-meta">
-                <span><strong>ID:</strong> <code id="modal-id"></code></span>
-                <span><strong>วันที่-เวลา:</strong> <span id="modal-time"></span></span>
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;" id="modal-tags">
+                <!-- Tags rendered dynamically -->
             </div>
-            <div class="detail-text-box" id="modal-text"></div>
+            <h2 id="modal-title" style="margin: 0 0 12px 0; font-size: 1.25rem; color: #ffffff;"></h2>
+            
+            <div id="modal-desc" style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 16px; white-space: pre-wrap; background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);"></div>
+            
+            <div id="modal-code-wrapper" style="display: none;">
+                <div style="font-size: 0.8rem; font-weight: 600; color: #38bdf8; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fa-solid fa-terminal mr-1"></i> Code Snippet:</span>
+                    <button type="button" class="btn-copy-code" id="btn-copy-modal-code" onclick="copyModalCode()">
+                        <i class="fa-regular fa-copy"></i> คัดลอกโค้ด
+                    </button>
+                </div>
+                <div class="snippet-box" style="max-height: 320px; overflow-y: auto;">
+                    <pre><code id="modal-code"></code></pre>
+                </div>
+            </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-action btn-copy" id="btn-copy-text" onclick="copyModalText()">
-                <i class="fa-regular fa-copy"></i> คัดลอกข้อความ
-            </button>
-            <button type="button" class="btn-action btn-view" onclick="closeDetailModal()">ปิด</button>
+            <button type="button" class="btn-action btn-view" onclick="closeDetailModal()">ปิดหน้าต่าง</button>
         </div>
     </div>
 </div>
@@ -531,105 +844,35 @@
             <h3><i class="fa-solid fa-chart-pie text-emerald-400 mr-2"></i> ลิมิต & รายละเอียดการใช้งานระบบ</h3>
             <button class="modal-close" onclick="closeQuotaModal()">&times;</button>
         </div>
-        <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
-            <!-- 1. Firebase Section -->
+        <div class="modal-body">
+            <!-- Firebase Section -->
             <div style="margin-bottom: 20px;">
                 <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
                     <span>🔥 Firebase Realtime Database</span>
                     <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 10px; border-radius: 12px; font-weight: 600;">Spark Free Plan</span>
                 </h4>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <!-- Metric 1: Storage -->
-                    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-                            <span>📦 <strong>พื้นที่จัดเก็บ (Storage):</strong></span>
-                            <span id="m-fb-storage-text" style="color: #818cf8; font-weight: 600;">0.00 MB / 1,024 MB (1GB)</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">
-                            <span>ใช้ไป: <strong id="m-fb-storage-pct" style="color: #34d399;">0.0001%</strong></span>
-                            <span>คงเหลือ: <strong id="m-fb-storage-rem">1,023.99 MB</strong></span>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 6px; height: 6px; overflow: hidden;">
-                            <div id="m-fb-storage-bar" style="width: 1%; height: 100%; background: #6366f1; transition: width 0.3s;"></div>
-                        </div>
+                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                        <span>📦 <strong>พื้นที่จัดเก็บ (Storage Limit):</strong></span>
+                        <strong style="color: #818cf8;">1,024 MB (1GB)</strong>
                     </div>
-
-                    <!-- Metric 2: Bandwidth -->
-                    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-                            <span>🌐 <strong>รับส่งข้อมูล (Bandwidth/เดือน):</strong></span>
-                            <strong style="color: #818cf8;">~0.05 MB / 10,240 MB (10GB)</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">
-                            <span>ใช้ไป: <strong style="color: #34d399;">~0.0005%</strong> (ใช้งานน้อยมาก)</span>
-                            <span>คงเหลือ: <strong>~9.99 GB</strong></span>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 6px; height: 6px; overflow: hidden;">
-                            <div style="width: 1%; height: 100%; background: #6366f1;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Metric 3: Connections -->
-                    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-                            <span>📱 <strong>เชื่อมต่อพร้อมกัน (Connections):</strong></span>
-                            <strong style="color: #818cf8;">1 เครื่อง / 100 เครื่อง</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">
-                            <span>ใช้ไป: <strong style="color: #34d399;">1.0%</strong></span>
-                            <span>คงเหลือ: <strong>99 เครื่อง</strong></span>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 6px; height: 6px; overflow: hidden;">
-                            <div style="width: 1%; height: 100%; background: #34d399;"></div>
-                        </div>
+                    <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+                        รองรับการบันทึกข้อความและโค้ดได้มากกว่า <strong>100,000+ รายการ</strong> โดยไม่เสียค่าบริการ
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Netlify Section -->
+            <!-- Netlify Section -->
             <div style="margin-bottom: 20px;">
                 <h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
                     <span>🌐 Netlify Cloud Hosting</span>
                     <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 10px; border-radius: 12px; font-weight: 600;">Free Tier</span>
                 </h4>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <!-- Netlify Bandwidth -->
-                    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-                            <span>🚀 <strong>รับส่งเข้าชมเว็บ (Bandwidth/เดือน):</strong></span>
-                            <strong style="color: #818cf8;">~0.25 MB / 102,400 MB (100GB)</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">
-                            <span>ใช้ไป: <strong style="color: #34d399;">~0.0002%</strong> (ยังใช้ไม่ถึง 1%)</span>
-                            <span>คงเหลือ: <strong>99.999 GB</strong></span>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 6px; height: 6px; overflow: hidden;">
-                            <div style="width: 1%; height: 100%; background: #6366f1;"></div>
-                        </div>
+                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                        <span>🚀 <strong>รับส่งเข้าชมเว็บ (Bandwidth/เดือน):</strong></span>
+                        <strong style="color: #818cf8;">100 GB / เดือน</strong>
                     </div>
-
-                    <!-- Netlify Build Minutes -->
-                    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
-                            <span>⏱️ <strong>เวลาประมวลผล Build (Build Mins):</strong></span>
-                            <strong style="color: #94a3b8;">0 นาที / 300 นาที</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">
-                            <span>ใช้ไป: <strong style="color: #94a3b8;">0.00% (ยังไม่ได้ใช้)</strong></span>
-                            <span>คงเหลือ: <strong>300 นาทีเต็ม</strong></span>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 6px; height: 6px; overflow: hidden;">
-                            <div style="width: 0%; height: 100%; background: #64748b;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Summary -->
-            <div style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 14px; font-size: 0.88rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>📊 <strong>สรุปสถานะระบบโดยรวม:</strong></span>
-                    <strong style="color: #34d399;">🟢 ปกติสมบูรณ์ (โควตาเหลือ >99.99%)</strong>
                 </div>
             </div>
         </div>
@@ -639,6 +882,7 @@
     </div>
 </div>
 
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
@@ -658,116 +902,171 @@
         firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.database();
-    const itemsRef = db.ref('items');
+    const notesRef = db.ref('bootcamp_notes');
 
-    let currentModalText = '';
+    let allNotes = [];
+    let currentTechFilter = 'ALL';
+    let currentStatusFilter = 'ALL';
+    let modalCodeText = '';
 
     function escapeHtml(text) {
         return (text || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    function openDetailModal(item) {
-        document.getElementById('modal-id').innerText = item.id;
-        document.getElementById('modal-time').innerText = item.timestamp;
-        document.getElementById('modal-text').innerText = item.text;
-        currentModalText = item.text;
-        
-        const copyBtn = document.getElementById('btn-copy-text');
-        copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> คัดลอกข้อความ';
-        
-        document.getElementById('detailModal').classList.add('active');
-    }
-
-    function closeDetailModal() {
-        document.getElementById('detailModal').classList.remove('active');
-    }
-
-    function closeDetailModalOnOverlay(e) {
-        if (e.target.classList.contains('modal-overlay')) {
-            closeDetailModal();
+    function getTechClass(tech) {
+        switch((tech || '').toLowerCase()) {
+            case 'php': return 'tech-php';
+            case 'javascript': return 'tech-js';
+            case 'java': return 'tech-java';
+            case 'sql': return 'tech-sql';
+            case 'git': return 'tech-git';
+            case 'html/css': return 'tech-css';
+            default: return 'tech-gen';
         }
     }
 
-    function copyModalText() {
-        if (!currentModalText) return;
-        navigator.clipboard.writeText(currentModalText).then(() => {
-            const copyBtn = document.getElementById('btn-copy-text');
-            copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> คัดลอกแล้ว!';
-            setTimeout(() => {
-                copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i> คัดลอกข้อความ';
-            }, 2000);
-        }).catch(err => {
-            alert('ไม่สามารถคัดลอกได้: ' + err);
-        });
+    function getStatusBadge(status) {
+        switch(status) {
+            case 'mastered':
+                return `<span class="badge-status status-mastered"><i class="fa-solid fa-circle-check"></i> เข้าใจแล้ว</span>`;
+            case 'review':
+                return `<span class="badge-status status-review"><i class="fa-solid fa-rotate-left"></i> ต้องทบทวน</span>`;
+            case 'struggling':
+                return `<span class="badge-status status-struggling"><i class="fa-solid fa-triangle-exclamation"></i> ยังติดขัด</span>`;
+            default:
+                return `<span class="badge-status status-mastered"><i class="fa-solid fa-circle-check"></i> เข้าใจแล้ว</span>`;
+        }
     }
 
-    function renderItemList(data) {
-        const listEl = document.getElementById('item-list');
-        const searchBox = document.getElementById('search-box-container');
+    function updateDashboardStats(notes) {
+        const total = notes.length;
+        const codeCount = notes.filter(n => n.code && n.code.trim().length > 0).length;
+        const masteredCount = notes.filter(n => n.status === 'mastered').length;
+        const pct = total > 0 ? Math.round((masteredCount / total) * 100) : 0;
+
+        document.getElementById('stat-total-count').innerText = `${total} รายการ`;
+        document.getElementById('stat-code-count').innerText = `${codeCount} ชุด`;
+        document.getElementById('stat-mastery-pct').innerText = `${pct}%`;
+    }
+
+    function renderNotesList(data) {
+        const listEl = document.getElementById('notes-list');
         
-        if (!data || data.length === 0) {
-            listEl.innerHTML = '<div class="empty-state" id="empty-state">ยังไม่มีข้อมูลในระบบ เพิ่มข้อมูลใหม่ได้จากช่องด้านบน</div>';
-            if (searchBox) searchBox.style.display = 'none';
-            const badge = document.getElementById('count-badge');
-            if (badge) badge.innerText = 'ทั้งหมด 0 รายการ';
+        let filtered = data.filter(item => {
+            const matchTech = currentTechFilter === 'ALL' || item.tech === currentTechFilter;
+            const matchStatus = currentStatusFilter === 'ALL' || item.status === currentStatusFilter;
+            
+            const query = (document.getElementById('search-input').value || '').toLowerCase().trim();
+            const matchQuery = !query || 
+                (item.title || '').toLowerCase().includes(query) ||
+                (item.desc || '').toLowerCase().includes(query) ||
+                (item.code || '').toLowerCase().includes(query) ||
+                (item.tech || '').toLowerCase().includes(query) ||
+                (item.day || '').toLowerCase().includes(query);
+
+            return matchTech && matchStatus && matchQuery;
+        });
+
+        if (!filtered || filtered.length === 0) {
+            listEl.innerHTML = '<div class="empty-state">ไม่พบข้อมูลโน้ตตามเงื่อนไขที่ค้นหา สามารถเพิ่มโน้ตใหม่ได้จากช่องด้านบน</div>';
             return;
         }
 
-        if (searchBox) searchBox.style.display = 'block';
-
         let html = '';
-        data.forEach(item => {
-            const safeText = escapeHtml(item.text);
+        filtered.forEach(item => {
+            const safeTitle = escapeHtml(item.title);
+            const safeDesc = escapeHtml(item.desc);
+            const safeCode = escapeHtml(item.code);
+            const safeTech = escapeHtml(item.tech || 'General');
+            const safeDay = escapeHtml(item.day || 'General');
             const safeTime = escapeHtml(item.timestamp);
             const safeId = escapeHtml(item.id);
+
+            const techClass = getTechClass(safeTech);
+            const statusHtml = getStatusBadge(item.status);
+
+            let snippetHtml = '';
+            if (safeCode && safeCode.trim().length > 0) {
+                snippetHtml = `
+                    <div class="snippet-box">
+                        <button type="button" class="btn-copy-code" onclick="copySnippetCode(event, \`${encodeURIComponent(item.code)}\`)">
+                            <i class="fa-regular fa-copy"></i> คัดลอกโค้ด
+                        </button>
+                        <pre><code>${safeCode}</code></pre>
+                    </div>
+                `;
+            }
+
             const itemJson = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
 
             html += `
-                <li class="item" data-id="${safeId}" data-text="${safeText}">
-                    <div class="item-content">
-                        <span class="item-text">${safeText}</span>
-                        <span class="item-time"><i class="fa-regular fa-clock"></i> ${safeTime}</span>
+                <li class="note-card" data-id="${safeId}">
+                    <div class="note-header">
+                        <div class="tags-group">
+                            <span class="badge-day">${safeDay}</span>
+                            <span class="badge-tech ${techClass}">#${safeTech}</span>
+                            ${statusHtml}
+                        </div>
                     </div>
-                    <div class="item-actions">
-                        <button type="button" class="btn-action btn-view" onclick='openDetailModal(${itemJson})'>
-                            <i class="fa-regular fa-eye"></i> ดูข้อมูล
-                        </button>
-                        <button type="button" class="btn-action btn-del" onclick="handleDelete('${safeId}')">
-                            <i class="fa-regular fa-trash-can"></i> ลบ
-                        </button>
+                    
+                    <h3 class="note-title">${safeTitle}</h3>
+                    ${safeDesc ? `<div class="note-desc">${safeDesc}</div>` : ''}
+                    ${snippetHtml}
+
+                    <div class="note-footer">
+                        <span><i class="fa-regular fa-clock mr-1"></i> ${safeTime}</span>
+                        <div class="note-actions">
+                            <button type="button" class="btn-action btn-view" onclick='openDetailModal(${itemJson})'>
+                                <i class="fa-regular fa-eye"></i> รายละเอียด
+                            </button>
+                            <button type="button" class="btn-action btn-del" onclick="handleDeleteNote('${safeId}')">
+                                <i class="fa-regular fa-trash-can"></i> ลบ
+                            </button>
+                        </div>
                     </div>
                 </li>
             `;
         });
 
         listEl.innerHTML = html;
-        filterItems();
     }
 
-    // Firebase Realtime Listener
-    itemsRef.on('value', (snapshot) => {
+    // Firebase Listener
+    notesRef.on('value', (snapshot) => {
         const val = snapshot.val();
-        const dataList = [];
+        allNotes = [];
         if (val) {
             Object.keys(val).forEach(key => {
-                dataList.push({
+                allNotes.push({
                     id: key,
-                    text: val[key].text,
-                    timestamp: val[key].timestamp
+                    title: val[key].title || val[key].text || 'ไม่มีหัวข้อ',
+                    desc: val[key].desc || '',
+                    code: val[key].code || '',
+                    tech: val[key].tech || 'General',
+                    status: val[key].status || 'mastered',
+                    day: val[key].day || 'General',
+                    timestamp: val[key].timestamp || ''
                 });
             });
         }
-        dataList.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        renderItemList(dataList);
+        allNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        updateDashboardStats(allNotes);
+        renderNotesList(allNotes);
     }, (error) => {
-        console.error("Firebase Read Error:", error);
+        console.error("Firebase Listener Error:", error);
     });
 
-    function handleAddSubmit(e) {
+    function handleSaveNote(e) {
         e.preventDefault();
-        const input = document.getElementById('text_input');
-        const text = input.value.trim();
-        if (!text) return;
+        const titleInput = document.getElementById('note-title');
+        const techSelect = document.getElementById('note-tech');
+        const statusSelect = document.getElementById('note-status');
+        const daySelect = document.getElementById('note-day');
+        const descInput = document.getElementById('note-desc');
+        const codeInput = document.getElementById('note-code');
+
+        const title = titleInput.value.trim();
+        if (!title) return;
 
         const now = new Date();
         const timestamp = now.getFullYear() + '-' +
@@ -777,92 +1076,116 @@
             String(now.getMinutes()).padStart(2, '0') + ':' +
             String(now.getSeconds()).padStart(2, '0');
 
-        const newItemRef = itemsRef.push();
-        newItemRef.set({
-            text: text,
+        const newNoteRef = notesRef.push();
+        newNoteRef.set({
+            title: title,
+            tech: techSelect.value,
+            status: statusSelect.value,
+            day: daySelect.value,
+            desc: descInput.value.trim(),
+            code: codeInput.value.trim(),
             timestamp: timestamp
         }).then(() => {
-            input.value = '';
+            titleInput.value = '';
+            descInput.value = '';
+            codeInput.value = '';
         }).catch(err => {
-            alert('⚠️ Firebase Error: ' + err.message + '\n\nหากขึ้น Permission Denied กรุณาเปิด Realtime Database เป็น Test Mode ใน Firebase Console');
+            alert('⚠️ Firebase Error: ' + err.message);
         });
     }
 
-    function handleDelete(id) {
-        if (!confirm('ยืนยันการลบรายการนี้?')) return;
-        itemsRef.child(id).remove().catch(err => {
+    function handleDeleteNote(id) {
+        if (!confirm('ยืนยันการลบรายการโน้ตนี้?')) return;
+        notesRef.child(id).remove().catch(err => {
             alert('ลบไม่สำเร็จ: ' + err.message);
         });
     }
 
-    function filterItems() {
-        const query = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase().trim() : '';
-        const items = document.querySelectorAll('#item-list .item');
-        let visibleCount = 0;
+    function setTechFilter(tech, btn) {
+        currentTechFilter = tech;
+        document.querySelectorAll('#tech-pills .pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderNotesList(allNotes);
+    }
 
-        items.forEach(item => {
-            const text = (item.getAttribute('data-text') || '').toLowerCase();
-            if (text.includes(query)) {
-                item.style.display = 'flex';
-                visibleCount++;
-            } else {
-                item.style.display = 'none';
-            }
-        });
+    function setStatusFilter(status, btn) {
+        currentStatusFilter = status;
+        document.querySelectorAll('#status-pills .pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderNotesList(allNotes);
+    }
 
-        const badge = document.getElementById('count-badge');
-        if (badge) {
-            if (query) {
-                badge.innerText = `พบ ${visibleCount} จาก ${items.length} รายการ`;
-            } else {
-                badge.innerText = `ทั้งหมด ${items.length} รายการ`;
-            }
+    function filterNotes() {
+        renderNotesList(allNotes);
+    }
+
+    function copySnippetCode(event, encodedCode) {
+        event.stopPropagation();
+        const code = decodeURIComponent(encodedCode);
+        navigator.clipboard.writeText(code).then(() => {
+            const btn = event.currentTarget;
+            btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> คัดลอกแล้ว!';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-regular fa-copy"></i> คัดลอกโค้ด';
+            }, 2000);
+        }).catch(err => alert('คัดลอกไม่สำเร็จ: ' + err));
+    }
+
+    function openDetailModal(item) {
+        document.getElementById('modal-title').innerText = item.title;
+        document.getElementById('modal-desc').innerText = item.desc || 'ไม่มีคำอธิบายเพิ่มเติม';
+        
+        const tagsContainer = document.getElementById('modal-tags');
+        const techClass = getTechClass(item.tech);
+        const statusHtml = getStatusBadge(item.status);
+        tagsContainer.innerHTML = `
+            <span class="badge-day">${escapeHtml(item.day || 'General')}</span>
+            <span class="badge-tech ${techClass}">#${escapeHtml(item.tech || 'General')}</span>
+            ${statusHtml}
+            <span style="font-size: 0.75rem; color: #94a3b8; margin-left: auto;"><i class="fa-regular fa-clock mr-1"></i> ${escapeHtml(item.timestamp)}</span>
+        `;
+
+        const codeWrapper = document.getElementById('modal-code-wrapper');
+        if (item.code && item.code.trim().length > 0) {
+            document.getElementById('modal-code').innerText = item.code;
+            modalCodeText = item.code;
+            codeWrapper.style.display = 'block';
+        } else {
+            codeWrapper.style.display = 'none';
+            modalCodeText = '';
         }
+
+        document.getElementById('detailModal').classList.add('active');
+    }
+
+    function closeDetailModal() {
+        document.getElementById('detailModal').classList.remove('active');
+    }
+
+    function closeDetailModalOnOverlay(e) {
+        if (e.target.classList.contains('modal-overlay')) closeDetailModal();
+    }
+
+    function copyModalCode() {
+        if (!modalCodeText) return;
+        navigator.clipboard.writeText(modalCodeText).then(() => {
+            const btn = document.getElementById('btn-copy-modal-code');
+            btn.innerHTML = '<i class="fa-solid fa-check text-emerald-400"></i> คัดลอกเรียบร้อย!';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-regular fa-copy"></i> คัดลอกโค้ด';
+            }, 2000);
+        });
     }
 
     function openQuotaModal() {
-        const items = document.querySelectorAll('#item-list .item');
-        const count = items.length;
-        
-        const estBytes = count * 250;
-        const estMB = (estBytes / (1024 * 1024)).toFixed(4);
-        const totalStorageMB = 1024;
-        const estPercent = Math.max(0.0001, (estBytes / (1024 * 1024 * 1024) * 100)).toFixed(4);
-        const remMB = (totalStorageMB - (estBytes / (1024 * 1024))).toFixed(2);
-        
-        const storageTextEl = document.getElementById('m-fb-storage-text');
-        if (storageTextEl) storageTextEl.innerText = `${estMB} MB / 1,024 MB (1GB)`;
-        
-        const storagePctEl = document.getElementById('m-fb-storage-pct');
-        if (storagePctEl) storagePctEl.innerText = `${estPercent}%`;
-
-        const storageRemEl = document.getElementById('m-fb-storage-rem');
-        if (storageRemEl) storageRemEl.innerText = `${remMB} MB`;
-
-        const storageBarEl = document.getElementById('m-fb-storage-bar');
-        if (storageBarEl) storageBarEl.style.width = Math.max(1, Math.min(100, parseFloat(estPercent) * 100)) + '%';
-        
-        const modal = document.getElementById('quotaModal');
-        if (modal) modal.classList.add('active');
+        document.getElementById('quotaModal').classList.add('active');
     }
-
     function closeQuotaModal() {
-        const modal = document.getElementById('quotaModal');
-        if (modal) modal.classList.remove('active');
+        document.getElementById('quotaModal').classList.remove('active');
     }
-
     function closeQuotaModalOnOverlay(e) {
-        if (e.target.classList.contains('modal-overlay')) {
-            closeQuotaModal();
-        }
+        if (e.target.classList.contains('modal-overlay')) closeQuotaModal();
     }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeDetailModal();
-            closeQuotaModal();
-        }
-    });
 </script>
 </body>
 </html>
