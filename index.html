@@ -755,7 +755,7 @@
                     <i class="fa-solid fa-user-lock text-amber-400"></i> เข้าสู่ระบบ
                 </button>
 
-                <button type="button" class="btn-nav" onclick="openQuotaModal()">
+                <button type="button" id="btn-quota" class="btn-nav" onclick="openQuotaModal()" style="display: none;">
                     <i class="fa-solid fa-chart-pie text-emerald-400"></i> ลิมิตระบบ
                 </button>
                 <a href="bootcamp_master_learning_hub.html" class="btn-nav">
@@ -1218,6 +1218,15 @@
         loginUserSession(userData);
     }
 
+    const ADMIN_USERNAMES = ['admin', 'suwanchai', 'sky_14'];
+
+    function isAdminUser(user) {
+        if (!user) return false;
+        if (user.role === 'admin') return true;
+        const clean = cleanUsername(user.username);
+        return ADMIN_USERNAMES.includes(clean);
+    }
+
     function loginUserSession(userObj) {
         currentUser = userObj;
         localStorage.setItem('vault_auth_user', JSON.stringify(currentUser));
@@ -1232,11 +1241,21 @@
     function updateHeaderUserBadge() {
         const profileBadge = document.getElementById('user-profile-badge');
         const loginBtn = document.getElementById('btn-show-login');
+        const quotaBtn = document.getElementById('btn-quota');
+
         if (currentUser) {
-            document.getElementById('user-name').innerText = `${currentUser.username} (คลังส่วนตัว)`;
+            const adminState = isAdminUser(currentUser);
+            const roleBadge = adminState ? ' 👑 (Admin)' : ' (คลังส่วนตัว)';
+            document.getElementById('user-name').innerText = `${currentUser.username}${roleBadge}`;
             document.getElementById('user-avatar').innerText = currentUser.avatar || '👨‍💻';
             profileBadge.style.display = 'inline-flex';
             if (loginBtn) loginBtn.style.display = 'none';
+
+            if (quotaBtn) {
+                quotaBtn.style.display = adminState ? 'inline-flex' : 'none';
+            }
+        } else {
+            if (quotaBtn) quotaBtn.style.display = 'none';
         }
     }
 
@@ -1637,6 +1656,10 @@
     }
 
     function openQuotaModal() {
+        if (!isAdminUser(currentUser)) {
+            alert('⚠️ หน้ารายละเอียดโควตาระบบ (Quota Limits) สงวนสิทธิ์สำหรับผู้ดูแลระบบ (Admin) เท่านั้น');
+            return;
+        }
         document.getElementById('quotaModal').classList.add('active');
     }
     function closeQuotaModal() {
