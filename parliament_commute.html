@@ -598,6 +598,10 @@
         
         document.getElementById('input-date').addEventListener('change', updateThaiDatePreview);
         
+        // Load initial local records
+        const localRecs = loadLocalCommuteRecords();
+        syncCombinedRecords(localRecs);
+        
         // Firebase Realtime Listener
         commuteRef.on('value', (snapshot) => {
             const val = snapshot.val();
@@ -613,9 +617,10 @@
                     });
                 });
             }
-            // Sort by date ascending (เหมือนไฟล์สภาตัวอย่าง 08/06/2569 -> 03/07/2569)
-            allRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
-            renderCommuteRecords();
+            syncCombinedRecords(loadLocalCommuteRecords());
+        }, (err) => {
+            console.warn("Firebase listener error, fallback to local:", err.message);
+            syncCombinedRecords(loadLocalCommuteRecords());
         });
     });
 
@@ -700,6 +705,21 @@
         renderStagedImagePreviews();
     }
 
+    function loadLocalCommuteRecords() {
+        try {
+            const localData = localStorage.getItem('parliament_commute_local');
+            return localData ? JSON.parse(localData) : [];
+        } catch(e) {
+            return [];
+        }
+    }
+
+    function saveLocalCommuteRecords(records) {
+        try {
+            localStorage.setItem('parliament_commute_local', JSON.stringify(records));
+        } catch(e) {}
+    }
+
     function saveCommuteRecord(e) {
         e.preventDefault();
         const dateVal = document.getElementById('input-date').value;
@@ -715,28 +735,59 @@
             return;
         }
 
+        const recordId = 'local_' + Date.now();
         const recordData = {
+            id: recordId,
             date: dateVal,
             titleThai: titleThaiVal || formatThaiDateString(dateVal),
-            images: stagedImages,
+            images: [...stagedImages],
             timestamp: Date.now()
         };
 
+        // Try saving to Firebase Realtime Database first
         commuteRef.push(recordData, (err) => {
             if (err) {
-                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + err.message);
+                console.warn("Firebase Permission Pending, saving locally:", err.message);
+                // Save to LocalStorage Fallback so user can still export DOCX & PDF immediately!
+                const localRecs = loadLocalCommuteRecords();
+                localRecs.push(recordData);
+                saveLocalCommuteRecords(localRecs);
+                
+                // Refresh list using combined records
+                syncCombinedRecords(localRecs);
+
+                stagedImages = [];
+                renderStagedImagePreviews();
+                document.getElementById('input-file-images').value = '';
+                alert('บันทึกข้อมูลและแนบภาพแผนที่เรียบร้อยแล้ว! (บันทึกไว้บนอุปกรณ์ พร้อมออกรายงาน Word/PDF ได้ทันที)');
             } else {
                 stagedImages = [];
                 renderStagedImagePreviews();
                 document.getElementById('input-file-images').value = '';
-                alert('บันทึกภาพแผนที่การเดินทางลง Cloud เรียบร้อยแล้ว!');
+                alert('บันทึกภาพแผนที่การเดินทางลง Firebase Cloud เรียบร้อยแล้ว!');
             }
         });
     }
 
+    function syncCombinedRecords(localRecs = []) {
+        const map = new Map();
+        [...allRecords, ...localRecs].forEach(r => map.set(r.id || r.timestamp, r));
+        allRecords = Array.from(map.values());
+        allRecords.sort((a, b) => new Date(a.date) - new Date(b.date));
+        renderCommuteRecords();
+    }
+
     function deleteRecord(id) {
         if (!confirm('ยืนยันลบรายการบันทึกนี้หรือไม่?')) return;
-        commuteRef.child(id).remove();
+        if (id && id.startsWith('local_')) {
+            let localRecs = loadLocalCommuteRecords();
+            localRecs = localRecs.filter(r => r.id !== id);
+            saveLocalCommuteRecords(localRecs);
+            allRecords = allRecords.filter(r => r.id !== id);
+            renderCommuteRecords();
+        } else {
+            commuteRef.child(id).remove();
+        }
     }
 
     function renderCommuteRecords() {
