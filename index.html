@@ -855,6 +855,25 @@
             </button>
         </form>
 
+        <!-- Admin Master View Switcher (แสดงเฉพาะ Admin) -->
+        <div id="admin-view-switcher" style="display: none; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); padding: 10px 14px; border-radius: 14px; margin-bottom: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.1rem;">👑</span>
+                <div>
+                    <strong style="color: #a5b4fc; font-size: 0.88rem;">Admin Master Control Panel</strong>
+                    <span style="display: block; font-size: 0.76rem; color: #94a3b8;">สลับมุมมองเพื่อเรียกดู/จัดการคลังโน้ตของสมาชิกทุกคนในระบบ</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+                <button type="button" id="btn-admin-view-own" onclick="switchAdminViewMode('OWN')" style="padding: 6px 12px; border: none; border-radius: 8px; background: #6366f1; color: white; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">
+                    <i class="fa-solid fa-user-lock mr-1"></i> โน้ตส่วนตัวของฉัน
+                </button>
+                <button type="button" id="btn-admin-view-all" onclick="switchAdminViewMode('ALL')" style="padding: 6px 12px; border: none; border-radius: 8px; background: transparent; color: #94a3b8; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255, 255, 255, 0.15);">
+                    <i class="fa-solid fa-users-gear mr-1"></i> โน้ตของสมาชิกทั้งหมด
+                </button>
+            </div>
+        </div>
+
         <!-- Search & Filter Controls -->
         <div class="filters-wrapper">
             <div class="search-box">
@@ -1219,12 +1238,45 @@
     }
 
     const ADMIN_USERNAMES = ['admin', 'suwanchai', 'sky_14'];
+    let currentAdminViewMode = 'OWN';
 
     function isAdminUser(user) {
         if (!user) return false;
         if (user.role === 'admin') return true;
         const clean = cleanUsername(user.username);
         return ADMIN_USERNAMES.includes(clean);
+    }
+
+    function switchAdminViewMode(mode) {
+        currentAdminViewMode = mode;
+        const btnOwn = document.getElementById('btn-admin-view-own');
+        const btnAll = document.getElementById('btn-admin-view-all');
+
+        if (mode === 'ALL') {
+            if (btnAll) {
+                btnAll.style.background = '#6366f1';
+                btnAll.style.color = '#ffffff';
+                btnAll.style.border = 'none';
+            }
+            if (btnOwn) {
+                btnOwn.style.background = 'transparent';
+                btnOwn.style.color = '#94a3b8';
+                btnOwn.style.border = '1px solid rgba(255, 255, 255, 0.15)';
+            }
+        } else {
+            if (btnOwn) {
+                btnOwn.style.background = '#6366f1';
+                btnOwn.style.color = '#ffffff';
+                btnOwn.style.border = 'none';
+            }
+            if (btnAll) {
+                btnAll.style.background = 'transparent';
+                btnAll.style.color = '#94a3b8';
+                btnAll.style.border = '1px solid rgba(255, 255, 255, 0.15)';
+            }
+        }
+
+        attachIsolatedUserNotesListener();
     }
 
     function loginUserSession(userObj) {
@@ -1242,6 +1294,7 @@
         const profileBadge = document.getElementById('user-profile-badge');
         const loginBtn = document.getElementById('btn-show-login');
         const quotaBtn = document.getElementById('btn-quota');
+        const adminPanel = document.getElementById('admin-view-switcher');
 
         if (currentUser) {
             const adminState = isAdminUser(currentUser);
@@ -1254,44 +1307,86 @@
             if (quotaBtn) {
                 quotaBtn.style.display = adminState ? 'inline-flex' : 'none';
             }
+            if (adminPanel) {
+                adminPanel.style.display = adminState ? 'flex' : 'none';
+            }
         } else {
             if (quotaBtn) quotaBtn.style.display = 'none';
+            if (adminPanel) adminPanel.style.display = 'none';
         }
     }
 
     function attachIsolatedUserNotesListener() {
         if (!currentUser) return;
-        const cleanUser = cleanUsername(currentUser.username);
-        
         if (userNotesRef) userNotesRef.off();
-        userNotesRef = db.ref('user_notes/' + cleanUser);
 
-        userNotesRef.on('value', (snapshot) => {
-            const val = snapshot.val();
-            allNotes = [];
-            if (val) {
-                Object.keys(val).forEach(key => {
-                    allNotes.push({
-                        id: key,
-                        title: val[key].title || 'ไม่มีหัวข้อ',
-                        desc: val[key].desc || '',
-                        code: val[key].code || '',
-                        tech: val[key].tech || 'General',
-                        status: val[key].status || 'mastered',
-                        day: val[key].day || 'General',
-                        author: currentUser.username,
-                        authorAvatar: currentUser.avatar || '👨‍💻',
-                        timestamp: val[key].timestamp || ''
+        if (isAdminUser(currentUser) && currentAdminViewMode === 'ALL') {
+            userNotesRef = db.ref('user_notes');
+            userNotesRef.on('value', (snapshot) => {
+                const allUsersVal = snapshot.val();
+                allNotes = [];
+                if (allUsersVal) {
+                    Object.keys(allUsersVal).forEach(uKey => {
+                        const userNotesObj = allUsersVal[uKey];
+                        if (userNotesObj) {
+                            Object.keys(userNotesObj).forEach(nKey => {
+                                const item = userNotesObj[nKey];
+                                allNotes.push({
+                                    id: nKey,
+                                    userKey: uKey,
+                                    title: item.title || 'ไม่มีหัวข้อ',
+                                    desc: item.desc || '',
+                                    code: item.code || '',
+                                    tech: item.tech || 'General',
+                                    status: item.status || 'mastered',
+                                    day: item.day || 'General',
+                                    author: item.author || uKey,
+                                    authorAvatar: item.authorAvatar || '👤',
+                                    timestamp: item.timestamp || ''
+                                });
+                            });
+                        }
                     });
-                });
-            }
-            allNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            updateDashboardStats(allNotes);
-            renderNotesList(allNotes);
-            checkUrlQueryParams();
-        }, (error) => {
-            console.error("Firebase Listener Error:", error);
-        });
+                }
+                allNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                updateDashboardStats(allNotes);
+                renderNotesList(allNotes);
+                checkUrlQueryParams();
+            }, (error) => {
+                console.error("Firebase Listener Error:", error);
+            });
+        } else {
+            const cleanUser = cleanUsername(currentUser.username);
+            userNotesRef = db.ref('user_notes/' + cleanUser);
+
+            userNotesRef.on('value', (snapshot) => {
+                const val = snapshot.val();
+                allNotes = [];
+                if (val) {
+                    Object.keys(val).forEach(key => {
+                        allNotes.push({
+                            id: key,
+                            userKey: cleanUser,
+                            title: val[key].title || 'ไม่มีหัวข้อ',
+                            desc: val[key].desc || '',
+                            code: val[key].code || '',
+                            tech: val[key].tech || 'General',
+                            status: val[key].status || 'mastered',
+                            day: val[key].day || 'General',
+                            author: currentUser.username,
+                            authorAvatar: currentUser.avatar || '👨‍💻',
+                            timestamp: val[key].timestamp || ''
+                        });
+                    });
+                }
+                allNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                updateDashboardStats(allNotes);
+                renderNotesList(allNotes);
+                checkUrlQueryParams();
+            }, (error) => {
+                console.error("Firebase Listener Error:", error);
+            });
+        }
     }
 
     function handleLogout() {
@@ -1522,9 +1617,13 @@
     }
 
     function handleDeleteNote(id) {
-        if (!currentUser || !userNotesRef) return;
-        if (!confirm('ยืนยันการลบรายการโน้ตนี้จากคลังส่วนตัว?')) return;
-        userNotesRef.child(id).remove().catch(err => {
+        if (!currentUser) return;
+        const targetNote = allNotes.find(n => n.id === id);
+        if (!targetNote) return;
+
+        if (!confirm(`ยืนยันการลบโน้ตเรื่อง "${targetNote.title}"?`)) return;
+
+        db.ref(`user_notes/${targetNote.userKey}/${id}`).remove().catch(err => {
             alert('ลบไม่สำเร็จ: ' + err.message);
         });
     }
@@ -1622,15 +1721,18 @@
 
     function handleUpdateNote(e) {
         e.preventDefault();
-        if (!currentUser || !userNotesRef) return;
+        if (!currentUser) return;
 
         const id = document.getElementById('edit-note-id').value;
         if (!id) return;
 
+        const targetNote = allNotes.find(n => n.id === id);
+        if (!targetNote) return;
+
         const title = document.getElementById('edit-note-title').value.trim();
         if (!title) return;
 
-        userNotesRef.child(id).update({
+        db.ref(`user_notes/${targetNote.userKey}/${id}`).update({
             title: title,
             tech: document.getElementById('edit-note-tech').value,
             status: document.getElementById('edit-note-status').value,
