@@ -11,6 +11,9 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- EXIF Metadata Parser (ดึงวันเวลาที่ถ่ายภาพจริงจากไฟล์รูป) -->
+    <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.min.js"></script>
+
     <!-- DOCX Export Libraries -->
     <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -649,6 +652,48 @@
         }
     }
 
+    function extractImageRealDateTime(file, callback) {
+        if (typeof EXIF !== 'undefined' && file) {
+            EXIF.getData(file, function() {
+                const dateTime = EXIF.getTag(this, "DateTimeOriginal") || EXIF.getTag(this, "DateTime") || EXIF.getTag(this, "DigitizedDateTime");
+                if (dateTime && typeof dateTime === 'string' && dateTime.includes(':')) {
+                    try {
+                        // EXIF format: "YYYY:MM:DD HH:MM:SS" (e.g. "2026:06:08 08:30:15")
+                        const parts = dateTime.trim().split(' ');
+                        const dateParts = parts[0].split(':');
+                        const timeParts = parts[1] || '';
+                        
+                        const yearBE = parseInt(dateParts[0], 10) + 543;
+                        const realDate = `${dateParts[2]}/${dateParts[1]}/${yearBE}`;
+                        const realIsoDate = `${dateParts[0]}-${dateParts[1]}-${dateParts[2]}`;
+                        const realTime = timeParts ? `${timeParts} น.` : '';
+                        
+                        callback({ realDate, realTime, realIsoDate });
+                        return;
+                    } catch(e) {
+                        console.error("EXIF date parse error:", e);
+                    }
+                }
+                
+                // Fallback 1: Extract from File lastModified date/time
+                const fDate = new Date(file.lastModified || Date.now());
+                const yearBE = fDate.getFullYear() + 543;
+                const realDate = `${String(fDate.getDate()).padStart(2, '0')}/${String(fDate.getMonth() + 1).padStart(2, '0')}/${yearBE}`;
+                const realIsoDate = fDate.toISOString().split('T')[0];
+                const realTime = fDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' น.';
+                callback({ realDate, realTime, realIsoDate });
+            });
+        } else {
+            // Fallback 2: Standard File date/time
+            const fDate = file.lastModified ? new Date(file.lastModified) : new Date();
+            const yearBE = fDate.getFullYear() + 543;
+            const realDate = `${String(fDate.getDate()).padStart(2, '0')}/${String(fDate.getMonth() + 1).padStart(2, '0')}/${yearBE}`;
+            const realIsoDate = fDate.toISOString().split('T')[0];
+            const realTime = fDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' น.';
+            callback({ realDate, realTime, realIsoDate });
+        }
+    }
+
     function handleImageSelection(e) {
         const files = Array.from(e.target.files);
         if (!files.length) return;
@@ -656,23 +701,28 @@
         files.forEach((file) => {
             if (!file.type.startsWith('image/')) return;
 
-            const timeStr = file.lastModified 
-                ? new Date(file.lastModified).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-                : new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            extractImageRealDateTime(file, (meta) => {
+                // Auto-fill the form date if it's the first image uploaded!
+                if (stagedImages.length === 0 && meta.realIsoDate) {
+                    document.getElementById('input-date').value = meta.realIsoDate;
+                    document.getElementById('input-title-thai').value = meta.realDate;
+                }
 
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                compressImageBase64(evt.target.result, 1200, 0.8, function(compressedData) {
-                    const defaultLabel = (stagedImages.length === 0) ? 'ภาพที่ 1 (ขาไปสภา)' : `ภาพที่ ${stagedImages.length + 1} (ขากลับ/GPS)`;
-                    stagedImages.push({
-                        url: compressedData,
-                        time: timeStr,
-                        label: defaultLabel
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    compressImageBase64(evt.target.result, 1200, 0.8, function(compressedData) {
+                        const defaultLabel = (stagedImages.length === 0) ? 'ภาพที่ 1 (ขาไปสภา)' : `ภาพที่ ${stagedImages.length + 1} (ขากลับ/GPS)`;
+                        stagedImages.push({
+                            url: compressedData,
+                            date: meta.realDate,
+                            time: meta.realTime,
+                            label: defaultLabel
+                        });
+                        renderStagedImagePreviews();
                     });
-                    renderStagedImagePreviews();
-                });
-            };
-            reader.readAsDataURL(file);
+                };
+                reader.readAsDataURL(file);
+            });
         });
     }
 
@@ -813,16 +863,18 @@
     }
 
     function normalizeImageObj(imgRaw, dateStr, idx) {
-        if (!imgRaw) return { url: '', time: 'ไม่ระบุเวลา', label: `ภาพที่ ${idx + 1}` };
+        if (!imgRaw) return { url: '', date: dateStr || '', time: 'ไม่ระบุเวลา', label: `ภาพที่ ${idx + 1}` };
         if (typeof imgRaw === 'string') {
             return {
                 url: imgRaw,
-                time: 'บันทึกภาพแล้ว',
+                date: dateStr || '',
+                time: 'อัปโหลดภาพแล้ว',
                 label: `ภาพที่ ${idx + 1} (แผนที่เส้นทาง)`
             };
         }
         return {
             url: imgRaw.url || '',
+            date: imgRaw.date || dateStr || '',
             time: imgRaw.time || 'ไม่ระบุเวลา',
             label: imgRaw.label || `ภาพที่ ${idx + 1}`
         };
