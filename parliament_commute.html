@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏛️ ระบบออกรายงานภาพแผนที่ ไป-กลับ สภา</title>
+    <title>รายงานภาพแผนที่การเดินทาง</title>
     <!-- Google Fonts: Prompt & Fira Code -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -437,7 +437,7 @@
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 12mm 12mm 12mm 12mm;
+                margin: 8mm 8mm 8mm 8mm;
             }
             body {
                 background: #ffffff !important;
@@ -447,8 +447,10 @@
             }
             body::before { display: none !important; }
             
-            /* Hide ALL Web UI controls, search bar, inputs, and buttons */
+            /* Hide ALL Web UI controls, top header logo, title, search bar, inputs, and buttons */
             .header-title, 
+            .header-left,
+            .header-logo,
             .form-box, 
             .header-actions, 
             #filter-search, 
@@ -458,11 +460,15 @@
             .live-status,
             .btn-remove-img { 
                 display: none !important; 
+                margin: 0 !important;
+                height: 0 !important;
             }
 
             /* Show Official Printable Document Header */
             .print-only-header {
                 display: block !important;
+                margin-top: 4px !important;
+                margin-bottom: 16px !important;
             }
 
             .container {
@@ -483,16 +489,17 @@
                 border: 1.5px solid #cbd5e1 !important;
                 border-radius: 12px !important;
                 color: #0f172a !important;
-                padding: 14px !important;
-                page-break-inside: avoid;
-                margin-bottom: 20px !important;
+                padding: 12px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                margin-bottom: 16px !important;
                 box-shadow: none !important;
             }
 
             .date-header {
                 border-bottom: 2px solid #1e293b !important;
-                padding-bottom: 8px !important;
-                margin-bottom: 12px !important;
+                padding-bottom: 6px !important;
+                margin-bottom: 10px !important;
             }
 
             .date-badge {
@@ -500,17 +507,17 @@
                 color: #ffffff !important;
                 box-shadow: none !important;
                 font-size: 0.95rem !important;
-                padding: 4px 14px !important;
+                padding: 3px 12px !important;
             }
 
             .map-images-grid {
                 display: grid !important;
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 10px !important;
+                gap: 12px !important;
             }
 
             .map-image-wrapper {
-                height: 185px !important;
+                height: 235px !important; /* Enlarged map preview for clear PDF output! */
                 border: 1px solid #cbd5e1 !important;
                 border-radius: 8px !important;
                 background: #ffffff !important;
@@ -1020,6 +1027,36 @@
         document.getElementById('image-modal').classList.remove('active');
     }
 
+    function getDocxImageRun(imgUrl, width, height) {
+        if (!imgUrl || typeof imgUrl !== 'string') return null;
+        let base64 = imgUrl.trim();
+        if (base64.includes(',')) {
+            base64 = base64.split(',')[1];
+        }
+        base64 = base64.replace(/[\r\n\s]/g, '');
+        if (!base64) return null;
+
+        try {
+            const binaryStr = window.atob(base64);
+            const len = binaryStr.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryStr.charCodeAt(i);
+            }
+
+            return new docx.ImageRun({
+                data: bytes,
+                transformation: {
+                    width: width,
+                    height: height
+                }
+            });
+        } catch(err) {
+            console.error("Base64 DOCX image conversion error:", err);
+            return null;
+        }
+    }
+
     // ==========================================
     // EXPORT TO DOCX (Microsoft Word Document)
     // ==========================================
@@ -1071,7 +1108,7 @@
             );
 
             // Construct 2-column image table for Word DOCX layout (2 or 4 images per page)
-            const rawImgs = item.images || [];
+            const rawImgs = item.images || (item.image ? [item.image] : []);
             const tableRows = [];
 
             for (let i = 0; i < rawImgs.length; i += 2) {
@@ -1079,23 +1116,31 @@
                 
                 // Cell 1
                 const imgObj1 = normalizeImageObj(rawImgs[i], dateTitle, i);
-                try {
-                    const base64Data1 = imgObj1.url.split(',')[1];
-                    const binaryStr1 = atob(base64Data1);
-                    const len1 = binaryStr1.length;
-                    const bytes1 = new Uint8Array(len1);
-                    for (let k = 0; k < len1; k++) bytes1[k] = binaryStr1.charCodeAt(k);
+                const imgRun1 = getDocxImageRun(imgObj1.url, 255, 170);
+
+                rowCells.push(
+                    new TableCell({
+                        children: [
+                            new Paragraph({
+                                children: imgRun1 ? [imgRun1] : [new TextRun({ text: "ภาพแผนที่ 1", color: "94A3B8" })],
+                                alignment: AlignmentType.CENTER
+                            })
+                        ],
+                        width: { size: 50, type: WidthType.PERCENTAGE },
+                        borders: noBorders
+                    })
+                );
+
+                // Cell 2 (if present)
+                if (i + 1 < rawImgs.length) {
+                    const imgObj2 = normalizeImageObj(rawImgs[i+1], dateTitle, i+1);
+                    const imgRun2 = getDocxImageRun(imgObj2.url, 255, 170);
 
                     rowCells.push(
                         new TableCell({
                             children: [
                                 new Paragraph({
-                                    children: [
-                                        new ImageRun({
-                                            data: bytes1,
-                                            transformation: { width: 250, height: 165 }
-                                        })
-                                    ],
+                                    children: imgRun2 ? [imgRun2] : [new TextRun({ text: "ภาพแผนที่ 2", color: "94A3B8" })],
                                     alignment: AlignmentType.CENTER
                                 })
                             ],
@@ -1103,40 +1148,6 @@
                             borders: noBorders
                         })
                     );
-                } catch(e) {
-                    console.error("Error processing image 1 for docx:", e);
-                }
-
-                // Cell 2 (if present)
-                if (i + 1 < rawImgs.length) {
-                    const imgObj2 = normalizeImageObj(rawImgs[i+1], dateTitle, i+1);
-                    try {
-                        const base64Data2 = imgObj2.url.split(',')[1];
-                        const binaryStr2 = atob(base64Data2);
-                        const len2 = binaryStr2.length;
-                        const bytes2 = new Uint8Array(len2);
-                        for (let k = 0; k < len2; k++) bytes2[k] = binaryStr2.charCodeAt(k);
-
-                        rowCells.push(
-                            new TableCell({
-                                children: [
-                                    new Paragraph({
-                                        children: [
-                                            new ImageRun({
-                                                data: bytes2,
-                                                transformation: { width: 250, height: 165 }
-                                            })
-                                        ],
-                                        alignment: AlignmentType.CENTER
-                                    })
-                                ],
-                                width: { size: 50, type: WidthType.PERCENTAGE },
-                                borders: noBorders
-                            })
-                        );
-                    } catch(e) {
-                        console.error("Error processing image 2 for docx:", e);
-                    }
                 } else {
                     // Empty cell to maintain 2-column grid alignment
                     rowCells.push(
