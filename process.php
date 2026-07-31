@@ -35,13 +35,15 @@ function saveData($data) {
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'fetch') {
+$request_method = $_SERVER['REQUEST_METHOD'] ?? '';
+
+if ($request_method === 'GET' && isset($_GET['action']) && $_GET['action'] === 'fetch') {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(loadData(), JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($request_method === 'POST') {
     $action = $_POST['action'] ?? '';
     if ($action === 'add') {
         $raw_text = trim($_POST['text_input'] ?? '');
