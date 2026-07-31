@@ -672,6 +672,18 @@
             </div>
             
             <div class="header-actions">
+                <div id="user-profile-badge" style="display: none; align-items: center; gap: 8px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); padding: 4px 12px; border-radius: 9999px;">
+                    <span id="user-avatar" style="font-size: 1.1rem;">👤</span>
+                    <span id="user-name" style="font-size: 0.8rem; font-weight: 600; color: #a5b4fc;">Guest</span>
+                    <button type="button" onclick="handleLogout()" style="background: none; border: none; color: #fda4af; cursor: pointer; font-size: 0.8rem; padding: 2px 4px;" title="ออกจากระบบ">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+
+                <button type="button" id="btn-show-login" class="btn-nav" onclick="openLoginModal()">
+                    <i class="fa-solid fa-user-lock text-amber-400"></i> เข้าสู่ระบบ
+                </button>
+
                 <button type="button" class="btn-nav" onclick="openQuotaModal()">
                     <i class="fa-solid fa-chart-pie text-emerald-400"></i> ลิมิตระบบ
                 </button>
@@ -956,6 +968,45 @@
     </div>
 </div>
 
+<!-- Modal สำหรับเข้าสู่ระบบ / ลงทะเบียนผู้ใช้งาน -->
+<div class="modal-overlay" id="loginModal" onclick="closeLoginModalOnOverlay(event)">
+    <div class="modal-card" style="max-width: 420px;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-user-shield text-indigo-400 mr-2"></i> เข้าสู่ระบบ / ลงทะเบียนชื่อ</h3>
+            <button class="modal-close" onclick="closeLoginModal()">&times;</button>
+        </div>
+        <form class="modal-body" id="login-form" onsubmit="handleLoginSubmit(event)">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 2.5rem; margin-bottom: 8px;">👨‍💻</div>
+                <h4 style="margin:0 0 4px 0; color:#fff;">เข้าสู่ระบบบันทึกโน้ต</h4>
+                <p style="margin:0; font-size:0.8rem; color:#94a3b8;">ระบุชื่อของคุณเพื่อแสดงเป็นผู้บันทึกโน้ตและคลังโค้ด</p>
+            </div>
+
+            <div class="form-group-full" style="margin-bottom: 14px;">
+                <label><i class="fa-solid fa-user text-indigo-400 mr-1"></i> ชื่อผู้ใช้งาน (Username) *</label>
+                <input type="text" id="login-username" placeholder="เช่น AlexDev หรือ Suwanchai" required autocomplete="off">
+            </div>
+
+            <div class="form-group-full" style="margin-bottom: 20px;">
+                <label><i class="fa-solid fa-icons text-purple-400 mr-1"></i> เลือกอวาตาร์ประจำตัว</label>
+                <select id="login-avatar">
+                    <option value="👨‍💻">👨‍💻 Coder Boy</option>
+                    <option value="👩‍💻">👩‍💻 Coder Girl</option>
+                    <option value="🚀">🚀 Rocket Dev</option>
+                    <option value="⚡">⚡ Lightning Ninja</option>
+                    <option value="🧠">🧠 Mastermind</option>
+                    <option value="🔥">🔥 Hacker Fire</option>
+                    <option value="🎓">🎓 Student Learner</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-right-to-bracket"></i> ยืนยันเข้าสู่ระบบ
+            </button>
+        </form>
+    </div>
+</div>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -1073,6 +1124,9 @@
 
             const itemJson = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
 
+            const safeAuthor = escapeHtml(item.author || 'Anonymous');
+            const safeAvatar = escapeHtml(item.authorAvatar || '👤');
+
             html += `
                 <li class="note-card" data-id="${safeId}">
                     <div class="note-header">
@@ -1088,7 +1142,7 @@
                     ${snippetHtml}
 
                     <div class="note-footer">
-                        <span><i class="fa-regular fa-clock mr-1"></i> ${safeTime}</span>
+                        <span><strong style="color:#a5b4fc;">${safeAvatar} ${safeAuthor}</strong> • <i class="fa-regular fa-clock mr-1"></i> ${safeTime}</span>
                         <div class="note-actions">
                             <button type="button" class="btn-action btn-view" onclick="openDetailModal('${safeId}')">
                                 <i class="fa-regular fa-eye"></i> รายละเอียด
@@ -1122,6 +1176,8 @@
                     tech: val[key].tech || 'General',
                     status: val[key].status || 'mastered',
                     day: val[key].day || 'General',
+                    author: val[key].author || 'Anonymous',
+                    authorAvatar: val[key].authorAvatar || '👤',
                     timestamp: val[key].timestamp || ''
                 });
             });
@@ -1130,6 +1186,7 @@
         updateDashboardStats(allNotes);
         renderNotesList(allNotes);
         checkUrlQueryParams();
+        initUserSession();
     }, (error) => {
         console.error("Firebase Listener Error:", error);
     });
@@ -1160,8 +1217,70 @@
         }
     }
 
+    let currentUser = null;
+
+    function initUserSession() {
+        const savedUser = localStorage.getItem('vault_user');
+        if (savedUser) {
+            try {
+                currentUser = JSON.parse(savedUser);
+                updateUserUI();
+            } catch(e) { currentUser = null; }
+        }
+    }
+
+    function updateUserUI() {
+        const profileBadge = document.getElementById('user-profile-badge');
+        const loginBtn = document.getElementById('btn-show-login');
+        if (currentUser && currentUser.username) {
+            document.getElementById('user-name').innerText = currentUser.username;
+            document.getElementById('user-avatar').innerText = currentUser.avatar || '👨‍💻';
+            profileBadge.style.display = 'inline-flex';
+            loginBtn.style.display = 'none';
+        } else {
+            profileBadge.style.display = 'none';
+            loginBtn.style.display = 'inline-flex';
+        }
+    }
+
+    function openLoginModal() {
+        document.getElementById('loginModal').classList.add('active');
+        document.getElementById('login-username').focus();
+    }
+    function closeLoginModal() {
+        document.getElementById('loginModal').classList.remove('active');
+    }
+    function closeLoginModalOnOverlay(e) {
+        if (e.target.classList.contains('modal-overlay')) closeLoginModal();
+    }
+
+    function handleLoginSubmit(e) {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value.trim();
+        const avatar = document.getElementById('login-avatar').value;
+        if (!username) return;
+
+        currentUser = { username: username, avatar: avatar };
+        localStorage.setItem('vault_user', JSON.stringify(currentUser));
+        updateUserUI();
+        closeLoginModal();
+    }
+
+    function handleLogout() {
+        if (!confirm('ยืนยันออกจากระบบ?')) return;
+        localStorage.removeItem('vault_user');
+        currentUser = null;
+        updateUserUI();
+    }
+
     function handleSaveNote(e) {
         e.preventDefault();
+        if (!currentUser) {
+            alert('กรุณาเข้าสู่ระบบก่อนบันทึกโน้ต!');
+            openLoginModal();
+            return;
+        }
+
         const titleInput = document.getElementById('note-title');
         const techSelect = document.getElementById('note-tech');
         const statusSelect = document.getElementById('note-status');
@@ -1188,6 +1307,8 @@
             day: daySelect.value,
             desc: descInput.value.trim(),
             code: codeInput.value.trim(),
+            author: currentUser.username,
+            authorAvatar: currentUser.avatar || '👨‍💻',
             timestamp: timestamp
         }).then(() => {
             titleInput.value = '';
