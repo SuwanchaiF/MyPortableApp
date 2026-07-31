@@ -654,7 +654,78 @@
 </head>
 <body>
 
-<div class="container">
+<!-- Auth Gate Screen (สมัครสมาชิก / เข้าสู่ระบบ ก่อนเข้าใช้งาน) -->
+<div class="container" id="auth-screen-container" style="display: flex; max-width: 440px; margin-top: 40px;">
+    <div class="card" style="width: 100%; margin-bottom: 0;">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div class="header-logo" style="margin: 0 auto 12px auto; width: 54px; height: 54px; font-size: 1.8rem;">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h2 style="margin: 0 0 6px 0; font-size: 1.35rem; color: #fff;">ระบบสมาชิกคลังโน้ต</h2>
+            <p style="margin: 0; font-size: 0.82rem; color: #94a3b8;">
+                เข้าสู่ระบบหรือสมัครสมาชิกเพื่อเข้าถึงคลังโน้ตส่วนตัว (Data Isolation)
+            </p>
+        </div>
+
+        <!-- Auth Mode Tabs -->
+        <div style="display: flex; gap: 4px; background: rgba(15, 23, 42, 0.6); padding: 4px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.08);">
+            <button type="button" id="tab-auth-login" onclick="switchAuthTab('login')" style="flex: 1; padding: 8px; border: none; border-radius: 8px; background: #6366f1; color: white; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                <i class="fa-solid fa-right-to-bracket mr-1"></i> เข้าสู่ระบบ
+            </button>
+            <button type="button" id="tab-auth-register" onclick="switchAuthTab('register')" style="flex: 1; padding: 8px; border: none; border-radius: 8px; background: transparent; color: #94a3b8; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;">
+                <i class="fa-solid fa-user-plus mr-1"></i> สมัครสมาชิก
+            </button>
+        </div>
+
+        <!-- Alert Notice Box -->
+        <div id="auth-alert-box" style="display: none; padding: 10px 14px; border-radius: 10px; font-size: 0.82rem; margin-bottom: 16px;"></div>
+
+        <!-- Form 1: Login Form -->
+        <form id="auth-form-login" onsubmit="handleAuthLoginSubmit(event)">
+            <div class="form-group-full" style="margin-bottom: 12px;">
+                <label><i class="fa-solid fa-user text-indigo-400 mr-1"></i> ชื่อผู้ใช้งาน (Username) *</label>
+                <input type="text" id="auth-login-user" placeholder="พิมพ์ชื่อผู้ใช้งานของคุณ..." required autocomplete="off">
+            </div>
+            <div class="form-group-full" style="margin-bottom: 20px;">
+                <label><i class="fa-solid fa-lock text-purple-400 mr-1"></i> รหัสผ่าน (Password) *</label>
+                <input type="password" id="auth-login-pass" placeholder="พิมพ์รหัสผ่าน..." required>
+            </div>
+            <button type="submit" class="btn-submit" id="btn-login-submit">
+                <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบและโหลดคลังส่วนตัว
+            </button>
+        </form>
+
+        <!-- Form 2: Register Form -->
+        <form id="auth-form-register" onsubmit="handleAuthRegisterSubmit(event)" style="display: none;">
+            <div class="form-group-full" style="margin-bottom: 12px;">
+                <label><i class="fa-solid fa-user-plus text-indigo-400 mr-1"></i> ตั้งชื่อผู้ใช้งานใหม่ (Username) *</label>
+                <input type="text" id="auth-reg-user" placeholder="เช่น Suwanchai หรือ AlexDev" required autocomplete="off">
+            </div>
+            <div class="form-group-full" style="margin-bottom: 12px;">
+                <label><i class="fa-solid fa-key text-purple-400 mr-1"></i> ตั้งรหัสผ่าน (Password) *</label>
+                <input type="password" id="auth-reg-pass" placeholder="ตั้งรหัสผ่าน 4 ตัวขึ้นไป..." required minlength="4">
+            </div>
+            <div class="form-group-full" style="margin-bottom: 20px;">
+                <label><i class="fa-solid fa-icons text-emerald-400 mr-1"></i> เลือกอวาตาร์ประจำตัว</label>
+                <select id="auth-reg-avatar">
+                    <option value="👨‍💻">👨‍💻 Coder Boy</option>
+                    <option value="👩‍💻">👩‍💻 Coder Girl</option>
+                    <option value="🚀">🚀 Rocket Dev</option>
+                    <option value="⚡">⚡ Lightning Ninja</option>
+                    <option value="🧠">🧠 Mastermind</option>
+                    <option value="🔥">🔥 Hacker Fire</option>
+                    <option value="🎓">🎓 Student Learner</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit" id="btn-reg-submit" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <i class="fa-solid fa-user-check"></i> สมัครสมาชิกและเริ่มใช้งาน
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Main Application Screen (ซ่อนไว้จนกว่าจะล็อกอิน) -->
+<div class="container" id="app-main-container" style="display: none;">
     <div class="card">
         <!-- Top Header Navigation -->
         <div class="header-title">
@@ -1027,12 +1098,212 @@
         firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.database();
-    const notesRef = db.ref('bootcamp_notes');
-
+    const usersRef = db.ref('bootcamp_users');
+    let userNotesRef = null;
+    let currentUser = null;
     let allNotes = [];
     let currentTechFilter = 'ALL';
     let currentStatusFilter = 'ALL';
     let modalCodeText = '';
+
+    function cleanUsername(name) {
+        return (name || '').toLowerCase().replace(/[^a-z0-9_]/g, '');
+    }
+
+    async function hashPassword(pass) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(pass);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function switchAuthTab(mode) {
+        const loginForm = document.getElementById('auth-form-login');
+        const regForm = document.getElementById('auth-form-register');
+        const loginTab = document.getElementById('tab-auth-login');
+        const regTab = document.getElementById('tab-auth-register');
+        const alertBox = document.getElementById('auth-alert-box');
+
+        if (alertBox) alertBox.style.display = 'none';
+
+        if (mode === 'login') {
+            loginForm.style.display = 'block';
+            regForm.style.display = 'none';
+            loginTab.style.background = '#6366f1';
+            loginTab.style.color = '#ffffff';
+            regTab.style.background = 'transparent';
+            regTab.style.color = '#94a3b8';
+        } else {
+            loginForm.style.display = 'none';
+            regForm.style.display = 'block';
+            regTab.style.background = '#10b981';
+            regTab.style.color = '#ffffff';
+            loginTab.style.background = 'transparent';
+            loginTab.style.color = '#94a3b8';
+        }
+    }
+
+    function showAuthAlert(msg, isError = true) {
+        const alertBox = document.getElementById('auth-alert-box');
+        if (!alertBox) return;
+        alertBox.style.display = 'block';
+        alertBox.style.background = isError ? 'rgba(244, 63, 94, 0.15)' : 'rgba(16, 185, 129, 0.15)';
+        alertBox.style.color = isError ? '#fda4af' : '#34d399';
+        alertBox.style.border = isError ? '1px solid rgba(244, 63, 94, 0.3)' : '1px solid rgba(16, 185, 129, 0.3)';
+        alertBox.innerText = msg;
+    }
+
+    async function handleAuthRegisterSubmit(e) {
+        e.preventDefault();
+        const rawUser = document.getElementById('auth-reg-user').value.trim();
+        const rawPass = document.getElementById('auth-reg-pass').value;
+        const avatar = document.getElementById('auth-reg-avatar').value;
+
+        const cleanUser = cleanUsername(rawUser);
+        if (cleanUser.length < 3) {
+            showAuthAlert('ชื่อผู้ใช้งานต้องเป็นภาษาอังกฤษ/ตัวเลข ความยาวอย่างน้อย 3 ตัวอักษร');
+            return;
+        }
+        if (rawPass.length < 4) {
+            showAuthAlert('รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร');
+            return;
+        }
+
+        const snapshot = await usersRef.child(cleanUser).once('value');
+        if (snapshot.exists()) {
+            showAuthAlert('ชื่อผู้ใช้งานนี้ถูกลงทะเบียนแล้ว กรุณาใช้ชื่ออื่นหรือกดเข้าสู่ระบบ');
+            return;
+        }
+
+        const passHash = await hashPassword(rawPass);
+        const userObj = {
+            username: rawUser,
+            cleanUsername: cleanUser,
+            passHash: passHash,
+            avatar: avatar,
+            createdAt: new Date().toISOString()
+        };
+
+        await usersRef.child(cleanUser).set(userObj);
+        showAuthAlert('สมัครสมาชิกสำเร็จ! กำลังเข้าสู่คลังส่วนตัวของคุณ...', false);
+        
+        setTimeout(() => {
+            loginUserSession(userObj);
+        }, 800);
+    }
+
+    async function handleAuthLoginSubmit(e) {
+        e.preventDefault();
+        const rawUser = document.getElementById('auth-login-user').value.trim();
+        const rawPass = document.getElementById('auth-login-pass').value;
+        const cleanUser = cleanUsername(rawUser);
+
+        if (!cleanUser || !rawPass) return;
+
+        const snapshot = await usersRef.child(cleanUser).once('value');
+        if (!snapshot.exists()) {
+            showAuthAlert('ไม่พบชื่อผู้ใช้งานนี้ในระบบ กรุณาตรวจสอบหรือกดสมัครสมาชิกใหม่');
+            return;
+        }
+
+        const userData = snapshot.val();
+        const inputHash = await hashPassword(rawPass);
+
+        if (userData.passHash !== inputHash) {
+            showAuthAlert('รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+            return;
+        }
+
+        loginUserSession(userData);
+    }
+
+    function loginUserSession(userObj) {
+        currentUser = userObj;
+        localStorage.setItem('vault_auth_user', JSON.stringify(currentUser));
+        
+        document.getElementById('auth-screen-container').style.display = 'none';
+        document.getElementById('app-main-container').style.display = 'block';
+
+        updateHeaderUserBadge();
+        attachIsolatedUserNotesListener();
+    }
+
+    function updateHeaderUserBadge() {
+        const profileBadge = document.getElementById('user-profile-badge');
+        const loginBtn = document.getElementById('btn-show-login');
+        if (currentUser) {
+            document.getElementById('user-name').innerText = `${currentUser.username} (คลังส่วนตัว)`;
+            document.getElementById('user-avatar').innerText = currentUser.avatar || '👨‍💻';
+            profileBadge.style.display = 'inline-flex';
+            if (loginBtn) loginBtn.style.display = 'none';
+        }
+    }
+
+    function attachIsolatedUserNotesListener() {
+        if (!currentUser) return;
+        const cleanUser = cleanUsername(currentUser.username);
+        
+        if (userNotesRef) userNotesRef.off();
+        userNotesRef = db.ref('user_notes/' + cleanUser);
+
+        userNotesRef.on('value', (snapshot) => {
+            const val = snapshot.val();
+            allNotes = [];
+            if (val) {
+                Object.keys(val).forEach(key => {
+                    allNotes.push({
+                        id: key,
+                        title: val[key].title || 'ไม่มีหัวข้อ',
+                        desc: val[key].desc || '',
+                        code: val[key].code || '',
+                        tech: val[key].tech || 'General',
+                        status: val[key].status || 'mastered',
+                        day: val[key].day || 'General',
+                        author: currentUser.username,
+                        authorAvatar: currentUser.avatar || '👨‍💻',
+                        timestamp: val[key].timestamp || ''
+                    });
+                });
+            }
+            allNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            updateDashboardStats(allNotes);
+            renderNotesList(allNotes);
+            checkUrlQueryParams();
+        }, (error) => {
+            console.error("Firebase Listener Error:", error);
+        });
+    }
+
+    function handleLogout() {
+        if (!confirm('ยืนยันออกจากระบบสมาชิก?')) return;
+        if (userNotesRef) userNotesRef.off();
+        localStorage.removeItem('vault_auth_user');
+        currentUser = null;
+        allNotes = [];
+
+        document.getElementById('app-main-container').style.display = 'none';
+        document.getElementById('auth-screen-container').style.display = 'flex';
+        document.getElementById('auth-login-user').value = '';
+        document.getElementById('auth-login-pass').value = '';
+        const alertBox = document.getElementById('auth-alert-box');
+        if (alertBox) alertBox.style.display = 'none';
+    }
+
+    function initAuthSession() {
+        const savedUser = localStorage.getItem('vault_auth_user');
+        if (savedUser) {
+            try {
+                const parsed = JSON.parse(savedUser);
+                if (parsed && parsed.username) {
+                    loginUserSession(parsed);
+                    return;
+                }
+            } catch(e) {}
+        }
+        document.getElementById('auth-screen-container').style.display = 'flex';
+        document.getElementById('app-main-container').style.display = 'none';
+    }
 
     function escapeHtml(text) {
         return (text || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
@@ -1122,8 +1393,6 @@
                 `;
             }
 
-            const itemJson = JSON.stringify(item).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-
             const safeAuthor = escapeHtml(item.author || 'Anonymous');
             const safeAvatar = escapeHtml(item.authorAvatar || '👤');
 
@@ -1162,35 +1431,6 @@
         listEl.innerHTML = html;
     }
 
-    // Firebase Listener
-    notesRef.on('value', (snapshot) => {
-        const val = snapshot.val();
-        allNotes = [];
-        if (val) {
-            Object.keys(val).forEach(key => {
-                allNotes.push({
-                    id: key,
-                    title: val[key].title || val[key].text || 'ไม่มีหัวข้อ',
-                    desc: val[key].desc || '',
-                    code: val[key].code || '',
-                    tech: val[key].tech || 'General',
-                    status: val[key].status || 'mastered',
-                    day: val[key].day || 'General',
-                    author: val[key].author || 'Anonymous',
-                    authorAvatar: val[key].authorAvatar || '👤',
-                    timestamp: val[key].timestamp || ''
-                });
-            });
-        }
-        allNotes.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        updateDashboardStats(allNotes);
-        renderNotesList(allNotes);
-        checkUrlQueryParams();
-        initUserSession();
-    }, (error) => {
-        console.error("Firebase Listener Error:", error);
-    });
-
     function checkUrlQueryParams() {
         const urlParams = new URLSearchParams(window.location.search);
         const day = urlParams.get('day');
@@ -1217,67 +1457,10 @@
         }
     }
 
-    let currentUser = null;
-
-    function initUserSession() {
-        const savedUser = localStorage.getItem('vault_user');
-        if (savedUser) {
-            try {
-                currentUser = JSON.parse(savedUser);
-                updateUserUI();
-            } catch(e) { currentUser = null; }
-        }
-    }
-
-    function updateUserUI() {
-        const profileBadge = document.getElementById('user-profile-badge');
-        const loginBtn = document.getElementById('btn-show-login');
-        if (currentUser && currentUser.username) {
-            document.getElementById('user-name').innerText = currentUser.username;
-            document.getElementById('user-avatar').innerText = currentUser.avatar || '👨‍💻';
-            profileBadge.style.display = 'inline-flex';
-            loginBtn.style.display = 'none';
-        } else {
-            profileBadge.style.display = 'none';
-            loginBtn.style.display = 'inline-flex';
-        }
-    }
-
-    function openLoginModal() {
-        document.getElementById('loginModal').classList.add('active');
-        document.getElementById('login-username').focus();
-    }
-    function closeLoginModal() {
-        document.getElementById('loginModal').classList.remove('active');
-    }
-    function closeLoginModalOnOverlay(e) {
-        if (e.target.classList.contains('modal-overlay')) closeLoginModal();
-    }
-
-    function handleLoginSubmit(e) {
-        e.preventDefault();
-        const username = document.getElementById('login-username').value.trim();
-        const avatar = document.getElementById('login-avatar').value;
-        if (!username) return;
-
-        currentUser = { username: username, avatar: avatar };
-        localStorage.setItem('vault_user', JSON.stringify(currentUser));
-        updateUserUI();
-        closeLoginModal();
-    }
-
-    function handleLogout() {
-        if (!confirm('ยืนยันออกจากระบบ?')) return;
-        localStorage.removeItem('vault_user');
-        currentUser = null;
-        updateUserUI();
-    }
-
     function handleSaveNote(e) {
         e.preventDefault();
-        if (!currentUser) {
+        if (!currentUser || !userNotesRef) {
             alert('กรุณาเข้าสู่ระบบก่อนบันทึกโน้ต!');
-            openLoginModal();
             return;
         }
 
@@ -1299,7 +1482,7 @@
             String(now.getMinutes()).padStart(2, '0') + ':' +
             String(now.getSeconds()).padStart(2, '0');
 
-        const newNoteRef = notesRef.push();
+        const newNoteRef = userNotesRef.push();
         newNoteRef.set({
             title: title,
             tech: techSelect.value,
@@ -1320,8 +1503,9 @@
     }
 
     function handleDeleteNote(id) {
-        if (!confirm('ยืนยันการลบรายการโน้ตนี้?')) return;
-        notesRef.child(id).remove().catch(err => {
+        if (!currentUser || !userNotesRef) return;
+        if (!confirm('ยืนยันการลบรายการโน้ตนี้จากคลังส่วนตัว?')) return;
+        userNotesRef.child(id).remove().catch(err => {
             alert('ลบไม่สำเร็จ: ' + err.message);
         });
     }
@@ -1419,13 +1603,15 @@
 
     function handleUpdateNote(e) {
         e.preventDefault();
+        if (!currentUser || !userNotesRef) return;
+
         const id = document.getElementById('edit-note-id').value;
         if (!id) return;
 
         const title = document.getElementById('edit-note-title').value.trim();
         if (!title) return;
 
-        notesRef.child(id).update({
+        userNotesRef.child(id).update({
             title: title,
             tech: document.getElementById('edit-note-tech').value,
             status: document.getElementById('edit-note-status').value,
@@ -1459,6 +1645,11 @@
     function closeQuotaModalOnOverlay(e) {
         if (e.target.classList.contains('modal-overlay')) closeQuotaModal();
     }
+
+    // Initialize session on window load
+    window.addEventListener('DOMContentLoaded', () => {
+        initAuthSession();
+    });
 </script>
 </body>
 </html>
