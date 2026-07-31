@@ -545,6 +545,9 @@
         .btn-view { background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.1); }
         .btn-view:hover { background: rgba(99, 102, 241, 0.3); color: #ffffff; border-color: rgba(99, 102, 241, 0.5); }
 
+        .btn-edit { background: rgba(245, 158, 11, 0.12); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.25); }
+        .btn-edit:hover { background: #f59e0b; color: white; }
+
         .btn-del { background: rgba(244, 63, 94, 0.12); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.25); }
         .btn-del:hover { background: #f43f5e; color: white; }
 
@@ -882,6 +885,77 @@
     </div>
 </div>
 
+<!-- Modal สำหรับแก้ไขข้อมูลโน้ต -->
+<div class="modal-overlay" id="editModal" onclick="closeEditModalOnOverlay(event)">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> แก้ไขข้อมูลโน้ต</h3>
+            <button class="modal-close" onclick="closeEditModal()">&times;</button>
+        </div>
+        <form class="modal-body" id="edit-note-form" onsubmit="handleUpdateNote(event)">
+            <input type="hidden" id="edit-note-id">
+            
+            <div class="form-row">
+                <div>
+                    <label><i class="fa-solid fa-heading text-indigo-400 mr-1"></i> หัวข้อเรื่อง / สรุปความรู้ *</label>
+                    <input type="text" id="edit-note-title" required autocomplete="off">
+                </div>
+                <div>
+                    <label><i class="fa-solid fa-tags text-purple-400 mr-1"></i> หมวดหมู่ภาษา/เทคโนโลยี</label>
+                    <select id="edit-note-tech">
+                        <option value="PHP">PHP</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="Java">Java</option>
+                        <option value="SQL">SQL</option>
+                        <option value="Git">Git</option>
+                        <option value="HTML/CSS">HTML / CSS</option>
+                        <option value="General">ทั่วไป (General)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <label><i class="fa-solid fa-gauge-high text-emerald-400 mr-1"></i> ระดับความเข้าใจ</label>
+                    <select id="edit-note-status">
+                        <option value="mastered">🟢 เข้าใจแล้ว (Mastered)</option>
+                        <option value="review">🟡 ต้องทบทวนเพิ่ม (Review)</option>
+                        <option value="struggling">🔴 ยังติดขัด (Struggling)</option>
+                    </select>
+                </div>
+                <div>
+                    <label><i class="fa-solid fa-calendar-day text-blue-400 mr-1"></i> อ้างอิงบทเรียน Bootcamp</label>
+                    <select id="edit-note-day">
+                        <option value="General">ทั่วไป / นอกเหนือบทเรียน</option>
+                        <script>
+                            for(let i=1; i<=60; i++) {
+                                document.write(`<option value="Day ${String(i).padStart(2, '0')}">Day ${String(i).padStart(2, '0')}</option>`);
+                            }
+                        </script>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group-full">
+                <label><i class="fa-solid fa-align-left text-slate-400 mr-1"></i> คำอธิบายรายละเอียด / สรุปแนวคิด</label>
+                <textarea id="edit-note-desc" rows="3"></textarea>
+            </div>
+
+            <div class="form-group-full">
+                <label><i class="fa-solid fa-code text-cyan-400 mr-1"></i> บล็อกโค้ดตัวอย่าง (Code Snippet)</label>
+                <textarea id="edit-note-code" class="code-area" rows="4"></textarea>
+            </div>
+
+            <div class="modal-footer" style="padding-left:0; padding-right:0; padding-bottom:0; background:transparent; border-top:none;">
+                <button type="button" class="btn-action btn-view" onclick="closeEditModal()">ยกเลิก</button>
+                <button type="submit" class="btn-submit" style="width:auto; padding:10px 24px;">
+                    <i class="fa-solid fa-floppy-disk"></i> บันทึกการแก้ไข
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -1018,6 +1092,9 @@
                         <div class="note-actions">
                             <button type="button" class="btn-action btn-view" onclick='openDetailModal(${itemJson})'>
                                 <i class="fa-regular fa-eye"></i> รายละเอียด
+                            </button>
+                            <button type="button" class="btn-action btn-edit" onclick='openEditModal(${itemJson})'>
+                                <i class="fa-solid fa-pen-to-square"></i> แก้ไข
                             </button>
                             <button type="button" class="btn-action btn-del" onclick="handleDeleteNote('${safeId}')">
                                 <i class="fa-regular fa-trash-can"></i> ลบ
@@ -1191,6 +1268,48 @@
 
     function closeDetailModalOnOverlay(e) {
         if (e.target.classList.contains('modal-overlay')) closeDetailModal();
+    }
+
+    function openEditModal(item) {
+        document.getElementById('edit-note-id').value = item.id;
+        document.getElementById('edit-note-title').value = item.title || '';
+        document.getElementById('edit-note-tech').value = item.tech || 'General';
+        document.getElementById('edit-note-status').value = item.status || 'mastered';
+        document.getElementById('edit-note-day').value = item.day || 'General';
+        document.getElementById('edit-note-desc').value = item.desc || '';
+        document.getElementById('edit-note-code').value = item.code || '';
+
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+    }
+
+    function closeEditModalOnOverlay(e) {
+        if (e.target.classList.contains('modal-overlay')) closeEditModal();
+    }
+
+    function handleUpdateNote(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-note-id').value;
+        if (!id) return;
+
+        const title = document.getElementById('edit-note-title').value.trim();
+        if (!title) return;
+
+        notesRef.child(id).update({
+            title: title,
+            tech: document.getElementById('edit-note-tech').value,
+            status: document.getElementById('edit-note-status').value,
+            day: document.getElementById('edit-note-day').value,
+            desc: document.getElementById('edit-note-desc').value.trim(),
+            code: document.getElementById('edit-note-code').value.trim()
+        }).then(() => {
+            closeEditModal();
+        }).catch(err => {
+            alert('อัปเดตไม่สำเร็จ: ' + err.message);
+        });
     }
 
     function copyModalCode() {
