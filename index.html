@@ -33,7 +33,7 @@
         
         body {
             font-family: 'Prompt', system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 70%);
+            background: #0f172a;
             color: var(--text-main);
             padding: 24px 16px;
             margin: 0;
@@ -41,6 +41,21 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Fixed GPU-accelerated background layer for ultra-smooth 60fps scrolling on mobile */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 70%);
+            z-index: -1;
+            pointer-events: none;
+            transform: translateZ(0);
+            will-change: transform;
         }
 
         ::-webkit-scrollbar {
@@ -689,12 +704,25 @@
             gap: 10px;
         }
 
-        @media (max-width: 640px) {
-            body { padding: 16px 10px; }
-            .card { padding: 20px 16px; border-radius: 20px; }
-            .header-title { flex-direction: column; align-items: flex-start; }
+        @media (max-width: 768px) {
+            body { padding: 12px 8px; }
+            .card { padding: 18px 14px; border-radius: 20px; }
+            .header-title { padding-right: 0 !important; flex-direction: column; align-items: flex-start; gap: 12px; }
+            .user-dropdown-wrapper { position: relative !important; top: 0 !important; right: 0 !important; margin-left: auto; margin-bottom: 4px; }
+            .user-dropdown-menu { right: 0 !important; width: 220px !important; }
             .header-actions { width: 100%; justify-content: space-between; }
+            .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+            .stat-card { padding: 10px 8px; flex-direction: column; text-align: center; gap: 6px; }
+            .stat-card .stat-icon { margin: 0 auto; }
+            .form-row { grid-template-columns: 1fr; gap: 10px; }
+            input, select, textarea, button { font-size: 16px !important; } /* Prevents iOS browser auto-zoom on input focus */
+            .modal-card { width: 95% !important; border-radius: 18px; }
+            .modal-body { padding: 16px !important; max-height: 75vh; }
+        }
+
+        @media (max-width: 480px) {
             .stats-grid { grid-template-columns: 1fr; }
+            .stat-card { flex-direction: row; text-align: left; }
         }
     </style>
     <script>
