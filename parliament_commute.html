@@ -1967,7 +1967,7 @@
     }
 
     // ==========================================
-    // EXPORT TO PDF (ใช้ html2pdf.js สร้าง PDF โดยตรง — รองรับมือถือทุกรุ่น)
+    // EXPORT TO PDF (ใช้ html2pdf.js สร้าง PDF โดยตรง — รองรับมือถือทุกรุ่น รวม LINE Browser)
     // ==========================================
     function exportToPDF() {
         if (!allRecords.length) {
@@ -1982,9 +1982,21 @@
             return;
         }
 
-        // Build temporary off-screen A4 container for html2pdf rendering
+        // Show loading overlay while generating PDF
+        const overlay = document.createElement('div');
+        overlay.id = 'pdf-loading-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.92);z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#fff;font-family:sans-serif;';
+        overlay.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:2.5rem;color:#818cf8;"></i>
+            <div style="font-size:1.1rem;font-weight:600;">กำลังสร้างรายงาน PDF...</div>
+            <div style="font-size:0.8rem;color:#94a3b8;">กรุณารอสักครู่ ระบบกำลังประมวลผลรูปภาพ</div>
+        `;
+        document.body.appendChild(overlay);
+
+        // Build on-screen A4 container (visible but behind overlay so html2canvas can capture)
         const wrapper = document.createElement('div');
-        wrapper.style.cssText = 'position:absolute;left:-9999px;top:0;width:210mm;background:#fff;color:#0f172a;font-family:sans-serif;padding:12mm 10mm;';
+        wrapper.id = 'pdf-render-wrapper';
+        wrapper.style.cssText = 'position:fixed;top:0;left:0;width:210mm;background:#fff;color:#0f172a;font-family:sans-serif;padding:12mm 10mm;z-index:999998;overflow:auto;box-sizing:border-box;';
 
         // Date range for subtitle
         let minDate = '', maxDate = '';
@@ -2022,24 +2034,66 @@
 
         document.body.appendChild(wrapper);
 
-        // Use html2pdf.js to generate PDF
-        const opt = {
-            margin: 0,
-            filename: `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.pdf`,
-            image: { type: 'jpeg', quality: 0.92 },
-            html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
+        // Wait for ALL images inside wrapper to finish loading before rendering PDF
+        const allImgs = wrapper.querySelectorAll('img');
+        const imgPromises = Array.from(allImgs).map(img => {
+            if (img.complete && img.naturalHeight > 0) return Promise.resolve();
+            return new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve; // continue even if image fails
+            });
+        });
 
-        html2pdf().set(opt).from(wrapper).save().then(() => {
-            document.body.removeChild(wrapper);
-        }).catch(err => {
-            console.error('html2pdf error:', err);
-            document.body.removeChild(wrapper);
-            // Fallback to window.print() if html2pdf fails
-            alert('กำลังเปิดหน้าต่างพิมพ์ PDF สำรอง...');
-            window.print();
+        Promise.all(imgPromises).then(() => {
+            // Small delay to let browser paint
+            setTimeout(() => {
+                const opt = {
+                    margin: 0,
+                    filename: `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.pdf`,
+                    image: { type: 'jpeg', quality: 0.88 },
+                    html2canvas: { scale: 1.5, useCORS: true, allowTaint: true, logging: false, scrollX: 0, scrollY: 0, windowWidth: wrapper.scrollWidth },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                };
+
+                // Detect LINE / in-app browser
+                const isLineOrInApp = /Line\//i.test(navigator.userAgent) || /FBAN|FBAV|Instagram|Twitter/i.test(navigator.userAgent);
+
+                if (isLineOrInApp) {
+                    // For LINE browser: generate as blob -> open as data URL in new window
+                    html2pdf().set(opt).from(wrapper).outputPdf('datauristring').then(dataUri => {
+                        cleanup();
+                        // Open PDF in new tab as data URI
+                        const newWin = window.open();
+                        if (newWin) {
+                            newWin.document.write(`<html><head><title>รายงาน PDF</title></head><body style="margin:0;padding:0;"><iframe src="${dataUri}" style="width:100%;height:100vh;border:none;"></iframe></body></html>`);
+                            newWin.document.close();
+                        } else {
+                            // If popup blocked, offer direct link
+                            const a = document.createElement('a');
+                            a.href = dataUri;
+                            a.download = opt.filename;
+                            a.click();
+                        }
+                    }).catch(handleError);
+                } else {
+                    // Standard browser: save as file download
+                    html2pdf().set(opt).from(wrapper).save().then(() => {
+                        cleanup();
+                    }).catch(handleError);
+                }
+
+                function cleanup() {
+                    if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
+                    if (document.body.contains(overlay)) document.body.removeChild(overlay);
+                }
+
+                function handleError(err) {
+                    console.error('html2pdf error:', err);
+                    cleanup();
+                    alert('ไม่สามารถสร้าง PDF ได้ กรุณาลองเปิดในเบราว์เซอร์ Chrome หรือ Safari แล้วลองใหม่อีกครั้ง');
+                }
+            }, 500);
         });
     }
 </script>
