@@ -1967,7 +1967,7 @@
     }
 
     // ==========================================
-    // EXPORT TO PDF (เปิดหน้าต่างบันทึกเป็น PDF คมชัด อัตราส่วนตรงเป๊ะ)
+    // EXPORT TO PDF (ใช้ html2pdf.js สร้าง PDF โดยตรง — รองรับมือถือทุกรุ่น)
     // ==========================================
     function exportToPDF() {
         if (!allRecords.length) {
@@ -1975,13 +1975,72 @@
             return;
         }
 
-        if (currentFilteredSections && currentFilteredSections.length === 0) {
+        const sections = (currentFilteredSections && currentFilteredSections.length > 0) ? currentFilteredSections : groupImagesByRealDate(allRecords);
+
+        if (!sections || sections.length === 0) {
             alert('ไม่พบรายการภาพแผนที่ตามช่วงวันที่ที่เลือก กรุณาปรับเปลี่ยนตัวกรองวันที่ก่อนออกรายงาน');
             return;
         }
 
-        // เปิดหน้าต่างพิมพ์/บันทึก PDF ของเบราว์เซอร์ (สวยงาม คมชัด ไม่ยืดไม่เบี้ยว)
-        window.print();
+        // Build temporary off-screen A4 container for html2pdf rendering
+        const wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:absolute;left:-9999px;top:0;width:210mm;background:#fff;color:#0f172a;font-family:sans-serif;padding:12mm 10mm;';
+
+        // Date range for subtitle
+        let minDate = '', maxDate = '';
+        sections.forEach(s => {
+            if (!minDate || s.dateDisplay < minDate) minDate = s.dateDisplay;
+            if (!maxDate || s.dateDisplay > maxDate) maxDate = s.dateDisplay;
+        });
+
+        // Header
+        wrapper.innerHTML = `
+            <div style="text-align:center;border-bottom:2px solid #0f172a;padding-bottom:12px;margin-bottom:18px;">
+                <h1 style="margin:0 0 6px;font-size:1.65rem;font-weight:700;color:#0f172a;">รายงานภาพแผนที่การเดินทาง ไป-กลับ สภา</h1>
+                <p style="margin:4px 0 0;font-size:1.05rem;font-weight:600;color:#1e293b;">(ช่วงวันที่ ${minDate} ถึง ${maxDate})</p>
+            </div>
+        `;
+
+        // For each date section
+        sections.forEach(sec => {
+            const sectionEl = document.createElement('div');
+            sectionEl.style.cssText = 'border:1.5px solid #cbd5e1;border-radius:12px;padding:16px;margin-bottom:24px;page-break-inside:avoid;';
+
+            let imgsHtml = '';
+            sec.images.forEach(img => {
+                imgsHtml += `<div style="border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;background:#fff;">
+                    <img src="${img.url}" style="width:100%;height:350px;object-fit:contain;display:block;" crossorigin="anonymous">
+                </div>`;
+            });
+
+            sectionEl.innerHTML = `
+                <div style="font-size:1.1rem;font-weight:700;color:#1e40af;margin-bottom:10px;">📅 ${sec.dateDisplay}</div>
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">${imgsHtml}</div>
+            `;
+            wrapper.appendChild(sectionEl);
+        });
+
+        document.body.appendChild(wrapper);
+
+        // Use html2pdf.js to generate PDF
+        const opt = {
+            margin: 0,
+            filename: `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.pdf`,
+            image: { type: 'jpeg', quality: 0.92 },
+            html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        html2pdf().set(opt).from(wrapper).save().then(() => {
+            document.body.removeChild(wrapper);
+        }).catch(err => {
+            console.error('html2pdf error:', err);
+            document.body.removeChild(wrapper);
+            // Fallback to window.print() if html2pdf fails
+            alert('กำลังเปิดหน้าต่างพิมพ์ PDF สำรอง...');
+            window.print();
+        });
     }
 </script>
 
