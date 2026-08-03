@@ -1967,9 +1967,9 @@
     }
 
     // ==========================================
-    // EXPORT TO PDF (ใช้ html2pdf.js สร้าง PDF โดยตรง — รองรับมือถือทุกรุ่น รวม LINE Browser)
+    // EXPORT TO PDF (ใช้ jsPDF โดยตรง — ไม่พึ่ง html2canvas — รองรับมือถือทุกรุ่น)
     // ==========================================
-    function exportToPDF() {
+    async function exportToPDF() {
         if (!allRecords.length) {
             alert('ยังไม่มีข้อมูลสำหรับออกรายงาน กรุณาเพิ่มข้อมูลบันทึกก่อนออกรายงาน');
             return;
@@ -1982,9 +1982,8 @@
             return;
         }
 
-        // Show loading overlay while generating PDF
+        // Show loading overlay
         const overlay = document.createElement('div');
-        overlay.id = 'pdf-loading-overlay';
         overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.92);z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#fff;font-family:sans-serif;';
         overlay.innerHTML = `
             <i class="fa-solid fa-spinner fa-spin" style="font-size:2.5rem;color:#818cf8;"></i>
@@ -1993,108 +1992,170 @@
         `;
         document.body.appendChild(overlay);
 
-        // Build on-screen A4 container (visible but behind overlay so html2canvas can capture)
-        const wrapper = document.createElement('div');
-        wrapper.id = 'pdf-render-wrapper';
-        wrapper.style.cssText = 'position:fixed;top:0;left:0;width:210mm;background:#fff;color:#0f172a;font-family:sans-serif;padding:12mm 10mm;z-index:999998;overflow:auto;box-sizing:border-box;';
+        try {
+            // Get jsPDF from the html2pdf bundle
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
 
-        // Date range for subtitle
-        let minDate = '', maxDate = '';
-        sections.forEach(s => {
-            if (!minDate || s.dateDisplay < minDate) minDate = s.dateDisplay;
-            if (!maxDate || s.dateDisplay > maxDate) maxDate = s.dateDisplay;
-        });
+            // A4 dimensions: 210 x 297 mm
+            const pageW = 210, pageH = 297;
+            const marginX = 12, marginTop = 12;
+            const contentW = pageW - 2 * marginX; // 186mm
+            const colGap = 5;
+            const colW = (contentW - colGap) / 2; // ~90.5mm each column
+            const imgH = 125; // image height in mm
 
-        // Header
-        wrapper.innerHTML = `
-            <div style="text-align:center;border-bottom:2px solid #0f172a;padding-bottom:12px;margin-bottom:18px;">
-                <h1 style="margin:0 0 6px;font-size:1.65rem;font-weight:700;color:#0f172a;">รายงานภาพแผนที่การเดินทาง ไป-กลับ สภา</h1>
-                <p style="margin:4px 0 0;font-size:1.05rem;font-weight:600;color:#1e293b;">(ช่วงวันที่ ${minDate} ถึง ${maxDate})</p>
-            </div>
-        `;
+            // --- Helper: Render Thai text to canvas -> PNG data URL ---
+            function renderText(text, fontSize, fontWeight, color, canvasW) {
+                const canvas = document.createElement('canvas');
+                const scale = 4;
+                canvas.width = canvasW * scale;
+                canvas.height = (fontSize + 12) * scale;
+                const ctx = canvas.getContext('2d');
+                ctx.scale(scale, scale);
+                ctx.font = `${fontWeight} ${fontSize}px "Segoe UI", "Noto Sans Thai", sans-serif`;
+                ctx.fillStyle = color;
+                ctx.textBaseline = 'top';
+                ctx.fillText(text, 0, 4);
+                return canvas.toDataURL('image/png');
+            }
 
-        // For each date section
-        sections.forEach(sec => {
-            const sectionEl = document.createElement('div');
-            sectionEl.style.cssText = 'border:1.5px solid #cbd5e1;border-radius:12px;padding:16px;margin-bottom:24px;page-break-inside:avoid;';
-
-            let imgsHtml = '';
-            sec.images.forEach(img => {
-                imgsHtml += `<div style="border:1px solid #cbd5e1;border-radius:8px;overflow:hidden;background:#fff;">
-                    <img src="${img.url}" style="width:100%;height:350px;object-fit:contain;display:block;" crossorigin="anonymous">
-                </div>`;
-            });
-
-            sectionEl.innerHTML = `
-                <div style="font-size:1.1rem;font-weight:700;color:#1e40af;margin-bottom:10px;">📅 ${sec.dateDisplay}</div>
-                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">${imgsHtml}</div>
-            `;
-            wrapper.appendChild(sectionEl);
-        });
-
-        document.body.appendChild(wrapper);
-
-        // Wait for ALL images inside wrapper to finish loading before rendering PDF
-        const allImgs = wrapper.querySelectorAll('img');
-        const imgPromises = Array.from(allImgs).map(img => {
-            if (img.complete && img.naturalHeight > 0) return Promise.resolve();
-            return new Promise((resolve) => {
-                img.onload = resolve;
-                img.onerror = resolve; // continue even if image fails
-            });
-        });
-
-        Promise.all(imgPromises).then(() => {
-            // Small delay to let browser paint
-            setTimeout(() => {
-                const opt = {
-                    margin: 0,
-                    filename: `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.pdf`,
-                    image: { type: 'jpeg', quality: 0.88 },
-                    html2canvas: { scale: 1.5, useCORS: true, allowTaint: true, logging: false, scrollX: 0, scrollY: 0, windowWidth: wrapper.scrollWidth },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-                };
-
-                // Detect LINE / in-app browser
-                const isLineOrInApp = /Line\//i.test(navigator.userAgent) || /FBAN|FBAV|Instagram|Twitter/i.test(navigator.userAgent);
-
-                if (isLineOrInApp) {
-                    // For LINE browser: generate as blob -> open as data URL in new window
-                    html2pdf().set(opt).from(wrapper).outputPdf('datauristring').then(dataUri => {
-                        cleanup();
-                        // Open PDF in new tab as data URI
-                        const newWin = window.open();
-                        if (newWin) {
-                            newWin.document.write(`<html><head><title>รายงาน PDF</title></head><body style="margin:0;padding:0;"><iframe src="${dataUri}" style="width:100%;height:100vh;border:none;"></iframe></body></html>`);
-                            newWin.document.close();
-                        } else {
-                            // If popup blocked, offer direct link
-                            const a = document.createElement('a');
-                            a.href = dataUri;
-                            a.download = opt.filename;
-                            a.click();
+            // --- Helper: Convert image URL (base64 data URL) to JPEG for jsPDF ---
+            function imgToJpeg(dataUrl) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const maxDim = 700;
+                        let w = img.naturalWidth || img.width;
+                        let h = img.naturalHeight || img.height;
+                        if (w > maxDim || h > maxDim) {
+                            const r = Math.min(maxDim / w, maxDim / h);
+                            w = Math.round(w * r);
+                            h = Math.round(h * r);
                         }
-                    }).catch(handleError);
-                } else {
-                    // Standard browser: save as file download
-                    html2pdf().set(opt).from(wrapper).save().then(() => {
-                        cleanup();
-                    }).catch(handleError);
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, w, h);
+                        ctx.drawImage(img, 0, 0, w, h);
+                        try {
+                            resolve({ data: canvas.toDataURL('image/jpeg', 0.82), w, h });
+                        } catch(e) {
+                            resolve(null);
+                        }
+                    };
+                    img.onerror = () => resolve(null);
+                    img.src = dataUrl;
+                });
+            }
+
+            // Date range
+            let minDate = '', maxDate = '';
+            sections.forEach(s => {
+                if (!minDate || s.dateDisplay < minDate) minDate = s.dateDisplay;
+                if (!maxDate || s.dateDisplay > maxDate) maxDate = s.dateDisplay;
+            });
+
+            // === PAGE 1: HEADER ===
+            const titleImg = renderText('รายงานภาพแผนที่การเดินทาง ไป-กลับ สภา', 20, 'bold', '#0f172a', 600);
+            const titleW = contentW * 0.92;
+            const titleH = 9;
+            doc.addImage(titleImg, 'PNG', marginX + (contentW - titleW) / 2, marginTop, titleW, titleH);
+
+            const subtitleImg = renderText(`(ช่วงวันที่ ${minDate} ถึง ${maxDate})`, 13, '600', '#1e293b', 400);
+            doc.addImage(subtitleImg, 'PNG', marginX + contentW * 0.18, marginTop + titleH + 2, contentW * 0.64, 6);
+
+            // Horizontal line
+            doc.setDrawColor(15, 23, 42);
+            doc.setLineWidth(0.6);
+            const lineY = marginTop + titleH + 11;
+            doc.line(marginX, lineY, pageW - marginX, lineY);
+
+            let y = lineY + 6;
+
+            // === EACH DATE SECTION ===
+            for (const sec of sections) {
+                // Check space for date header + at least 1 row of images
+                if (y + imgH + 18 > pageH - 10) {
+                    doc.addPage();
+                    y = marginTop;
                 }
 
-                function cleanup() {
-                    if (document.body.contains(wrapper)) document.body.removeChild(wrapper);
-                    if (document.body.contains(overlay)) document.body.removeChild(overlay);
+                // Date card border box start
+                const cardStartY = y;
+
+                // Date header text
+                const dateImg = renderText('📅 ' + sec.dateDisplay, 13, 'bold', '#1e40af', 400);
+                doc.addImage(dateImg, 'PNG', marginX + 6, y + 4, 75, 6);
+                y += 16;
+
+                // Images: 2-column grid
+                for (let i = 0; i < sec.images.length; i += 2) {
+                    if (y + imgH + 5 > pageH - 10) {
+                        // Draw border box for current card portion
+                        doc.setDrawColor(203, 213, 225);
+                        doc.setLineWidth(0.4);
+                        doc.roundedRect(marginX, cardStartY, contentW, y - cardStartY + 2, 3, 3, 'S');
+                        doc.addPage();
+                        y = marginTop;
+                    }
+
+                    // Image 1
+                    const img1 = await imgToJpeg(sec.images[i].url);
+                    if (img1) {
+                        doc.addImage(img1.data, 'JPEG', marginX + 2, y, colW, imgH);
+                    } else {
+                        doc.setDrawColor(203, 213, 225);
+                        doc.rect(marginX + 2, y, colW, imgH, 'S');
+                    }
+
+                    // Image 2
+                    if (i + 1 < sec.images.length) {
+                        const img2 = await imgToJpeg(sec.images[i + 1].url);
+                        if (img2) {
+                            doc.addImage(img2.data, 'JPEG', marginX + colW + colGap + 2, y, colW, imgH);
+                        } else {
+                            doc.setDrawColor(203, 213, 225);
+                            doc.rect(marginX + colW + colGap + 2, y, colW, imgH, 'S');
+                        }
+                    }
+
+                    y += imgH + 5;
                 }
 
-                function handleError(err) {
-                    console.error('html2pdf error:', err);
-                    cleanup();
-                    alert('ไม่สามารถสร้าง PDF ได้ กรุณาลองเปิดในเบราว์เซอร์ Chrome หรือ Safari แล้วลองใหม่อีกครั้ง');
-                }
-            }, 500);
-        });
+                // Draw date card border
+                doc.setDrawColor(203, 213, 225);
+                doc.setLineWidth(0.4);
+                doc.roundedRect(marginX, cardStartY, contentW, y - cardStartY + 2, 3, 3, 'S');
+
+                y += 10;
+            }
+
+            // === SAVE PDF ===
+            const fileName = `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.pdf`;
+
+            // Try standard download first
+            try {
+                doc.save(fileName);
+            } catch(e) {
+                // Fallback: open as data URI
+                const dataUri = doc.output('datauristring');
+                const a = document.createElement('a');
+                a.href = dataUri;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
+            }
+
+        } catch(err) {
+            console.error('PDF generation error:', err);
+            alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + err.message + '\n\nกรุณาลองเปิดในเบราว์เซอร์ Chrome หรือ Safari');
+        } finally {
+            if (document.body.contains(overlay)) document.body.removeChild(overlay);
+        }
     }
 </script>
 
