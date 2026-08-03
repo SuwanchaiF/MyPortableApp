@@ -13,6 +13,8 @@
     
     <!-- EXIF Metadata Parser (ดึงวันเวลาที่ถ่ายภาพจริงจากไฟล์รูป) -->
     <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.min.js"></script>
+    <!-- Tesseract.js OCR Engine (อ่านตัวเลขกิโลเมตรจากรูปภาพแผนที่อัตโนมัติ) -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
     <!-- DOCX Export Libraries -->
     <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
@@ -750,7 +752,74 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Action Toolbar: AI OCR Scan & Fast Table Grid -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
+                    <button type="button" onclick="scanAllImageDistancesWithOCR()" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                        <i class="fa-solid fa-robot text-purple-400"></i> <span id="ocr-btn-text">🤖 สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)</span>
+                    </button>
+                    <button type="button" onclick="openDistanceTableModal()" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                        <i class="fa-solid fa-table-list text-emerald-400"></i> 📋 ตารางระบุระยะทางแบบรวม (Fast Table)
+                    </button>
+                </div>
             </div>
+
+            <!-- Export Buttons Container (ตำแหน่งใหม่: อยู่ล่างสุดของตัวกรอง) -->
+            <div style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
+                <button type="button" class="btn-export-docx" onclick="exportToWordDocx()">
+                    <i class="fa-solid fa-file-word"></i> ออกรายงาน Word (.docx)
+                </button>
+                <button type="button" class="btn-export-pdf" onclick="exportToPDF()">
+                    <i class="fa-solid fa-file-pdf"></i> ออกรายงาน PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Commute Records List -->
+        <div id="commute-records-list" class="records-grid">
+            <div style="text-align: center; padding: 40px; color: #94a3b8;">กำลังโหลดข้อมูลจาก Firebase Cloud...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Fast Distance Table Modal -->
+<div id="distance-table-modal" class="modal-overlay" onclick="closeDistanceTableModal()">
+    <div style="position: relative; width: 92vw; max-width: 600px; max-height: 85vh; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 20px; padding: 20px; color: #f8fafc; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.8);" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1.05rem; color: #6ee7b7; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-table-list text-emerald-400"></i> ตารางระบุระยะทางแบบรวม (พิมพ์กรอกรวดเร็ว)
+            </h3>
+            <button type="button" onclick="closeDistanceTableModal()" style="background: rgba(244,63,94,0.2); color: #fda4af; border: 1px solid rgba(244,63,94,0.4); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <div style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 10px;">
+            💡 กดปุ่ม <kbd style="background: #334155; padding: 1px 5px; border-radius: 4px; color: #ffffff;">Tab</kbd> เพื่อพิมพ์กรอกระยะทางถัดไปได้อย่างรวดเร็วในหน้าเดียว
+        </div>
+
+        <div style="overflow-y: auto; flex: 1; margin-bottom: 14px; padding-right: 4px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.15); text-align: left; color: #a5b4fc;">
+                        <th style="padding: 8px;">📅 วันที่ / เที่ยวเดินทาง</th>
+                        <th style="padding: 8px;">⏱️ เวลา</th>
+                        <th style="padding: 8px; text-align: center;">🛣️ ระยะทาง (กม.)</th>
+                    </tr>
+                </thead>
+                <tbody id="distance-table-body">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+            <button type="button" onclick="closeDistanceTableModal()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: #ffffff; padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+                <i class="fa-solid fa-check mr-1"></i> เสร็จสิ้น
+            </button>
+        </div>
+    </div>
+</div>
 
             <!-- Export Buttons Container (ตำแหน่งใหม่: อยู่ล่างสุดของตัวกรอง) -->
             <div style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
@@ -1499,6 +1568,77 @@
 
     function closeImageModal() {
         document.getElementById('image-modal').classList.remove('active');
+    }
+
+    function openDistanceTableModal() {
+        const tbody = document.getElementById('distance-table-body');
+        if (!tbody) return;
+
+        let rowsHtml = '';
+        currentFilteredSections.forEach(sec => {
+            sec.images.forEach(img => {
+                const imgKm = parseDistanceKm(img);
+                const valDisplay = imgKm > 0 ? imgKm : '';
+                rowsHtml += `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <td style="padding: 8px; color: #cbd5e1;">
+                            <strong style="color: #ffffff;">📅 ${sec.dateDisplay}</strong>
+                            <div style="font-size: 0.74rem; color: #94a3b8;"><i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ${img.label}</div>
+                        </td>
+                        <td style="padding: 8px; color: #fbbf24; font-size: 0.78rem;">⏱️ ${img.time}</td>
+                        <td style="padding: 8px; text-align: center;">
+                            <input type="number" value="${valDisplay}" placeholder="0" step="0.5" min="0" onchange="updatePhotoDistance('${img.recordId}', ${img.origIdx}, this.value)" style="width: 65px; padding: 4px 6px; font-size: 0.85rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(74,222,128,0.5); border-radius: 6px; color: #4ade80; font-weight: bold; text-align: center;">
+                        </td>
+                    </tr>
+                `;
+            });
+        });
+
+        tbody.innerHTML = rowsHtml || '<tr><td colspan="3" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่พบรายการที่กรอง</td></tr>';
+        document.getElementById('distance-table-modal').classList.add('active');
+    }
+
+    function closeDistanceTableModal() {
+        document.getElementById('distance-table-modal').classList.remove('active');
+    }
+
+    async function scanAllImageDistancesWithOCR() {
+        if (typeof Tesseract === 'undefined') {
+            alert("กำลังโหลดระบบอ่านภาพด้วย AI (OCR) โปรดลองอีกครั้งใน 3 วินาที");
+            return;
+        }
+
+        const btnText = document.getElementById('ocr-btn-text');
+        if (btnText) btnText.innerText = "กำลังสแกนอ่านระยะทางด้วย AI...";
+
+        let countSuccess = 0;
+        let totalScanned = 0;
+
+        for (const sec of currentFilteredSections) {
+            for (const img of sec.images) {
+                totalScanned++;
+                if (!img.url) continue;
+
+                try {
+                    const res = await Tesseract.recognize(img.url, 'tha+eng');
+                    const text = res.data.text || '';
+                    const match = text.match(/(\d+(?:\.\d+)?)\s*(?:กม|km|กม\.|km\.)/i);
+                    if (match) {
+                        const parsedKm = parseFloat(match[1]);
+                        if (parsedKm > 0 && parsedKm < 500) {
+                            updatePhotoDistance(img.recordId, img.origIdx, parsedKm);
+                            countSuccess++;
+                        }
+                    }
+                } catch(err) {
+                    console.warn("OCR scan notice:", err);
+                }
+            }
+        }
+
+        if (btnText) btnText.innerText = "🤖 สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)";
+        alert(`สแกนอ่านระยะทางเสร็จสิ้น! ดึงตัวเลขกิโลเมตรสำเร็จ ${countSuccess} / ${totalScanned} ภาพ`);
+        renderCommuteRecords();
     }
 
     function getDocxImageRun(imgUrl, width, height) {
