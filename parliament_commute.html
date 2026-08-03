@@ -437,18 +437,27 @@
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 8mm 8mm 8mm 8mm;
+                margin: 0; /* Setting @page margin to 0 removes browser headers/footers (date, title, URL, page numbers) completely */
             }
             body {
                 background: #ffffff !important;
                 color: #0f172a !important;
-                padding: 0 !important;
+                padding: 12mm 10mm 12mm 10mm !important;
                 margin: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-            body::before { display: none !important; }
+            body::before,
+            .card::before { 
+                display: none !important; 
+                content: none !important;
+                height: 0 !important;
+                background: none !important;
+            }
             
             /* Hide ALL Web UI controls, top header logo, title, search bar, inputs, and buttons */
             .header-title, 
+            .header-title *,
             .header-left,
             .header-logo,
             .form-box, 
@@ -458,17 +467,39 @@
             button, 
             .modal-overlay,
             .live-status,
-            .btn-remove-img { 
+            .btn-remove-img,
+            [style*="background: rgba(15, 23, 42, 0.6);"],
+            [style*="border-radius: 16px; padding: 16px 18px;"] { 
                 display: none !important; 
+                visibility: hidden !important;
                 margin: 0 !important;
+                padding: 0 !important;
                 height: 0 !important;
+                border: none !important;
             }
 
             /* Show Official Printable Document Header */
             .print-only-header {
                 display: block !important;
+                text-align: center !important;
                 margin-top: 4px !important;
-                margin-bottom: 16px !important;
+                margin-bottom: 18px !important;
+                border-bottom: 2px solid #0f172a !important;
+                padding-bottom: 12px !important;
+            }
+
+            .print-only-header h1 {
+                font-size: 1.65rem !important;
+                font-weight: 700 !important;
+                color: #0f172a !important;
+                margin: 0 0 6px 0 !important;
+            }
+
+            .print-only-header p {
+                font-size: 1.05rem !important;
+                font-weight: 600 !important;
+                color: #1e293b !important;
+                margin: 4px 0 0 0 !important;
             }
 
             .container {
@@ -489,39 +520,49 @@
                 border: 1.5px solid #cbd5e1 !important;
                 border-radius: 12px !important;
                 color: #0f172a !important;
-                padding: 12px !important;
+                padding: 16px !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
-                margin-bottom: 16px !important;
+                margin-bottom: 24px !important;
                 box-shadow: none !important;
             }
 
+            /* Strictly force a page break after every 2nd date card (2 days / 4 photos per page) */
+            .date-card:nth-child(2n) {
+                page-break-after: always !important;
+                break-after: page !important;
+                margin-bottom: 0 !important;
+            }
+
             .date-header {
-                border-bottom: 2px solid #1e293b !important;
-                padding-bottom: 6px !important;
+                border-bottom: none !important;
+                padding-bottom: 0 !important;
                 margin-bottom: 10px !important;
             }
 
             .date-badge {
-                background: #1e293b !important;
-                color: #ffffff !important;
+                background: transparent !important;
+                color: #0f172a !important;
                 box-shadow: none !important;
-                font-size: 0.95rem !important;
-                padding: 3px 12px !important;
+                font-size: 1.1rem !important;
+                font-weight: 700 !important;
+                padding: 0 !important;
             }
 
             .map-images-grid {
                 display: grid !important;
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 12px !important;
+                gap: 16px !important;
             }
 
             .map-image-wrapper {
-                height: 275px !important; /* Enlarged map preview (4 images / 2 days per A4 page) */
+                height: 350px !important; /* Enlarged photo preview for maximum visibility (4 photos / 2 days per A4 page) */
+                max-height: 360px !important;
                 border: 1px solid #cbd5e1 !important;
                 border-radius: 8px !important;
                 background: #ffffff !important;
-                page-break-inside: avoid;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
                 overflow: hidden !important;
             }
 
@@ -533,7 +574,7 @@
             }
 
             .image-caption {
-                display: none !important; /* Hide captions/timestamps on PDF printed report */
+                display: none !important;
             }
         }
 
@@ -553,9 +594,9 @@
 <div class="container">
     <div class="card" id="printable-report-area">
         <!-- Printable Official Document Header (แสดงเฉพาะตอนพิมพ์/ออก PDF) -->
-        <div class="print-only-header" style="display: none; text-align: center; margin-bottom: 24px; border-bottom: 2px solid #0f172a; padding-bottom: 12px;">
-            <h1 style="margin: 0 0 6px 0; font-size: 1.6rem; font-weight: 700; color: #0f172a;">รายงานภาพแผนที่การเดินทาง ไป-กลับ สภา</h1>
-            <p style="margin: 0; font-size: 0.9rem; color: #475569;" id="print-date-range">เอกสารสรุปบันทึกภาพเส้นทางแผนที่การเดินทางฉบับทางการ</p>
+        <div class="print-only-header" style="display: none; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #0f172a; padding-bottom: 12px;">
+            <h1 style="margin: 0 0 6px 0; font-size: 1.65rem; font-weight: 700; color: #0f172a;">รายงานภาพแผนที่การเดินทาง ไป-กลับ สภา</h1>
+            <p style="margin: 4px 0 0 0; font-size: 1.05rem; font-weight: 600; color: #1e293b;" id="print-date-range">(ช่วงวันที่ - ถึง -)</p>
         </div>
 
         <!-- Top Header Navigation -->
@@ -573,19 +614,32 @@
                 </div>
             </div>
             
-            <div class="header-actions" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <a href="index.html" class="btn-nav">
-                    <i class="fa-solid fa-code text-indigo-400"></i> คลังโน้ต
-                </a>
-                <a href="bootcamp_master_learning_hub.html" class="btn-nav">
-                    <i class="fa-solid fa-rocket text-purple-400"></i> Roadmap 60 วัน
-                </a>
-                <button type="button" class="btn-export-docx" onclick="exportToWordDocx()">
-                    <i class="fa-solid fa-file-word"></i> ออกรายงาน Word (.docx)
-                </button>
-                <button type="button" class="btn-export-pdf" onclick="exportToPDF()">
-                    <i class="fa-solid fa-file-pdf"></i> ออกรายงาน PDF
-                </button>
+            <div class="header-actions" style="display: flex; align-items: center; gap: 8px;">
+                <!-- Top Right Profile Avatar Dropdown Icon -->
+                <div class="user-dropdown-wrapper" style="position: relative;">
+                    <button type="button" id="user-profile-badge" onclick="toggleUserDropdown(event)" class="btn-profile-badge" style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: 2px solid rgba(255, 255, 255, 0.25); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); padding: 0; transition: all 0.2s;" title="โปรไฟล์ผู้ใช้ / เมนูหลัก">
+                        <span id="user-avatar">👤</span>
+                    </button>
+
+                    <!-- User Profile Dropdown Menu -->
+                    <div id="userDropdownMenu" style="display: none; position: absolute; right: 0; top: calc(100% + 8px); width: 220px; background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); z-index: 1000; overflow: hidden;">
+                        <div style="padding: 12px 14px; background: rgba(30, 41, 59, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">👨‍💻</div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: #ffffff;">เมนูทางลัด</h4>
+                                <span style="font-size: 0.7rem; color: #a5b4fc;">ระบบบันทึกการเดินทาง</span>
+                            </div>
+                        </div>
+                        <div style="padding: 6px;">
+                            <a href="index.html" class="dropdown-item" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; color: #cbd5e1; font-size: 0.82rem; font-weight: 500; border-radius: 8px; text-decoration: none; transition: all 0.15s ease;">
+                                <i class="fa-solid fa-code text-indigo-400"></i> คลังโน้ต
+                            </a>
+                            <a href="bootcamp_master_learning_hub.html" class="dropdown-item" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; color: #cbd5e1; font-size: 0.82rem; font-weight: 500; border-radius: 8px; text-decoration: none; transition: all 0.15s ease;">
+                                <i class="fa-solid fa-rocket text-purple-400"></i> Roadmap 60 วัน
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -629,15 +683,99 @@
             </form>
         </div>
 
-        <!-- Records Header & Filter Bar -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="margin: 0; font-size: 1.05rem; color: #ffffff; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-list-check text-indigo-400"></i> รายการภาพแผนที่การเดินทาง
-                <span id="records-count-badge" style="font-size: 0.75rem; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); padding: 2px 10px; border-radius: 9999px;">0 รายการ</span>
-            </h3>
-            
-            <div style="display: flex; gap: 8px; align-items: center;">
-                <input type="text" id="filter-search" onkeyup="renderCommuteRecords()" placeholder="ค้นหาวันที่..." style="width: 180px; padding: 6px 12px; font-size: 0.8rem;">
+        <!-- Date Filter & Range Control Panel -->
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 16px; padding: 16px 18px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 1.05rem; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-filter text-indigo-400"></i> กรองวันที่ออกรายงาน
+                    <span id="records-count-badge" style="font-size: 0.75rem; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); padding: 2px 10px; border-radius: 9999px;">0 รายการ</span>
+                </h3>
+                
+                <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <button type="button" onclick="setFilterPreset('all')" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); color: #cbd5e1; font-size: 0.76rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;">ทั้งหมด</button>
+                    <button type="button" onclick="setFilterPreset('this_month')" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #a5b4fc; font-size: 0.76rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;">เดือนนี้</button>
+                    <button type="button" onclick="setFilterPreset('last_7')" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 0.76rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;">7 วันล่าสุด</button>
+                    <button type="button" onclick="clearDateFilter()" style="background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: #fda4af; font-size: 0.76rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;"><i class="fa-solid fa-rotate-left"></i> ล้างตัวกรอง</button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px;">
+                <div style="flex: 1; min-width: 130px;">
+                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">📅 จากวันที่ (Start Date)</label>
+                    <input type="date" id="filter-start-date" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 100%; padding: 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff;">
+                </div>
+                <div style="flex: 1; min-width: 130px;">
+                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">📅 ถึงวันที่ (End Date)</label>
+                    <input type="date" id="filter-end-date" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 100%; padding: 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff;">
+                </div>
+                <div style="flex: 1.5; min-width: 170px;">
+                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">🔍 ค้นหาวันที่/ข้อความ</label>
+                    <input type="text" id="filter-search" onkeyup="renderCommuteRecords()" oninput="renderCommuteRecords()" placeholder="พิมพ์ค้นหาวันที่..." style="width: 100%; padding: 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff;">
+                </div>
+            </div>
+
+            <!-- On-Screen Total Calculation Summary Dashboard (แสดงเฉพาะบนหน้าจอ ไม่รวมในรายงาน PDF) -->
+            <div id="filter-summary-dashboard" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <div style="font-size: 0.85rem; font-weight: 700; color: #6ee7b7; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-calculator text-emerald-400"></i> สรุปผลการคำนวณระยะทาง & ค่าน้ำมัน (ตามช่วงวันที่เลือก)
+                    </span>
+                    <span style="font-size: 0.72rem; color: #94a3b8; background: rgba(15, 23, 42, 0.6); padding: 2px 8px; border-radius: 6px;">
+                        🔒 แสดงเฉพาะบนหน้าจอ (ไม่รวมในรายงาน PDF/Word)
+                    </span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+                    <div style="background: rgba(15, 23, 42, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="font-size: 0.72rem; color: #94a3b8;"><i class="fa-regular fa-calendar-days text-indigo-400 mr-1"></i> รวมจำนวนวัน</div>
+                        <div id="stat-total-days" style="font-size: 1.15rem; font-weight: 700; color: #ffffff; margin-top: 2px;">0 วัน</div>
+                    </div>
+
+                    <div style="background: rgba(15, 23, 42, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="font-size: 0.72rem; color: #94a3b8;"><i class="fa-solid fa-car text-sky-400 mr-1"></i> จำนวนเที่ยว (ภาพ)</div>
+                        <div id="stat-total-trips" style="font-size: 1.15rem; font-weight: 700; color: #38bdf8; margin-top: 2px;">0 เที่ยว</div>
+                    </div>
+
+                    <div style="background: rgba(15, 23, 42, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="font-size: 0.72rem; color: #94a3b8;"><i class="fa-solid fa-route text-emerald-400 mr-1"></i> ระยะทางรวม</div>
+                        <div id="stat-total-distance" style="font-size: 1.15rem; font-weight: 700; color: #4ade80; margin-top: 2px;">0 กม.</div>
+                    </div>
+
+                    <div style="background: rgba(15, 23, 42, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
+                        <div style="font-size: 0.72rem; color: #94a3b8;"><i class="fa-solid fa-coins text-amber-400 mr-1"></i> คำนวณเบิกจ่าย</div>
+                        <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+                            <input type="number" id="rate-per-km" value="4" step="0.5" min="0" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 48px; padding: 2px 4px; font-size: 0.78rem; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(250,204,21,0.4); border-radius: 6px; color: #fbbf24; text-align: center;" title="ระบุอัตราค่าเดินทาง (บาท/กิโลเมตร)">
+                            <span style="font-size: 0.72rem; color: #cbd5e1;">฿/กม. = </span>
+                            <span id="stat-total-cost" style="font-size: 1.05rem; font-weight: 700; color: #fbbf24;">0 ฿</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batch Preset Controls for Custom Morning/Evening Distance -->
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.76rem; color: #cbd5e1;">
+                    <span style="font-weight: 600; color: #6ee7b7;"><i class="fa-solid fa-sliders text-emerald-400 mr-1"></i> ปรับระยะทางตั้งต้น:</span>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <label style="color: #94a3b8;">ขาไป:</label>
+                        <input type="number" id="default-go-km" value="19" onchange="applyBatchDefaultDistances()" style="width: 44px; padding: 2px 4px; font-size: 0.76rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #6ee7b7; text-align: center;"> กม.
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <label style="color: #94a3b8;">ขากลับ:</label>
+                        <input type="number" id="default-back-km" value="21" onchange="applyBatchDefaultDistances()" style="width: 44px; padding: 2px 4px; font-size: 0.76rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #6ee7b7; text-align: center;"> กม.
+                    </div>
+                    <button type="button" onclick="applyBatchDefaultDistances()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 0.74rem; padding: 3px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> ใส่ระยะทางนี้ให้ทุกภาพในรายการที่กรอง
+                    </button>
+                </div>
+            </div>
+
+            <!-- Export Buttons Container (ตำแหน่งใหม่: อยู่ล่างสุดของตัวกรอง) -->
+            <div style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
+                <button type="button" class="btn-export-docx" onclick="exportToWordDocx()">
+                    <i class="fa-solid fa-file-word"></i> ออกรายงาน Word (.docx)
+                </button>
+                <button type="button" class="btn-export-pdf" onclick="exportToPDF()">
+                    <i class="fa-solid fa-file-pdf"></i> ออกรายงาน PDF
+                </button>
             </div>
         </div>
 
@@ -735,7 +873,7 @@
                     try {
                         // EXIF format: "YYYY:MM:DD HH:MM:SS" (e.g. "2026:06:08 08:30:15")
                         const parts = dateTime.trim().split(' ');
-                        const dateParts = parts[0].split(':');
+                        const dateParts = dateTime.trim().split(' ')[0].split(':');
                         const timeParts = parts[1] || '';
                         
                         const yearBE = parseInt(dateParts[0], 10) + 543;
@@ -787,11 +925,13 @@
                 reader.onload = function(evt) {
                     compressImageBase64(evt.target.result, 1200, 0.8, function(compressedData) {
                         const defaultLabel = (stagedImages.length === 0) ? 'ภาพที่ 1 (ขาไปสภา)' : `ภาพที่ ${stagedImages.length + 1} (ขากลับ/GPS)`;
+                        const defaultKm = (stagedImages.length === 0) ? (parseFloat(document.getElementById('default-go-km')?.value) || 19) : (parseFloat(document.getElementById('default-back-km')?.value) || 21);
                         stagedImages.push({
                             url: compressedData,
                             date: meta.realDate,
                             time: meta.realTime,
-                            label: defaultLabel
+                            label: defaultLabel,
+                            distance: defaultKm
                         });
                         renderStagedImagePreviews();
                     });
@@ -799,6 +939,12 @@
                 reader.readAsDataURL(file);
             });
         });
+    }
+
+    function updateStagedDistance(index, val) {
+        if (stagedImages[index]) {
+            stagedImages[index].distance = parseFloat(val) || 0;
+        }
     }
 
     function compressImageBase64(dataUrl, maxDimension, quality, callback) {
@@ -834,13 +980,19 @@
         stagedImages.forEach((imgObj, idx) => {
             const card = document.createElement('div');
             card.className = 'img-preview-card';
+            card.style.height = '110px';
             card.innerHTML = `
                 <img src="${imgObj.url}" alt="Preview Map ${idx+1}">
                 <button type="button" class="btn-remove-img" onclick="removeStagedImage(${idx})">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
-                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: #fbbf24; font-size: 0.65rem; padding: 2px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ⏱️ ${imgObj.time}
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); color: #fbbf24; font-size: 0.65rem; padding: 3px 4px; text-align: center;">
+                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">⏱️ ${imgObj.time}</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 2px; margin-top: 2px;">
+                        <span style="color: #4ade80;">🛣️</span>
+                        <input type="number" value="${imgObj.distance || (idx === 0 ? 19 : 21)}" step="0.5" onchange="updateStagedDistance(${idx}, this.value)" style="width: 38px; padding: 0 2px; font-size: 0.65rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(74,222,128,0.5); color: #4ade80; border-radius: 3px; text-align: center;" title="แก้ไขระยะทางเฉพาะภาพนี้">
+                        <span style="color: #4ade80;">กม.</span>
+                    </div>
                 </div>
             `;
             container.appendChild(card);
@@ -955,6 +1107,50 @@
         };
     }
 
+    let currentFilteredSections = [];
+
+    function toggleUserDropdown(e) {
+        if (e) e.stopPropagation();
+        const menu = document.getElementById('userDropdownMenu');
+        if (menu) {
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('userDropdownMenu');
+        const badge = document.getElementById('user-profile-badge');
+        if (menu && menu.style.display === 'block') {
+            if (!menu.contains(e.target) && (!badge || !badge.contains(e.target))) {
+                menu.style.display = 'none';
+            }
+        }
+    });
+
+    function parseTimeToSeconds(timeStr) {
+        if (!timeStr || typeof timeStr !== 'string') return 0;
+        const clean = timeStr.replace(/[^0-9:]/g, '').trim();
+        if (!clean.includes(':')) return 0;
+        const parts = clean.split(':');
+        const h = parseInt(parts[0], 10) || 0;
+        const m = parseInt(parts[1], 10) || 0;
+        const s = parseInt(parts[2], 10) || 0;
+        return h * 3600 + m * 60 + s;
+    }
+
+    function getSmartPhotoLabel(timeStr, idxInDateGroup, totalInDateGroup) {
+        const secs = parseTimeToSeconds(timeStr);
+        if (secs > 0) {
+            const hour = Math.floor(secs / 3600);
+            if (hour < 12) {
+                return `ภาพที่ ${idxInDateGroup + 1} (ขาไปสภา)`;
+            } else {
+                return `ภาพที่ ${idxInDateGroup + 1} (ขากลับ/GPS)`;
+            }
+        }
+        return idxInDateGroup === 0 ? `ภาพที่ 1 (ขาไปสภา)` : `ภาพที่ ${idxInDateGroup + 1} (ขากลับ/GPS)`;
+    }
+
     function parseThaiDateForSort(dateStr) {
         if (!dateStr) return 0;
         if (dateStr.includes('/')) {
@@ -992,25 +1188,222 @@
         });
 
         const groupedSections = Array.from(dateMap.values());
+        // 1. Sort date sections chronologically
         groupedSections.sort((a, b) => parseThaiDateForSort(a.dateDisplay) - parseThaiDateForSort(b.dateDisplay));
+
+        // 2. Sort photos in each date section chronologically by time, and set smart morning/afternoon labels!
+        groupedSections.forEach(sec => {
+            sec.images.sort((imgA, imgB) => parseTimeToSeconds(imgA.time) - parseTimeToSeconds(imgB.time));
+            sec.images.forEach((img, idx) => {
+                img.label = getSmartPhotoLabel(img.time, idx, sec.images.length);
+            });
+        });
+
         return groupedSections;
+    }
+
+    function convertThaiDateToIsoAD(dateStr) {
+        if (!dateStr) return '';
+        dateStr = String(dateStr).trim();
+        
+        // Extract 3 date parts regardless of extra surrounding text like "(เดินทางไป-กลับสภา)"
+        const match = dateStr.match(/(\d{1,4})[\/\-](\d{1,2})[\/\-](\d{1,4})/);
+        if (match) {
+            let p1 = parseInt(match[1], 10);
+            let p2 = parseInt(match[2], 10);
+            let p3 = parseInt(match[3], 10);
+
+            let year, month, day;
+            if (p1 > 1000) {
+                // Format: YYYY-MM-DD
+                year = p1;
+                month = p2;
+                day = p3;
+            } else {
+                // Format: DD/MM/YYYY
+                day = p1;
+                month = p2;
+                year = p3;
+            }
+            if (year > 2400) year = year - 543; // Convert พ.ศ. 2569 -> ค.ศ. 2026
+            
+            const sYear = String(year);
+            const sMonth = String(month).padStart(2, '0');
+            const sDay = String(day).padStart(2, '0');
+            return `${sYear}-${sMonth}-${sDay}`;
+        }
+        return '';
+    }
+
+    function setFilterPreset(type) {
+        const startInput = document.getElementById('filter-start-date');
+        const endInput = document.getElementById('filter-end-date');
+        
+        const grouped = groupImagesByRealDate(allRecords);
+        const isoDates = grouped.map(g => convertThaiDateToIsoAD(g.dateDisplay)).filter(d => d).sort();
+
+        if (type === 'all') {
+            startInput.value = '';
+            endInput.value = '';
+        } else if (type === 'this_month') {
+            if (isoDates.length > 0) {
+                const latestDate = isoDates[isoDates.length - 1];
+                const parts = latestDate.split('-');
+                startInput.value = `${parts[0]}-${parts[1]}-01`;
+                endInput.value = latestDate;
+            } else {
+                const today = new Date();
+                startInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
+                endInput.value = today.toISOString().split('T')[0];
+            }
+        } else if (type === 'last_7') {
+            if (isoDates.length > 0) {
+                const latestDateStr = isoDates[isoDates.length - 1];
+                const latestDateObj = new Date(latestDateStr);
+                const past7 = new Date(latestDateObj.getTime() - 7 * 24 * 60 * 60 * 1000);
+                startInput.value = past7.toISOString().split('T')[0];
+                endInput.value = latestDateStr;
+            } else {
+                const today = new Date();
+                const past7 = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                startInput.value = past7.toISOString().split('T')[0];
+                endInput.value = today.toISOString().split('T')[0];
+            }
+        }
+        renderCommuteRecords();
+    }
+
+    function clearDateFilter() {
+        document.getElementById('filter-start-date').value = '';
+        document.getElementById('filter-end-date').value = '';
+        document.getElementById('filter-search').value = '';
+        renderCommuteRecords();
+    }
+
+    function parseDistanceKm(imgObj) {
+        if (!imgObj) return 0;
+        if (imgObj.distance !== undefined && !isNaN(parseFloat(imgObj.distance)) && parseFloat(imgObj.distance) > 0) {
+            return parseFloat(imgObj.distance);
+        }
+        // Match numbers before "กม" or "km" e.g., "52 นาที (19 กม.)" or "21 กม."
+        const str = (imgObj.time || '') + ' ' + (imgObj.label || '') + ' ' + (imgObj.caption || '') + ' ' + (imgObj.date || '');
+        const match = str.match(/(\d+(?:\.\d+)?)\s*(?:กม|km)/i);
+        if (match) {
+            return parseFloat(match[1]);
+        }
+
+        // Smart Default Fallbacks based on morning vs afternoon trip:
+        const goKm = parseFloat(document.getElementById('default-go-km')?.value) || 19;
+        const backKm = parseFloat(document.getElementById('default-back-km')?.value) || 21;
+
+        if (imgObj.label && (imgObj.label.includes('ขาไป') || imgObj.label.includes('ภาพที่ 1'))) {
+            return goKm;
+        } else if (imgObj.label && (imgObj.label.includes('ขากลับ') || imgObj.label.includes('ภาพที่ 2'))) {
+            return backKm;
+        }
+        return goKm;
+    }
+
+    function updatePhotoDistance(recordId, imgIdx, val) {
+        const num = parseFloat(val) || 0;
+        const rec = allRecords.find(r => r.id === recordId);
+        if (rec && rec.images && rec.images[imgIdx]) {
+            if (typeof rec.images[imgIdx] === 'string') {
+                rec.images[imgIdx] = { url: rec.images[imgIdx], distance: num };
+            } else {
+                rec.images[imgIdx].distance = num;
+            }
+        }
+        renderCommuteRecords();
+    }
+
+    function applyBatchDefaultDistances() {
+        const goKm = parseFloat(document.getElementById('default-go-km')?.value) || 19;
+        const backKm = parseFloat(document.getElementById('default-back-km')?.value) || 21;
+
+        allRecords.forEach(rec => {
+            if (rec.images && Array.isArray(rec.images)) {
+                rec.images.forEach((img, idx) => {
+                    const kmVal = (idx === 0) ? goKm : backKm;
+                    if (typeof img === 'string') {
+                        rec.images[idx] = { url: img, distance: kmVal };
+                    } else {
+                        img.distance = kmVal;
+                    }
+                });
+            }
+        });
+        renderCommuteRecords();
     }
 
     function renderCommuteRecords() {
         const container = document.getElementById('commute-records-list');
         const countBadge = document.getElementById('records-count-badge');
         const query = (document.getElementById('filter-search').value || '').toLowerCase().trim();
+        const startDateVal = document.getElementById('filter-start-date').value;
+        const endDateVal = document.getElementById('filter-end-date').value;
 
         const grouped = groupImagesByRealDate(allRecords);
 
         const filtered = grouped.filter(g => {
-            return !query || (g.dateDisplay || '').toLowerCase().includes(query);
+            const secIso = convertThaiDateToIsoAD(g.dateDisplay);
+            if (startDateVal && secIso && secIso < startDateVal) return false;
+            if (endDateVal && secIso && secIso > endDateVal) return false;
+            if (query && !(g.dateDisplay || '').toLowerCase().includes(query) && !(secIso).includes(query)) return false;
+            return true;
         });
 
+        currentFilteredSections = filtered;
         countBadge.innerText = `${filtered.length} รายการ (วันที่)`;
 
+        // Update summary dashboard stats based on currently filtered records
+        let totalTrips = 0;
+        let totalKm = 0;
+        filtered.forEach(sec => {
+            sec.images.forEach(img => {
+                totalTrips++;
+                totalKm += parseDistanceKm(img);
+            });
+        });
+
+        const rateInput = document.getElementById('rate-per-km');
+        const ratePerKm = rateInput ? (parseFloat(rateInput.value) || 0) : 4;
+        const totalCost = totalKm * ratePerKm;
+
+        const statDays = document.getElementById('stat-total-days');
+        const statTrips = document.getElementById('stat-total-trips');
+        const statKm = document.getElementById('stat-total-distance');
+        const statCost = document.getElementById('stat-total-cost');
+
+        if (statDays) statDays.innerText = `${filtered.length} วัน`;
+        if (statTrips) statTrips.innerText = `${totalTrips} เที่ยว`;
+        if (statKm) statKm.innerText = `${totalKm.toLocaleString('th-TH', { maximumFractionDigits: 1 })} กม.`;
+        if (statCost) statCost.innerText = `${totalCost.toLocaleString('th-TH', { maximumFractionDigits: 0 })} ฿`;
+
+        // Update printable subtitle with filter range
+        const printSub = document.getElementById('print-date-range');
+        if (printSub) {
+            if (startDateVal || endDateVal) {
+                const sDisp = startDateVal ? formatThaiDateString(startDateVal) : 'เริ่มต้น';
+                const eDisp = endDateVal ? formatThaiDateString(endDateVal) : 'ปัจจุบัน';
+                printSub.innerText = `(ช่วงวันที่ ${sDisp} ถึง ${eDisp})`;
+            } else {
+                if (filtered.length > 0) {
+                    const firstDate = filtered[0].dateDisplay;
+                    const lastDate = filtered[filtered.length - 1].dateDisplay;
+                    if (firstDate === lastDate) {
+                        printSub.innerText = `(ประจำวันที่ ${firstDate})`;
+                    } else {
+                        printSub.innerText = `(ช่วงวันที่ ${firstDate} ถึง ${lastDate})`;
+                    }
+                } else {
+                    printSub.innerText = `(ช่วงวันที่ทั้งหมด)`;
+                }
+            }
+        }
+
         if (filtered.length === 0) {
-            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8; background: rgba(15,23,42,0.4); border-radius: 16px;">ไม่พบรายการภาพแผนที่การเดินทาง สามารถเพิ่มบันทึกใหม่ได้จากช่องด้านบน</div>';
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #94a3b8; background: rgba(15,23,42,0.4); border-radius: 16px;">ไม่พบรายการภาพแผนที่การเดินทางที่ตรงตามช่วงวันที่เลือก</div>';
             return;
         }
 
@@ -1024,13 +1417,24 @@
                 const safeTime = img.time;
                 const safeLabel = img.label;
                 const safeDate = dateDisplay;
+                const imgKm = parseDistanceKm(img);
+                const kmBadge = `
+                    <div onclick="event.stopPropagation()" style="display: inline-flex; align-items: center; gap: 3px; background: rgba(74, 222, 128, 0.15); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(74, 222, 128, 0.3);">
+                        <i class="fa-solid fa-route text-emerald-400" style="font-size: 0.7rem;"></i>
+                        <input type="number" value="${imgKm}" step="0.5" min="0" onchange="updatePhotoDistance('${section.recordId}', ${imgIdx}, this.value)" style="width: 38px; padding: 0 2px; font-size: 0.72rem; background: transparent; border: none; color: #4ade80; font-weight: bold; text-align: center;" title="แตะเพื่อแก้ไขระยะทางกิโลเมตรเฉพาะภาพนี้">
+                        <span style="color: #4ade80; font-size: 0.7rem;">กม.</span>
+                    </div>
+                `;
 
                 imgsHtml += `
                     <div class="map-image-wrapper" onclick="openImageModal('${safeUrl}', '${safeDate}', '${safeTime}', '${safeLabel}')">
                         <img src="${safeUrl}" alt="Map ${dateDisplay}">
-                        <div class="image-caption">
+                        <div class="image-caption" style="display: flex; justify-content: space-between; align-items: center;">
                             <span><i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ${safeLabel}</span>
-                            <span style="color: #fbbf24; font-size: 0.7rem;"><i class="fa-regular fa-clock"></i> ${safeTime}</span>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                ${kmBadge}
+                                <span style="color: #fbbf24; font-size: 0.7rem;"><i class="fa-regular fa-clock"></i> ${safeTime}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1108,6 +1512,13 @@
             return;
         }
 
+        const grouped = (currentFilteredSections && currentFilteredSections.length > 0) ? currentFilteredSections : groupImagesByRealDate(allRecords);
+
+        if (!grouped || grouped.length === 0) {
+            alert('ไม่พบรายการภาพแผนที่ตามช่วงวันที่ที่เลือก กรุณาปรับเปลี่ยนตัวกรองวันที่ก่อนออกรายงาน');
+            return;
+        }
+
         if (typeof docx === 'undefined') {
             alert('กำลังโหลดไลบรารี DOCX กรุณาลองใหม่อีกครั้ง');
             return;
@@ -1130,8 +1541,6 @@
                 spacing: { after: 250 }
             })
         ];
-
-        const grouped = groupImagesByRealDate(allRecords);
 
         for (const section of grouped) {
             const dateTitle = section.dateDisplay;
@@ -1251,7 +1660,7 @@
     }
 
     // ==========================================
-    // EXPORT TO PDF (รองรับทั้งมือถือและคอมพิวเตอร์)
+    // EXPORT TO PDF (เปิดหน้าต่างบันทึกเป็น PDF คมชัด อัตราส่วนตรงเป๊ะ)
     // ==========================================
     function exportToPDF() {
         if (!allRecords.length) {
@@ -1259,23 +1668,13 @@
             return;
         }
 
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (isMobile && typeof html2pdf !== 'undefined') {
-            alert('กำลังสร้างไฟล์ PDF บนมือถือ กรุณารอสักครู่...');
-            const element = document.getElementById('printable-report-area');
-            const opt = {
-                margin:       [6, 6, 6, 6],
-                filename:     `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.pdf`,
-                image:        { type: 'jpeg', quality: 0.92 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
-        } else {
-            // Desktop Native Print Dialog
-            window.print();
+        if (currentFilteredSections && currentFilteredSections.length === 0) {
+            alert('ไม่พบรายการภาพแผนที่ตามช่วงวันที่ที่เลือก กรุณาปรับเปลี่ยนตัวกรองวันที่ก่อนออกรายงาน');
+            return;
         }
+
+        // เปิดหน้าต่างพิมพ์/บันทึก PDF ของเบราว์เซอร์ (สวยงาม คมชัด ไม่ยืดไม่เบี้ยว)
+        window.print();
     }
 </script>
 
