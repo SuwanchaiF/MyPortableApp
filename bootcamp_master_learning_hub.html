@@ -79,7 +79,7 @@
 
     <!-- Top Navigation Header -->
     <header class="bg-slate-800/95 backdrop-blur border-b border-slate-700 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 relative pr-12 sm:pr-14">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg shrink-0">
                     ⚡
@@ -90,7 +90,7 @@
                 </div>
             </div>
 
-            <!-- Global Search & Action Badges -->
+            <!-- Global Search & Progress Badge -->
             <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                 <div class="relative flex-1 sm:w-52 min-w-[130px]">
                     <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -98,19 +98,36 @@
                         class="w-full bg-slate-900/90 border border-slate-700 rounded-lg pl-8 pr-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors">
                 </div>
                 
-                <div id="hub-user-badge" class="hidden bg-indigo-950/90 border border-indigo-500/40 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-xs">
-                    <span id="hub-user-avatar" class="text-sm">👨‍💻</span>
-                    <span id="hub-user-name" class="font-bold text-indigo-300 truncate max-w-[80px]">Guest</span>
-                </div>
-
-                <a href="index.html" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
-                    <i class="fa-solid fa-database"></i> 📁 คลังส่วนตัว
-                </a>
-                
                 <div class="bg-slate-900 border border-slate-700 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 whitespace-nowrap">
                     <i class="fa-solid fa-trophy text-amber-400 text-xs"></i>
                     <div class="text-xs">
                         <span id="progressText" class="font-bold text-indigo-400">0/60</span> เรียนแล้ว
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Right Profile Avatar Dropdown Icon -->
+            <div class="user-dropdown-wrapper absolute top-2.5 right-2.5 sm:right-4 z-50">
+                <button type="button" id="user-profile-badge" onclick="toggleUserDropdown(event)" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 border border-white/20 flex items-center justify-center text-sm shadow-md hover:scale-105 transition-all" title="โปรไฟล์ผู้ใช้ / เมนูหลัก">
+                    <span id="user-avatar">👤</span>
+                </button>
+
+                <!-- User Profile Dropdown Menu -->
+                <div id="userDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-52 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-xl shadow-2xl z-50 overflow-hidden text-xs">
+                    <div class="p-3 bg-slate-800/80 border-b border-slate-700/80 flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-sm">👨‍💻</div>
+                        <div>
+                            <h4 class="font-bold text-white">เมนูทางลัด</h4>
+                            <span class="text-[10px] text-indigo-300">ระบบคลังความรู้</span>
+                        </div>
+                    </div>
+                    <div class="p-1.5 space-y-1">
+                        <a href="index.html" class="flex items-center gap-2.5 w-full p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                            <i class="fa-solid fa-code text-indigo-400"></i> คลังโน้ต
+                        </a>
+                        <a href="parliament_commute.html" class="flex items-center gap-2.5 w-full p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                            <i class="fa-solid fa-map-location-dot text-rose-400"></i> รายงานแผนที่สภา
+                        </a>
                     </div>
                 </div>
             </div>
@@ -1453,6 +1470,22 @@ Document
                 }
             });
         }
+
+        function toggleUserDropdown(event) {
+            if (event) event.stopPropagation();
+            const menu = document.getElementById('userDropdownMenu');
+            if (menu) {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('userDropdownMenu');
+            const btn = document.getElementById('user-profile-badge');
+            if (menu && !menu.classList.contains('hidden') && btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
     </script>
 </body>
 </html>

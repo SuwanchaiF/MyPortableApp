@@ -122,6 +122,7 @@
             gap: 16px;
             margin-bottom: 20px;
             padding-bottom: 18px;
+            padding-right: 50px;
             border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
         }
 
@@ -414,20 +415,27 @@
             justify-content: space-between;
         }
 
-        /* Modal Lightbox */
+        /* Modal Lightbox Overlay */
         .modal-overlay {
             display: none;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 23, 42, 0.85);
-            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 99999;
             align-items: center;
             justify-content: center;
-            padding: 16px;
+            padding: 12px;
+            box-sizing: border-box;
+            overflow-y: auto;
         }
 
         .modal-overlay.active {
-            display: flex;
+            display: flex !important;
         }
 
         .modal-content-img {
@@ -583,13 +591,55 @@
         }
 
         @media (max-width: 768px) {
-            body { padding: 8px 4px; }
-            .card { padding: 16px 12px; border-radius: 20px; }
-            .form-row { grid-template-columns: 1fr; gap: 10px; }
-            .header-title h1 { font-size: 1.1rem; }
-            .map-images-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-            .map-image-wrapper { height: 140px; }
-            input, select, textarea, button { font-size: 16px !important; }
+            body { padding: 6px 4px; }
+            .container { padding: 0 2px; }
+            .card { padding: 14px 10px; border-radius: 16px; }
+            .form-row { grid-template-columns: 1fr !important; gap: 10px !important; }
+            .header-title h1 { font-size: 1.05rem !important; }
+            .live-status { font-size: 0.7rem !important; }
+            
+            /* Action toolbar buttons full-width on mobile */
+            .action-toolbar-buttons button {
+                width: 100% !important;
+                justify-content: center !important;
+                padding: 10px 14px !important;
+                font-size: 0.84rem !important;
+            }
+
+            /* Dashboard stats 2x2 grid on mobile */
+            .summary-stats-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+
+            /* Responsive map card grid: 1 column on mobile phones for clear map view & un-distorted captions */
+            .map-images-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+            .map-image-wrapper { height: 210px !important; }
+            .image-caption { padding: 6px 10px !important; flex-wrap: wrap !important; gap: 4px !important; font-size: 0.72rem !important; }
+
+            /* Header Layout & User Profile Dropdown Position Guard on Mobile */
+            .header-title { padding-right: 48px !important; flex-wrap: wrap !important; justify-content: space-between !important; gap: 10px !important; }
+            .header-left { flex: 1 !important; min-width: 180px !important; }
+            .user-dropdown-wrapper { position: absolute !important; top: 14px !important; right: 14px !important; }
+            .btn-profile-badge { width: 34px !important; height: 34px !important; font-size: 1.1rem !important; }
+            #userDropdownMenu {
+                right: 0 !important;
+                left: auto !important;
+                top: calc(100% + 6px) !important;
+                width: 210px !important;
+            }
+
+            /* Fast Table Modal Mobile Friendly Styling */
+            #distance-table-modal > div {
+                width: 95vw !important;
+                max-height: 90vh !important;
+                padding: 14px 10px !important;
+                border-radius: 16px !important;
+                margin: auto !important;
+            }
+            #distance-table-modal table { font-size: 0.76rem !important; }
+            #distance-table-modal th, #distance-table-modal td { padding: 6px 3px !important; }
+            #distance-table-modal input[type="number"] { width: 52px !important; padding: 3px 2px !important; font-size: 0.82rem !important; }
         }
     </style>
 </head>
@@ -618,9 +668,9 @@
                 </div>
             </div>
             
-            <div class="header-actions" style="display: flex; align-items: center; gap: 8px;">
+            <div class="header-actions">
                 <!-- Top Right Profile Avatar Dropdown Icon -->
-                <div class="user-dropdown-wrapper" style="position: relative;">
+                <div class="user-dropdown-wrapper" style="position: absolute; top: 20px; right: 20px; z-index: 1000;">
                     <button type="button" id="user-profile-badge" onclick="toggleUserDropdown(event)" class="btn-profile-badge" style="width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: 2px solid rgba(255, 255, 255, 0.25); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); padding: 0; transition: all 0.2s;" title="โปรไฟล์ผู้ใช้ / เมนูหลัก">
                         <span id="user-avatar">👤</span>
                     </button>
@@ -729,7 +779,7 @@
                     </span>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+                <div class="summary-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
                     <div style="background: rgba(15, 23, 42, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
                         <div style="font-size: 0.72rem; color: #94a3b8;"><i class="fa-regular fa-calendar-days text-indigo-400 mr-1"></i> รวมจำนวนวัน</div>
                         <div id="stat-total-days" style="font-size: 1.15rem; font-weight: 700; color: #ffffff; margin-top: 2px;">0 วัน</div>
@@ -756,7 +806,7 @@
                 </div>
 
                 <!-- Action Toolbar: AI OCR Scan & Fast Table Grid -->
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
+                <div class="action-toolbar-buttons" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
                     <button type="button" onclick="scanAllImageDistancesWithOCR()" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
                         <i class="fa-solid fa-robot text-purple-400"></i> <span id="ocr-btn-text">🤖 สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)</span>
                     </button>
@@ -806,6 +856,45 @@
         <button type="button" onclick="closeImageModal()" style="position: absolute; top: -14px; right: -14px; background: #f43f5e; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
             <i class="fa-solid fa-xmark"></i>
         </button>
+    </div>
+</div>
+
+<!-- Fast Distance Table Modal -->
+<div id="distance-table-modal" class="modal-overlay" onclick="closeDistanceTableModal()">
+    <div style="position: relative; width: 94vw; max-width: 620px; max-height: 88vh; margin: auto; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 20px; padding: 18px 14px; color: #f8fafc; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.8); z-index: 2000; box-sizing: border-box;" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1.05rem; color: #6ee7b7; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-table-list text-emerald-400"></i> ตารางระบุระยะทางแบบรวม (พิมพ์กรอกรวดเร็ว)
+            </h3>
+            <button type="button" onclick="closeDistanceTableModal()" style="background: rgba(244,63,94,0.2); color: #fda4af; border: 1px solid rgba(244,63,94,0.4); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <div style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 10px;">
+            💡 กดปุ่ม <kbd style="background: #334155; padding: 1px 5px; border-radius: 4px; color: #ffffff;">Tab</kbd> เพื่อพิมพ์กรอกระยะทางถัดไปได้อย่างรวดเร็วในหน้าเดียว
+        </div>
+
+        <div style="overflow-y: auto; flex: 1; margin-bottom: 14px; padding-right: 4px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.15); text-align: left; color: #a5b4fc;">
+                        <th style="padding: 8px;">📅 วันที่ / เที่ยวเดินทาง</th>
+                        <th style="padding: 8px;">⏱️ เวลา</th>
+                        <th style="padding: 8px; text-align: center;">🛣️ ระยะทาง (กม.)</th>
+                    </tr>
+                </thead>
+                <tbody id="distance-table-body">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+            <button type="button" onclick="closeDistanceTableModal()" style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: #ffffff; padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+                <i class="fa-solid fa-check mr-1"></i> เสร็จสิ้น
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1574,11 +1663,14 @@
     }
 
     function openDistanceTableModal() {
+        const modal = document.getElementById('distance-table-modal');
         const tbody = document.getElementById('distance-table-body');
-        if (!tbody) return;
+        if (!tbody || !modal) return;
+
+        const sections = (currentFilteredSections && currentFilteredSections.length > 0) ? currentFilteredSections : groupImagesByRealDate(allRecords);
 
         let rowsHtml = '';
-        currentFilteredSections.forEach(sec => {
+        sections.forEach(sec => {
             sec.images.forEach(img => {
                 const imgKm = parseDistanceKm(img);
                 const valDisplay = imgKm > 0 ? imgKm : '';
@@ -1598,7 +1690,7 @@
         });
 
         tbody.innerHTML = rowsHtml || '<tr><td colspan="3" style="text-align:center; padding: 20px; color:#94a3b8;">ไม่พบรายการที่กรอง</td></tr>';
-        document.getElementById('distance-table-modal').classList.add('active');
+        modal.classList.add('active');
     }
 
     function closeDistanceTableModal() {
