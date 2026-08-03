@@ -564,7 +564,15 @@
             .map-images-grid {
                 display: grid !important;
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 16px !important;
+                gap: 14px !important;
+            }
+
+            /* Override any mobile 1-column CSS that may apply during print on small screens */
+            @media (max-width: 768px) {
+                .map-images-grid {
+                    grid-template-columns: repeat(2, 1fr) !important;
+                    gap: 14px !important;
+                }
             }
 
             .map-image-wrapper {
@@ -590,7 +598,7 @@
             }
         }
 
-        @media (max-width: 768px) {
+        @media screen and (max-width: 768px) {
             body { padding: 6px 4px; }
             .container { padding: 0 2px; }
             .card { padding: 14px 10px; border-radius: 16px; }
@@ -613,6 +621,7 @@
             }
 
             /* Responsive map card grid: 1 column on mobile phones for clear map view & un-distorted captions */
+            /* NOTE: These mobile overrides are SCREEN-ONLY. @media print forces 2-column (old report format) via the print block above. */
             .map-images-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
             .map-image-wrapper { height: 210px !important; }
             .image-caption { padding: 6px 10px !important; flex-wrap: wrap !important; gap: 4px !important; font-size: 0.72rem !important; }
