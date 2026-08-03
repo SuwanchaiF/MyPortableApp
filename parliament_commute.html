@@ -1217,20 +1217,22 @@
     }
 
     function normalizeImageObj(imgRaw, dateStr, idx) {
-        if (!imgRaw) return { url: '', date: dateStr || '', time: 'ไม่ระบุเวลา', label: `ภาพที่ ${idx + 1}` };
+        if (!imgRaw) return { url: '', date: dateStr || '', time: 'ไม่ระบุเวลา', label: `ภาพที่ ${idx + 1}`, distance: 0 };
         if (typeof imgRaw === 'string') {
             return {
                 url: imgRaw,
                 date: dateStr || '',
                 time: 'อัปโหลดภาพแล้ว',
-                label: `ภาพที่ ${idx + 1} (แผนที่เส้นทาง)`
+                label: `ภาพที่ ${idx + 1} (แผนที่เส้นทาง)`,
+                distance: 0
             };
         }
         return {
             url: imgRaw.url || '',
             date: imgRaw.date || dateStr || '',
             time: imgRaw.time || 'ไม่ระบุเวลา',
-            label: imgRaw.label || `ภาพที่ ${idx + 1}`
+            label: imgRaw.label || `ภาพที่ ${idx + 1}`,
+            distance: (imgRaw.distance !== undefined && !isNaN(parseFloat(imgRaw.distance))) ? parseFloat(imgRaw.distance) : 0
         };
     }
 
@@ -1301,6 +1303,9 @@
 
             rawImgs.forEach((imgRaw, idx) => {
                 const img = normalizeImageObj(imgRaw, defaultDateStr, idx);
+                img.recordId = item.id;
+                img.origIdx = idx;
+
                 const realDateKey = img.date || defaultDateStr;
 
                 if (!dateMap.has(realDateKey)) {
@@ -1459,7 +1464,7 @@
         });
 
         currentFilteredSections = filtered;
-        countBadge.innerText = `${filtered.length} รายการ (วันที่)`;
+        if (countBadge) countBadge.innerText = `${filtered.length} รายการ (วันที่)`;
 
         // Update summary dashboard stats based on currently filtered records
         let totalTrips = 0;
