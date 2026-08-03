@@ -700,6 +700,14 @@
                             <a href="bootcamp_master_learning_hub.html" class="dropdown-item" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; color: #cbd5e1; font-size: 0.82rem; font-weight: 500; border-radius: 8px; text-decoration: none; transition: all 0.15s ease;">
                                 <i class="fa-solid fa-rocket text-purple-400"></i> Roadmap 60 วัน
                             </a>
+                            <a href="javascript:void(0)" onclick="openSystemLogModal(); if(typeof toggleUserDropdown==='function') toggleUserDropdown(event);" class="dropdown-item" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; color: #cbd5e1; font-size: 0.82rem; font-weight: 500; border-radius: 8px; text-decoration: none; transition: all 0.15s ease;">
+                                <i class="fa-solid fa-list-check text-emerald-400"></i> ประวัติ Log ระบบ
+                            </a>
+                            <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 4px; padding-top: 4px;">
+                                <button type="button" onclick="handleLogout()" class="dropdown-item" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; color: #f43f5e; font-size: 0.82rem; font-weight: 600; border-radius: 8px; background: transparent; border: none; cursor: pointer; transition: all 0.15s ease;">
+                                    <i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ (Logout)
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -907,6 +915,81 @@
     </div>
 </div>
 
+<!-- System Activity Log Modal -->
+<div id="system-log-modal" class="modal-overlay" onclick="closeSystemLogModal()">
+    <div style="position: relative; width: 95vw; max-width: 840px; max-height: 90vh; margin: auto; background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 20px; padding: 20px; color: #f8fafc; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85); z-index: 999999; box-sizing: border-box;" onclick="event.stopPropagation()">
+        
+        <!-- Modal Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px;">
+            <div>
+                <h3 style="margin: 0; font-size: 1.15rem; color: #818cf8; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-list-check text-indigo-400"></i> ประวัติ Log กิจกรรมทั้งหมดในระบบ (System Logs)
+                </h3>
+                <p style="margin: 4px 0 0 0; font-size: 0.76rem; color: #94a3b8;">บันทึกและติดตามทุกการอัปโหลด แก้ไข ลบ สแกน AI และส่งออกรายงานในระบบ</p>
+            </div>
+            <button type="button" onclick="closeSystemLogModal()" style="background: rgba(244,63,94,0.2); color: #fda4af; border: 1px solid rgba(244,63,94,0.4); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Filter Controls & Summary Stats Bar -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.6); padding: 10px 14px; border-radius: 12px; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.06);">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; flex: 1;">
+                <div style="position: relative; min-width: 160px; flex: 1;">
+                    <input type="text" id="log-filter-search" onkeyup="SystemLogger.renderLogModalUI()" oninput="SystemLogger.renderLogModalUI()" placeholder="🔍 ค้นหาตามข้อความ / กิจกรรม..." style="width: 100%; padding: 6px 12px; font-size: 0.78rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; color: #ffffff;">
+                </div>
+                <select id="log-filter-category" onchange="SystemLogger.renderLogModalUI()" style="padding: 6px 10px; font-size: 0.78rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; color: #ffffff;">
+                    <option value="ALL">ทุกหมวดหมู่ Log</option>
+                    <option value="CREATE">🟢 เพิ่มข้อมูล (CREATE)</option>
+                    <option value="UPDATE">🔵 แก้ไข (UPDATE)</option>
+                    <option value="DELETE">🔴 ลบข้อมูล (DELETE)</option>
+                    <option value="OCR">🤖 AI/OCR (OCR)</option>
+                    <option value="EXPORT">📄 ออกรายงาน (EXPORT)</option>
+                    <option value="SYSTEM">⚙️ ระบบ (SYSTEM)</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 12px; font-size: 0.78rem; color: #cbd5e1;">
+                <div><span style="color:#94a3b8;">รวม Log:</span> <strong id="log-total-count" style="color:#a5b4fc;">0 รายการ</strong></div>
+                <div><span style="color:#94a3b8;">วันนี้:</span> <strong id="log-today-count" style="color:#34d399;">0 รายการ</strong></div>
+            </div>
+        </div>
+
+        <!-- Log List Table Container -->
+        <div style="overflow-y: auto; flex: 1; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; background: rgba(15, 23, 42, 0.4);">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead style="position: sticky; top: 0; background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px); z-index: 10;">
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.12); color: #a5b4fc; font-size: 0.78rem;">
+                        <th style="padding: 10px 8px; width: 140px;">📅 วันเวลา / หน้าเว็บ</th>
+                        <th style="padding: 10px 8px; text-align: center; width: 100px;">หมวดหมู่</th>
+                        <th style="padding: 10px 8px; width: 180px;">กิจกรรม</th>
+                        <th style="padding: 10px 8px;">รายละเอียด</th>
+                    </tr>
+                </thead>
+                <tbody id="system-log-table-body">
+                    <!-- Populated dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal Action Footer Buttons -->
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 14px; flex-wrap: wrap;">
+            <button type="button" onclick="SystemLogger.clearAll()" style="background: rgba(244,63,94,0.15); color: #fda4af; border: 1px solid rgba(244,63,94,0.3); padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-trash-can"></i> ล้าง Log ทั้งหมด
+            </button>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" onclick="SystemLogger.exportCSV()" style="background: linear-gradient(135deg, #059669, #10b981); color: #ffffff; border: none; padding: 7px 16px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);">
+                    <i class="fa-solid fa-file-csv"></i> ส่งออกเป็นไฟล์ CSV
+                </button>
+                <button type="button" onclick="closeSystemLogModal()" style="background: rgba(255,255,255,0.1); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 7px 16px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer;">
+                    ปิดหน้าต่าง
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <script>
     // Firebase Config Initialization (ใช้องค์ประกอบ Firebase เดียวกัน)
     const firebaseConfig = {
@@ -919,10 +1002,215 @@
     const db = firebase.database();
     const commuteRef = db.ref('parliament_commute');
 
+    // ==========================================
+    // SYSTEM LOGGING ENGINE (ระบบบันทึก Log กิจกรรมทั้งหมดในระบบ)
+    // ==========================================
+    const SystemLogger = {
+        logs: [],
+        
+        init: function() {
+            this.loadLocalLogs();
+            this.listenFirebaseLogs();
+        },
+
+        loadLocalLogs: function() {
+            try {
+                const raw = localStorage.getItem('system_activity_logs');
+                if (raw) this.logs = JSON.parse(raw);
+            } catch(e) {
+                this.logs = [];
+            }
+        },
+
+        saveLocalLogs: function() {
+            try {
+                if (this.logs.length > 300) {
+                    this.logs = this.logs.slice(0, 300);
+                }
+                localStorage.setItem('system_activity_logs', JSON.stringify(this.logs));
+            } catch(e) {}
+        },
+
+        listenFirebaseLogs: function() {
+            if (typeof db !== 'undefined' && db) {
+                try {
+                    const logsRef = db.ref('system_logs');
+                    logsRef.limitToLast(100).on('value', (snapshot) => {
+                        const val = snapshot.val();
+                        if (val) {
+                            const cloudLogs = Object.values(val);
+                            const combined = [...cloudLogs, ...this.logs];
+                            const uniqueMap = new Map();
+                            combined.forEach(item => {
+                                if (item && item.id) uniqueMap.set(item.id, item);
+                            });
+                            this.logs = Array.from(uniqueMap.values());
+                            this.logs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                            this.saveLocalLogs();
+                            this.renderLogModalUI();
+                        }
+                    });
+                } catch(err) {
+                    console.warn("Firebase system_logs sync fallback:", err);
+                }
+            }
+        },
+
+        log: function(category, action, details, iconStr) {
+            const now = new Date();
+            const yearBE = now.getFullYear() + 543;
+            const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth()+1).padStart(2, '0')}/${yearBE}`;
+            
+            const logItem = {
+                id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                timestamp: Date.now(),
+                dateTimeStr: `${dateStr} ${timeStr} น.`,
+                page: (window.location.pathname.split('/').pop() || 'parliament_commute.html'),
+                category: category || 'SYSTEM',
+                action: action || 'กิจกรรมในระบบ',
+                details: details || '',
+                icon: iconStr || 'fa-solid fa-circle-info text-indigo-400',
+                user: 'admin'
+            };
+
+            this.logs.unshift(logItem);
+            this.saveLocalLogs();
+
+            if (typeof db !== 'undefined' && db) {
+                try {
+                    db.ref('system_logs/' + logItem.id).set(logItem).catch(() => {});
+                } catch(e) {}
+            }
+
+            this.renderLogModalUI();
+        },
+
+        clearAll: function() {
+            if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างประวัติ Log ทั้งหมดในระบบ?')) return;
+            this.logs = [];
+            localStorage.removeItem('system_activity_logs');
+            if (typeof db !== 'undefined' && db) {
+                try { db.ref('system_logs').remove().catch(() => {}); } catch(e) {}
+            }
+            this.renderLogModalUI();
+            alert('ล้างประวัติ Log ทั้งหมดเรียบร้อยแล้ว!');
+        },
+
+        exportCSV: function() {
+            if (!this.logs.length) {
+                alert('ยังไม่มีประวัติ Log สำหรับส่งออก');
+                return;
+            }
+            let csvContent = "\uFEFFลำดับ,วันเวลา,หมวดหมู่,กิจกรรม,รายละเอียด,หน้าเว็บ,ผู้ใช้งาน\n";
+            this.logs.forEach((item, idx) => {
+                csvContent += `"${idx + 1}","${item.dateTimeStr}","${item.category}","${(item.action||'').replace(/"/g, '""')}","${(item.details||'').replace(/"/g, '""')}","${item.page}","${item.user}"\n`;
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `system_activity_logs_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
+        },
+
+        renderLogModalUI: function() {
+            const tbody = document.getElementById('system-log-table-body');
+            const countBadge = document.getElementById('log-total-count');
+            const todayCountBadge = document.getElementById('log-today-count');
+            if (!tbody) return;
+
+            if (countBadge) countBadge.innerText = `${this.logs.length} รายการ`;
+
+            const todayIso = new Date().toISOString().split('T')[0];
+            const todayCount = this.logs.filter(l => {
+                const d = new Date(l.timestamp || Date.now());
+                return d.toISOString().split('T')[0] === todayIso;
+            }).length;
+            if (todayCountBadge) todayCountBadge.innerText = `${todayCount} รายการ`;
+
+            const filterCategory = document.getElementById('log-filter-category')?.value || 'ALL';
+            const searchQuery = (document.getElementById('log-filter-search')?.value || '').toLowerCase();
+
+            const filtered = this.logs.filter(item => {
+                if (filterCategory !== 'ALL' && item.category !== filterCategory) return false;
+                if (searchQuery) {
+                    const text = `${item.action} ${item.details} ${item.dateTimeStr} ${item.page}`.toLowerCase();
+                    return text.includes(searchQuery);
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:#94a3b8;"><i class="fa-solid fa-folder-open text-2xl mb-2"></i><div>ไม่พบรายการ Log ตามเงื่อนไขที่เลือก</div></td></tr>`;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((item) => {
+                let catBadge = '';
+                switch(item.category) {
+                    case 'CREATE': catBadge = '<span style="background:rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🟢 เพิ่มข้อมูล</span>'; break;
+                    case 'UPDATE': catBadge = '<span style="background:rgba(59,130,246,0.2); color:#93c5fd; border:1px solid rgba(59,130,246,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🔵 แก้ไข</span>'; break;
+                    case 'DELETE': catBadge = '<span style="background:rgba(244,63,94,0.2); color:#fda4af; border:1px solid rgba(244,63,94,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🔴 ลบข้อมูล</span>'; break;
+                    case 'OCR':    catBadge = '<span style="background:rgba(168,85,247,0.2); color:#c084fc; border:1px solid rgba(168,85,247,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🤖 AI/OCR</span>'; break;
+                    case 'EXPORT': catBadge = '<span style="background:rgba(245,158,11,0.2); color:#fcd34d; border:1px solid rgba(245,158,11,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">📄 ออกรายงาน</span>'; break;
+                    default:       catBadge = '<span style="background:rgba(99,102,241,0.2); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">⚙️ ระบบ</span>'; break;
+                }
+
+                html += `
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); font-size:0.8rem; transition: background 0.15s;" onmouseover="this.style.background='rgba(30,41,59,0.5)'" onmouseout="this.style.background='transparent'">
+                        <td style="padding:10px 8px; white-space:nowrap; color:#94a3b8; font-size:0.76rem;">
+                            <div><i class="fa-regular fa-clock text-slate-500 mr-1"></i>${item.dateTimeStr}</div>
+                            <div style="font-size:0.68rem; color:#64748b; margin-top:2px;">🌐 ${item.page}</div>
+                        </td>
+                        <td style="padding:10px 8px; text-align:center;">${catBadge}</td>
+                        <td style="padding:10px 8px; font-weight:600; color:#f8fafc; display:flex; align-items:center; gap:6px;">
+                            <i class="${item.icon}"></i> ${item.action}
+                        </td>
+                        <td style="padding:10px 8px; color:#cbd5e1; font-size:0.78rem; word-break:break-word;">
+                            ${item.details}
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+    };
+
+    function openSystemLogModal() {
+        const modal = document.getElementById('system-log-modal');
+        if (modal) {
+            modal.classList.add('active');
+            modal.style.display = 'flex';
+            SystemLogger.renderLogModalUI();
+        }
+    }
+
+    function closeSystemLogModal() {
+        const modal = document.getElementById('system-log-modal');
+        if (modal) {
+            modal.classList.remove('active');
+            modal.style.display = 'none';
+        }
+    }
+
+    function handleLogout() {
+        if (!confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) return;
+        if (typeof SystemLogger !== 'undefined') {
+            SystemLogger.log('SYSTEM', 'USER_LOGOUT', 'ผู้ใช้ออกจากระบบ', 'fa-right-from-bracket');
+        }
+        localStorage.removeItem('vault_auth_user');
+        window.location.href = 'index.html';
+    }
+
     let stagedImages = [];
     let allRecords = [];
 
     function initApp() {
+        SystemLogger.init();
         const today = new Date().toISOString().split('T')[0];
         const inputDate = document.getElementById('input-date');
         if (inputDate) {
@@ -1054,7 +1342,7 @@
 
         stagedImages.forEach((img, i) => {
             const secs = parseTimeToSeconds(img.time);
-            const isMorning = (secs > 0 && Math.floor(secs / 3600) < 12);
+            const isMorning = (secs > 0 && Math.floor(secs / 3600) < 13);
             if (i === 0 || isMorning) {
                 if (goKm > 0) img.distance = goKm;
             } else {
@@ -1089,7 +1377,7 @@
                 reader.onload = function(evt) {
                     compressImageBase64(evt.target.result, 1200, 0.8, function(compressedData) {
                         const secs = parseTimeToSeconds(meta.realTime);
-                        const isMorning = (secs > 0 && Math.floor(secs / 3600) < 12);
+                        const isMorning = (secs > 0 && Math.floor(secs / 3600) < 13);
                         
                         const goKmVal = parseFloat(document.getElementById('input-go-km')?.value) || 0;
                         const backKmVal = parseFloat(document.getElementById('input-back-km')?.value) || 0;
@@ -1224,6 +1512,7 @@
 
         // Try saving to Firebase Realtime Database first
         commuteRef.push(recordData, (err) => {
+            SystemLogger.log('CREATE', 'เพิ่มบันทึกการเดินทางใหม่', `บันทึกวันที่ ${recordData.titleThai} (แนบภาพ ${recordData.images.length} ภาพ)`, 'fa-solid fa-plus-circle text-emerald-400');
             if (err) {
                 console.warn("Firebase Permission Pending, saving locally:", err.message);
                 // Save to LocalStorage Fallback so user can still export DOCX & PDF immediately!
@@ -1257,6 +1546,7 @@
 
     function deleteRecord(id) {
         if (!confirm('ยืนยันลบรายการบันทึกนี้หรือไม่?')) return;
+        SystemLogger.log('DELETE', 'ลบบันทึกการเดินทาง', `ลบรายการบันทึก ID: ${id}`, 'fa-solid fa-trash-can text-rose-400');
         if (id && id.startsWith('local_')) {
             let localRecs = loadLocalCommuteRecords();
             localRecs = localRecs.filter(r => r.id !== id);
@@ -1323,7 +1613,7 @@
         const secs = parseTimeToSeconds(timeStr);
         if (secs > 0) {
             const hour = Math.floor(secs / 3600);
-            if (hour < 12) {
+            if (hour < 13) {
                 return `ภาพที่ ${idxInDateGroup + 1} (ขาไปสภา)`;
             } else {
                 return `ภาพที่ ${idxInDateGroup + 1} (ขากลับ/GPS)`;
@@ -1487,6 +1777,7 @@
 
     function updatePhotoDistance(recordId, origIdx, val) {
         const num = parseFloat(val) || 0;
+        SystemLogger.log('UPDATE', 'ระบุ/แก้ไขระยะทาง', `ปรับระยะทางเป็น ${num} กม.`, 'fa-solid fa-route text-sky-400');
         const rec = allRecords.find(r => r.id === recordId);
         if (rec && rec.images && rec.images[origIdx] !== undefined) {
             if (typeof rec.images[origIdx] === 'string') {
@@ -1776,6 +2067,7 @@
 
         console.warn = origWarn; // Restore original console.warn
         if (btnText) btnText.innerText = "🤖 สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)";
+        SystemLogger.log('OCR', 'สแกนอ่านระยะทางด้วย AI (OCR)', `ดึงข้อมูลสำเร็จ ${countSuccess} / ${totalScanned} ภาพ`, 'fa-solid fa-robot text-purple-400');
         alert(`สแกนอ่านระยะทางเสร็จสิ้น! ดึงตัวเลขกิโลเมตรสำเร็จ ${countSuccess} / ${totalScanned} ภาพ`);
         renderCommuteRecords();
     }
@@ -1830,6 +2122,8 @@
             alert('กำลังโหลดไลบรารี DOCX กรุณาลองใหม่อีกครั้ง');
             return;
         }
+
+        SystemLogger.log('EXPORT', 'ออกรายงาน Word (.docx)', `ดาวน์โหลดเอกสาร Word (.docx) รวม ${grouped.length} ช่วงวันที่`, 'fa-solid fa-file-word text-blue-400');
 
         const { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, AlignmentType, HeadingLevel, WidthType, BorderStyle } = docx;
 
@@ -1979,6 +2273,8 @@
             alert('ไม่พบรายการภาพแผนที่ตามช่วงวันที่ที่เลือก กรุณาปรับเปลี่ยนตัวกรองวันที่ก่อนออกรายงาน');
             return;
         }
+
+        SystemLogger.log('EXPORT', 'ออกรายงาน PDF', 'สั่งพิมพ์/บันทึก PDF รายงานการเดินทาง', 'fa-solid fa-file-pdf text-rose-400');
 
         // ตรวจจับ LINE Browser / In-App Browser บนมือถือ
         const isLineBrowser = /Line\//i.test(navigator.userAgent);
