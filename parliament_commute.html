@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>รายงานภาพแผนที่การเดินทาง</title>
+    <!-- Favicon (ป้องกันปัญหา 404 บน GitHub Pages / Netlify) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
     <!-- Google Fonts: Prompt & Fira Code -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -611,7 +613,7 @@
                     <h1>🏛️ รายงานภาพแผนที่ การเดินทาง ไป-กลับ สภา</h1>
                     <div class="live-status">
                         <span class="live-dot"></span>
-                        <span> Firebase Cloud Sync • ออกรายงานได้ทั้ง Word (.docx) และ PDF</span>
+                        <span id="cloud-status-badge"> Firebase Cloud Sync • ออกรายงานได้ทั้ง Word (.docx) และ PDF</span>
                     </div>
                 </div>
             </div>
@@ -834,7 +836,10 @@
 
         <!-- Commute Records List -->
         <div id="commute-records-list" class="records-grid">
-            <div style="text-align: center; padding: 40px; color: #94a3b8;">กำลังโหลดข้อมูลจาก Firebase Cloud...</div>
+            <div style="text-align: center; padding: 40px; color: #94a3b8; background: rgba(15,23,42,0.4); border-radius: 16px;">
+                <i class="fa-solid fa-spinner fa-spin text-indigo-400" style="font-size: 1.8rem; margin-bottom: 10px;"></i>
+                <div>กำลังโหลดและซิงค์ข้อมูลการเดินทาง...</div>
+            </div>
         </div>
     </div>
 </div>
@@ -884,12 +889,34 @@
         
         document.getElementById('input-date').addEventListener('change', updateThaiDatePreview);
         
-        // Load initial local records
+        // 1. Immediately render local records so user never sees blank or stuck screen!
         const localRecs = loadLocalCommuteRecords();
         syncCombinedRecords(localRecs);
         
-        // Firebase Realtime Listener
+        // 2. Status badge updater helper
+        const updateStatusBadge = (text, isConnected) => {
+            const badge = document.getElementById('cloud-status-badge');
+            if (badge) {
+                if (isConnected) {
+                    badge.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-400"></i> Firebase Cloud Sync (${text}) • ออกรายงานได้ทั้ง Word (.docx) และ PDF`;
+                } else {
+                    badge.innerHTML = `<i class="fa-solid fa-hard-drive text-indigo-400"></i> โหมด Offline / อุปกรณ์ (${text}) • ออกรายงานได้ทั้ง Word (.docx) และ PDF`;
+                }
+            }
+        };
+
+        let hasCloudSynced = false;
+        setTimeout(() => {
+            if (!hasCloudSynced) {
+                updateStatusBadge("ข้อมูลท้องถิ่นพร้อมใช้งาน", false);
+                syncCombinedRecords(loadLocalCommuteRecords());
+            }
+        }, 800);
+
+        // 3. Realtime Firebase Listener
         commuteRef.on('value', (snapshot) => {
+            hasCloudSynced = true;
+            updateStatusBadge("เชื่อมต่อ Cloud สำเร็จ", true);
             const val = snapshot.val();
             allRecords = [];
             if (val) {
@@ -905,7 +932,9 @@
             }
             syncCombinedRecords(loadLocalCommuteRecords());
         }, (err) => {
+            hasCloudSynced = true;
             console.warn("Firebase listener error, fallback to local:", err.message);
+            updateStatusBadge("ใช้งานข้อมูลจากอุปกรณ์", false);
             syncCombinedRecords(loadLocalCommuteRecords());
         });
     });
@@ -1602,6 +1631,27 @@
         document.getElementById('distance-table-modal').classList.remove('active');
     }
 
+    function cropImageBottomPanel(dataUrl) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const w = img.width;
+                const h = img.height;
+                const cropH = Math.round(h * 0.45); // lower 45% of map screenshot
+                const startY = h - cropH;
+                
+                canvas.width = w;
+                canvas.height = cropH;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, startY, w, cropH, 0, 0, w, cropH);
+                resolve(canvas.toDataURL('image/jpeg', 0.8));
+            };
+            img.onerror = () => resolve(dataUrl);
+            img.src = dataUrl;
+        });
+    }
+
     async function scanAllImageDistancesWithOCR() {
         if (typeof Tesseract === 'undefined') {
             alert("กำลังโหลดระบบอ่านภาพด้วย AI (OCR) โปรดลองอีกครั้งใน 3 วินาที");
@@ -1614,13 +1664,26 @@
         let countSuccess = 0;
         let totalScanned = 0;
 
+        // Filter out harmless Tesseract parameter warnings from dev console
+        const origWarn = console.warn;
+        console.warn = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('Parameter not found')) return;
+            origWarn.apply(console, args);
+        };
+
         for (const sec of currentFilteredSections) {
             for (const img of sec.images) {
                 totalScanned++;
                 if (!img.url) continue;
 
                 try {
-                    const res = await Tesseract.recognize(img.url, 'tha+eng');
+                    // Focus scan on lower 45% panel for 5X speed & higher accuracy
+                    const croppedUrl = await cropImageBottomPanel(img.url);
+
+                    const res = await Tesseract.recognize(croppedUrl || img.url, 'tha+eng', {
+                        tessedit_char_whitelist: '0123456789.กมkmKM ()'
+                    });
+
                     const text = res.data.text || '';
                     const match = text.match(/(\d+(?:\.\d+)?)\s*(?:กม|km|กม\.|km\.)/i);
                     if (match) {
@@ -1631,11 +1694,12 @@
                         }
                     }
                 } catch(err) {
-                    console.warn("OCR scan notice:", err);
+                    console.log("OCR scan item notice:", err);
                 }
             }
         }
 
+        console.warn = origWarn; // Restore original console.warn
         if (btnText) btnText.innerText = "🤖 สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)";
         alert(`สแกนอ่านระยะทางเสร็จสิ้น! ดึงตัวเลขกิโลเมตรสำเร็จ ${countSuccess} / ${totalScanned} ภาพ`);
         renderCommuteRecords();
