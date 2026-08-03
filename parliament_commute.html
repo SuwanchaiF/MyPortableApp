@@ -750,22 +750,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Batch Preset Controls for Custom Morning/Evening Distance -->
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 0.76rem; color: #cbd5e1;">
-                    <span style="font-weight: 600; color: #6ee7b7;"><i class="fa-solid fa-sliders text-emerald-400 mr-1"></i> ปรับระยะทางตั้งต้น:</span>
-                    <div style="display: flex; align-items: center; gap: 4px;">
-                        <label style="color: #94a3b8;">ขาไป:</label>
-                        <input type="number" id="default-go-km" value="19" onchange="applyBatchDefaultDistances()" style="width: 44px; padding: 2px 4px; font-size: 0.76rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #6ee7b7; text-align: center;"> กม.
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 4px;">
-                        <label style="color: #94a3b8;">ขากลับ:</label>
-                        <input type="number" id="default-back-km" value="21" onchange="applyBatchDefaultDistances()" style="width: 44px; padding: 2px 4px; font-size: 0.76rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #6ee7b7; text-align: center;"> กม.
-                    </div>
-                    <button type="button" onclick="applyBatchDefaultDistances()" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 0.74rem; padding: 3px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
-                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> ใส่ระยะทางนี้ให้ทุกภาพในรายการที่กรอง
-                    </button>
-                </div>
             </div>
 
             <!-- Export Buttons Container (ตำแหน่งใหม่: อยู่ล่างสุดของตัวกรอง) -->
@@ -794,6 +778,13 @@
             <span id="modal-img-label" style="font-weight: 700; color: #a5b4fc;"><i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ภาพแผนที่</span>
             <span id="modal-img-date" style="color: #cbd5e1;"><i class="fa-regular fa-calendar text-indigo-400 mr-1"></i> วันที่: -</span>
             <span id="modal-img-time" style="color: #fbbf24;"><i class="fa-regular fa-clock text-amber-400 mr-1"></i> เวลา: -</span>
+            
+            <div id="modal-distance-wrapper" style="display: flex; align-items: center; gap: 6px; background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.4); padding: 4px 10px; border-radius: 8px;">
+                <i class="fa-solid fa-route text-emerald-400"></i>
+                <span style="color: #6ee7b7; font-size: 0.8rem; font-weight: 600;">ระบุระยะทาง:</span>
+                <input type="number" id="modal-img-distance-input" placeholder="0" step="0.5" min="0" onchange="saveModalDistance(this.value)" oninput="saveModalDistance(this.value)" style="width: 55px; padding: 2px 4px; font-size: 0.88rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(74,222,128,0.5); border-radius: 6px; color: #4ade80; font-weight: bold; text-align: center;" title="ระบุระยะทางกิโลเมตรของภาพนี้">
+                <span style="color: #4ade80; font-size: 0.8rem; font-weight: 600;">กม.</span>
+            </div>
         </div>
         <button type="button" onclick="closeImageModal()" style="position: absolute; top: -14px; right: -14px; background: #f43f5e; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
             <i class="fa-solid fa-xmark"></i>
@@ -907,12 +898,35 @@
         }
     }
 
+    function updateStagedDefaultKm() {
+        const goKm = parseFloat(document.getElementById('input-go-km')?.value) || 0;
+        const backKm = parseFloat(document.getElementById('input-back-km')?.value) || 0;
+
+        stagedImages.forEach((img, i) => {
+            const secs = parseTimeToSeconds(img.time);
+            const isMorning = (secs > 0 && Math.floor(secs / 3600) < 12);
+            if (i === 0 || isMorning) {
+                if (goKm > 0) img.distance = goKm;
+            } else {
+                if (backKm > 0) img.distance = backKm;
+            }
+        });
+        renderStagedImagePreviews();
+    }
+
     function handleImageSelection(e) {
         const files = Array.from(e.target.files);
         if (!files.length) return;
 
         files.forEach((file) => {
             if (!file.type.startsWith('image/')) return;
+
+            // Check filename for km digits (e.g., "map_20.5km.jpg")
+            let fileKm = 0;
+            const nameMatch = file.name.match(/(\d+(?:\.\d+)?)\s*(?:กม|km)/i);
+            if (nameMatch) {
+                fileKm = parseFloat(nameMatch[1]);
+            }
 
             extractImageRealDateTime(file, (meta) => {
                 // Auto-fill the form date if it's the first image uploaded!
@@ -924,15 +938,29 @@
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     compressImageBase64(evt.target.result, 1200, 0.8, function(compressedData) {
-                        const defaultLabel = (stagedImages.length === 0) ? 'ภาพที่ 1 (ขาไปสภา)' : `ภาพที่ ${stagedImages.length + 1} (ขากลับ/GPS)`;
-                        const defaultKm = (stagedImages.length === 0) ? (parseFloat(document.getElementById('default-go-km')?.value) || 19) : (parseFloat(document.getElementById('default-back-km')?.value) || 21);
+                        const secs = parseTimeToSeconds(meta.realTime);
+                        const isMorning = (secs > 0 && Math.floor(secs / 3600) < 12);
+                        
+                        const goKmVal = parseFloat(document.getElementById('input-go-km')?.value) || 0;
+                        const backKmVal = parseFloat(document.getElementById('input-back-km')?.value) || 0;
+                        const formKm = isMorning ? goKmVal : backKmVal;
+
+                        const finalKm = formKm > 0 ? formKm : fileKm;
+
                         stagedImages.push({
                             url: compressedData,
                             date: meta.realDate,
                             time: meta.realTime,
-                            label: defaultLabel,
-                            distance: defaultKm
+                            label: isMorning ? 'ภาพที่ 1 (ขาไปสภา)' : 'ภาพที่ 2 (ขากลับ/GPS)',
+                            distance: finalKm
                         });
+
+                        // Sort staged images chronologically by time so morning is always first!
+                        stagedImages.sort((a, b) => parseTimeToSeconds(a.time) - parseTimeToSeconds(b.time));
+                        stagedImages.forEach((img, i) => {
+                            img.label = getSmartPhotoLabel(img.time, i, stagedImages.length);
+                        });
+
                         renderStagedImagePreviews();
                     });
                 };
@@ -981,16 +1009,17 @@
             const card = document.createElement('div');
             card.className = 'img-preview-card';
             card.style.height = '110px';
+            const kmVal = imgObj.distance && imgObj.distance > 0 ? imgObj.distance : '';
             card.innerHTML = `
-                <img src="${imgObj.url}" alt="Preview Map ${idx+1}">
+                <img src="${imgObj.url}" alt="Preview Map ${idx+1}" onclick="openImageModal('${imgObj.url}', '${imgObj.date}', '${imgObj.time}', '${imgObj.label}', null, null, ${imgObj.distance || 0}, true, ${idx})" style="cursor: pointer;" title="แตะเพื่อขยายดูรูปภาพและระบุระยะทาง">
                 <button type="button" class="btn-remove-img" onclick="removeStagedImage(${idx})">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
                 <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); color: #fbbf24; font-size: 0.65rem; padding: 3px 4px; text-align: center;">
                     <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">⏱️ ${imgObj.time}</div>
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 2px; margin-top: 2px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 2px; margin-top: 2px;" onclick="event.stopPropagation()">
                         <span style="color: #4ade80;">🛣️</span>
-                        <input type="number" value="${imgObj.distance || (idx === 0 ? 19 : 21)}" step="0.5" onchange="updateStagedDistance(${idx}, this.value)" style="width: 38px; padding: 0 2px; font-size: 0.65rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(74,222,128,0.5); color: #4ade80; border-radius: 3px; text-align: center;" title="แก้ไขระยะทางเฉพาะภาพนี้">
+                        <input type="number" value="${kmVal}" placeholder="0" step="0.5" min="0" onchange="updateStagedDistance(${idx}, this.value)" style="width: 38px; padding: 0 2px; font-size: 0.65rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(74,222,128,0.5); color: #4ade80; border-radius: 3px; text-align: center;" title="แตะเพื่อระบุระยะทางเฉพาะภาพนี้">
                         <span style="color: #4ade80;">กม.</span>
                     </div>
                 </div>
@@ -1285,54 +1314,32 @@
         if (imgObj.distance !== undefined && !isNaN(parseFloat(imgObj.distance)) && parseFloat(imgObj.distance) > 0) {
             return parseFloat(imgObj.distance);
         }
-        // Match numbers before "กม" or "km" e.g., "52 นาที (19 กม.)" or "21 กม."
+        // Match explicit numbers before "กม" or "km" e.g., "52 นาที (20 กม.)" or "20.5 กม."
         const str = (imgObj.time || '') + ' ' + (imgObj.label || '') + ' ' + (imgObj.caption || '') + ' ' + (imgObj.date || '');
         const match = str.match(/(\d+(?:\.\d+)?)\s*(?:กม|km)/i);
         if (match) {
             return parseFloat(match[1]);
         }
-
-        // Smart Default Fallbacks based on morning vs afternoon trip:
-        const goKm = parseFloat(document.getElementById('default-go-km')?.value) || 19;
-        const backKm = parseFloat(document.getElementById('default-back-km')?.value) || 21;
-
-        if (imgObj.label && (imgObj.label.includes('ขาไป') || imgObj.label.includes('ภาพที่ 1'))) {
-            return goKm;
-        } else if (imgObj.label && (imgObj.label.includes('ขากลับ') || imgObj.label.includes('ภาพที่ 2'))) {
-            return backKm;
-        }
-        return goKm;
+        return 0;
     }
 
-    function updatePhotoDistance(recordId, imgIdx, val) {
+    function updatePhotoDistance(recordId, origIdx, val) {
         const num = parseFloat(val) || 0;
         const rec = allRecords.find(r => r.id === recordId);
-        if (rec && rec.images && rec.images[imgIdx]) {
-            if (typeof rec.images[imgIdx] === 'string') {
-                rec.images[imgIdx] = { url: rec.images[imgIdx], distance: num };
+        if (rec && rec.images && rec.images[origIdx] !== undefined) {
+            if (typeof rec.images[origIdx] === 'string') {
+                rec.images[origIdx] = { url: rec.images[origIdx], distance: num };
             } else {
-                rec.images[imgIdx].distance = num;
+                rec.images[origIdx].distance = num;
+            }
+
+            // Sync update to Firebase if remote record
+            if (recordId && !recordId.startsWith('local_')) {
+                commuteRef.child(recordId).child('images').child(origIdx).update({ distance: num });
+            } else {
+                saveLocalCommuteRecords(allRecords.filter(r => r.id && r.id.startsWith('local_')));
             }
         }
-        renderCommuteRecords();
-    }
-
-    function applyBatchDefaultDistances() {
-        const goKm = parseFloat(document.getElementById('default-go-km')?.value) || 19;
-        const backKm = parseFloat(document.getElementById('default-back-km')?.value) || 21;
-
-        allRecords.forEach(rec => {
-            if (rec.images && Array.isArray(rec.images)) {
-                rec.images.forEach((img, idx) => {
-                    const kmVal = (idx === 0) ? goKm : backKm;
-                    if (typeof img === 'string') {
-                        rec.images[idx] = { url: img, distance: kmVal };
-                    } else {
-                        img.distance = kmVal;
-                    }
-                });
-            }
-        });
         renderCommuteRecords();
     }
 
@@ -1418,16 +1425,17 @@
                 const safeLabel = img.label;
                 const safeDate = dateDisplay;
                 const imgKm = parseDistanceKm(img);
+                const valDisplay = imgKm > 0 ? imgKm : '';
                 const kmBadge = `
                     <div onclick="event.stopPropagation()" style="display: inline-flex; align-items: center; gap: 3px; background: rgba(74, 222, 128, 0.15); padding: 1px 6px; border-radius: 6px; border: 1px solid rgba(74, 222, 128, 0.3);">
                         <i class="fa-solid fa-route text-emerald-400" style="font-size: 0.7rem;"></i>
-                        <input type="number" value="${imgKm}" step="0.5" min="0" onchange="updatePhotoDistance('${section.recordId}', ${imgIdx}, this.value)" style="width: 38px; padding: 0 2px; font-size: 0.72rem; background: transparent; border: none; color: #4ade80; font-weight: bold; text-align: center;" title="แตะเพื่อแก้ไขระยะทางกิโลเมตรเฉพาะภาพนี้">
+                        <input type="number" value="${valDisplay}" placeholder="0" step="0.5" min="0" onchange="updatePhotoDistance('${img.recordId}', ${img.origIdx}, this.value)" style="width: 40px; padding: 0 2px; font-size: 0.72rem; background: transparent; border: none; color: #4ade80; font-weight: bold; text-align: center;" title="แตะเพื่อระบุระยะทางกิโลเมตรเฉพาะภาพนี้">
                         <span style="color: #4ade80; font-size: 0.7rem;">กม.</span>
                     </div>
                 `;
 
                 imgsHtml += `
-                    <div class="map-image-wrapper" onclick="openImageModal('${safeUrl}', '${safeDate}', '${safeTime}', '${safeLabel}')">
+                    <div class="map-image-wrapper" onclick="openImageModal('${safeUrl}', '${safeDate}', '${safeTime}', '${safeLabel}', '${img.recordId}', ${img.origIdx}, ${imgKm}, false, null)">
                         <img src="${safeUrl}" alt="Map ${dateDisplay}">
                         <div class="image-caption" style="display: flex; justify-content: space-between; align-items: center;">
                             <span><i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ${safeLabel}</span>
@@ -1461,12 +1469,32 @@
         container.innerHTML = html;
     }
 
-    function openImageModal(imgUrl, dateStr, timeStr, labelStr) {
+    let currentModalTarget = null;
+
+    function openImageModal(imgUrl, dateStr, timeStr, labelStr, recordId, origIdx, imgKm, isStaged, stagedIdx) {
         document.getElementById('modal-full-img').src = imgUrl;
         document.getElementById('modal-img-label').innerHTML = `<i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ${labelStr || 'ภาพแผนที่'}`;
         document.getElementById('modal-img-date').innerHTML = `<i class="fa-regular fa-calendar text-indigo-400 mr-1"></i> วันที่: ${dateStr || '-'}`;
         document.getElementById('modal-img-time').innerHTML = `<i class="fa-regular fa-clock text-amber-400 mr-1"></i> เวลา: ${timeStr || '-'}`;
+        
+        const distInput = document.getElementById('modal-img-distance-input');
+        if (distInput) {
+            distInput.value = (imgKm && imgKm > 0) ? imgKm : '';
+        }
+
+        currentModalTarget = { recordId, origIdx, isStaged, stagedIdx };
         document.getElementById('image-modal').classList.add('active');
+    }
+
+    function saveModalDistance(val) {
+        if (!currentModalTarget) return;
+        const num = parseFloat(val) || 0;
+
+        if (currentModalTarget.isStaged) {
+            updateStagedDistance(currentModalTarget.stagedIdx, num);
+        } else if (currentModalTarget.recordId !== undefined) {
+            updatePhotoDistance(currentModalTarget.recordId, currentModalTarget.origIdx, num);
+        }
     }
 
     function closeImageModal() {
