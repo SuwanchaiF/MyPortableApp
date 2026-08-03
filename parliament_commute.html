@@ -1056,6 +1056,20 @@
             }
         },
 
+        getDeviceType: function() {
+            const ua = navigator.userAgent || '';
+            const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+            const isSmallScreen = window.innerWidth <= 768;
+            if (isMobileUA || isSmallScreen) {
+                if (/iPhone|iPad|iPod/i.test(ua)) return '📱 iPhone/iOS';
+                if (/Android/i.test(ua)) return '📱 Android';
+                return '📱 Mobile';
+            }
+            if (/Macintosh|Mac OS X/i.test(ua)) return '💻 Mac';
+            if (/Windows/i.test(ua)) return '💻 Windows';
+            return '💻 Desktop';
+        },
+
         log: function(category, action, details, iconStr) {
             const now = new Date();
             const yearBE = now.getFullYear() + 543;
@@ -1071,7 +1085,8 @@
                 action: action || 'กิจกรรมในระบบ',
                 details: details || '',
                 icon: iconStr || 'fa-solid fa-circle-info text-indigo-400',
-                user: 'admin'
+                device: this.getDeviceType(),
+                user: (typeof currentUser !== 'undefined' && currentUser?.username) ? currentUser.username : ((typeof hubUser !== 'undefined' && hubUser?.username) ? hubUser.username : 'admin')
             };
 
             this.logs.unshift(logItem);
@@ -1102,9 +1117,9 @@
                 alert('ยังไม่มีประวัติ Log สำหรับส่งออก');
                 return;
             }
-            let csvContent = "\uFEFFลำดับ,วันเวลา,หมวดหมู่,กิจกรรม,รายละเอียด,หน้าเว็บ,ผู้ใช้งาน\n";
+            let csvContent = "\uFEFFลำดับ,วันเวลา,หมวดหมู่,กิจกรรม,รายละเอียด,หน้าเว็บ,อุปกรณ์,ผู้ใช้งาน\n";
             this.logs.forEach((item, idx) => {
-                csvContent += `"${idx + 1}","${item.dateTimeStr}","${item.category}","${(item.action||'').replace(/"/g, '""')}","${(item.details||'').replace(/"/g, '""')}","${item.page}","${item.user}"\n`;
+                csvContent += `"${idx + 1}","${item.dateTimeStr}","${item.category}","${(item.action||'').replace(/"/g, '""')}","${(item.details||'').replace(/"/g, '""')}","${item.page}","${item.device||'Desktop'}","${item.user}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -1137,7 +1152,7 @@
             const filtered = this.logs.filter(item => {
                 if (filterCategory !== 'ALL' && item.category !== filterCategory) return false;
                 if (searchQuery) {
-                    const text = `${item.action} ${item.details} ${item.dateTimeStr} ${item.page}`.toLowerCase();
+                    const text = `${item.action} ${item.details} ${item.dateTimeStr} ${item.page} ${item.device || ''}`.toLowerCase();
                     return text.includes(searchQuery);
                 }
                 return true;
@@ -1160,11 +1175,16 @@
                     default:       catBadge = '<span style="background:rgba(99,102,241,0.2); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">⚙️ ระบบ</span>'; break;
                 }
 
+                const deviceTag = item.device ? `<span style="background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3); padding:1px 6px; border-radius:4px; font-size:0.65rem;">${item.device}</span>` : '';
+
                 html += `
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); font-size:0.8rem; transition: background 0.15s;" onmouseover="this.style.background='rgba(30,41,59,0.5)'" onmouseout="this.style.background='transparent'">
                         <td style="padding:10px 8px; white-space:nowrap; color:#94a3b8; font-size:0.76rem;">
                             <div><i class="fa-regular fa-clock text-slate-500 mr-1"></i>${item.dateTimeStr}</div>
-                            <div style="font-size:0.68rem; color:#64748b; margin-top:2px;">🌐 ${item.page}</div>
+                            <div style="font-size:0.68rem; color:#64748b; margin-top:3px; display:flex; align-items:center; gap:6px;">
+                                <span>🌐 ${item.page}</span>
+                                ${deviceTag}
+                            </div>
                         </td>
                         <td style="padding:10px 8px; text-align:center;">${catBadge}</td>
                         <td style="padding:10px 8px; font-weight:600; color:#f8fafc; display:flex; align-items:center; gap:6px;">
