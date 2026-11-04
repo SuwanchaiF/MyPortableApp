@@ -24,9 +24,10 @@
     <!-- PDF Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 
-    <!-- Firebase App & Database (Compat SDKs) -->
+    <!-- Firebase App & Database (Compat SDKs) & Shared Core -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="shared-core.js"></script>
 
     <style>
         :root {
@@ -822,7 +823,7 @@
                     </div>
                 </div>
 
-                <!-- Action Toolbar: AI OCR Scan & Fast Table Grid -->
+                <!-- Action Toolbar: AI OCR Scan, Fast Table Grid & JSON Backup -->
                 <div class="action-toolbar-buttons" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
                     <button type="button" onclick="scanAllImageDistancesWithOCR()" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
                         <i class="fa-solid fa-robot text-purple-400"></i> <span id="ocr-btn-text">🤖 สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)</span>
@@ -830,6 +831,13 @@
                     <button type="button" onclick="openDistanceTableModal()" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
                         <i class="fa-solid fa-table-list text-emerald-400"></i> 📋 ตารางระบุระยะทางแบบรวม (Fast Table)
                     </button>
+                    <button type="button" onclick="CommuteStorage.exportBackupJSON(allRecords)" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #7dd3fc; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" title="ดาวน์โหลดข้อมูลทั้งหมดเก็บเป็นไฟล์สำรอง .json">
+                        <i class="fa-solid fa-download text-sky-400"></i> 💾 สำรองข้อมูล (.json)
+                    </button>
+                    <label style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fcd34d; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" title="นำเข้าข้อมูลจากไฟล์สำรอง .json">
+                        <i class="fa-solid fa-file-import text-amber-400"></i> 📂 กู้คืนไฟล์สำรอง
+                        <input type="file" accept=".json,application/json" onchange="handleImportBackupJSON(event)" style="display: none;">
+                    </label>
                 </div>
             </div>
 
@@ -991,231 +999,9 @@
 </div>
 
 <script>
-    // Firebase Config Initialization (ใช้องค์ประกอบ Firebase เดียวกัน)
-    const firebaseConfig = {
-        databaseURL: "https://testprod-69c21-default-rtdb.firebaseio.com"
-    };
-
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.database();
+    // Firebase Config & SystemLogger are provided by shared-core.js
+    const db = window.initSharedFirebase();
     const commuteRef = db.ref('parliament_commute');
-
-    // ==========================================
-    // SYSTEM LOGGING ENGINE (ระบบบันทึก Log กิจกรรมทั้งหมดในระบบ)
-    // ==========================================
-    const SystemLogger = {
-        logs: [],
-        
-        init: function() {
-            this.loadLocalLogs();
-            this.listenFirebaseLogs();
-        },
-
-        loadLocalLogs: function() {
-            try {
-                const raw = localStorage.getItem('system_activity_logs');
-                if (raw) this.logs = JSON.parse(raw);
-            } catch(e) {
-                this.logs = [];
-            }
-        },
-
-        saveLocalLogs: function() {
-            try {
-                if (this.logs.length > 300) {
-                    this.logs = this.logs.slice(0, 300);
-                }
-                localStorage.setItem('system_activity_logs', JSON.stringify(this.logs));
-            } catch(e) {}
-        },
-
-        listenFirebaseLogs: function() {
-            if (typeof db !== 'undefined' && db) {
-                try {
-                    const logsRef = db.ref('system_logs');
-                    logsRef.limitToLast(100).on('value', (snapshot) => {
-                        const val = snapshot.val();
-                        if (val) {
-                            const cloudLogs = Object.values(val);
-                            const combined = [...cloudLogs, ...this.logs];
-                            const uniqueMap = new Map();
-                            combined.forEach(item => {
-                                if (item && item.id) uniqueMap.set(item.id, item);
-                            });
-                            this.logs = Array.from(uniqueMap.values());
-                            this.logs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                            this.saveLocalLogs();
-                            this.renderLogModalUI();
-                        }
-                    });
-                } catch(err) {
-                    console.warn("Firebase system_logs sync fallback:", err);
-                }
-            }
-        },
-
-        getDeviceType: function() {
-            const ua = navigator.userAgent || '';
-            const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-            const isSmallScreen = window.innerWidth <= 768;
-            if (isMobileUA || isSmallScreen) {
-                if (/iPhone|iPad|iPod/i.test(ua)) return '📱 iPhone/iOS';
-                if (/Android/i.test(ua)) return '📱 Android';
-                return '📱 Mobile';
-            }
-            if (/Macintosh|Mac OS X/i.test(ua)) return '💻 Mac';
-            if (/Windows/i.test(ua)) return '💻 Windows';
-            return '💻 Desktop';
-        },
-
-        log: function(category, action, details, iconStr) {
-            const now = new Date();
-            const yearBE = now.getFullYear() + 543;
-            const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth()+1).padStart(2, '0')}/${yearBE}`;
-            
-            const logItem = {
-                id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-                timestamp: Date.now(),
-                dateTimeStr: `${dateStr} ${timeStr} น.`,
-                page: (window.location.pathname.split('/').pop() || 'parliament_commute.html'),
-                category: category || 'SYSTEM',
-                action: action || 'กิจกรรมในระบบ',
-                details: details || '',
-                icon: iconStr || 'fa-solid fa-circle-info text-indigo-400',
-                device: this.getDeviceType(),
-                user: (typeof currentUser !== 'undefined' && currentUser?.username) ? currentUser.username : ((typeof hubUser !== 'undefined' && hubUser?.username) ? hubUser.username : 'admin')
-            };
-
-            this.logs.unshift(logItem);
-            this.saveLocalLogs();
-
-            if (typeof db !== 'undefined' && db) {
-                try {
-                    db.ref('system_logs/' + logItem.id).set(logItem).catch(() => {});
-                } catch(e) {}
-            }
-
-            this.renderLogModalUI();
-        },
-
-        clearAll: function() {
-            if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างประวัติ Log ทั้งหมดในระบบ?')) return;
-            this.logs = [];
-            localStorage.removeItem('system_activity_logs');
-            if (typeof db !== 'undefined' && db) {
-                try { db.ref('system_logs').remove().catch(() => {}); } catch(e) {}
-            }
-            this.renderLogModalUI();
-            alert('ล้างประวัติ Log ทั้งหมดเรียบร้อยแล้ว!');
-        },
-
-        exportCSV: function() {
-            if (!this.logs.length) {
-                alert('ยังไม่มีประวัติ Log สำหรับส่งออก');
-                return;
-            }
-            let csvContent = "\uFEFFลำดับ,วันเวลา,หมวดหมู่,กิจกรรม,รายละเอียด,หน้าเว็บ,อุปกรณ์,ผู้ใช้งาน\n";
-            this.logs.forEach((item, idx) => {
-                csvContent += `"${idx + 1}","${item.dateTimeStr}","${item.category}","${(item.action||'').replace(/"/g, '""')}","${(item.details||'').replace(/"/g, '""')}","${item.page}","${item.device||'Desktop'}","${item.user}"\n`;
-            });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `system_activity_logs_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
-        },
-
-        renderLogModalUI: function() {
-            const tbody = document.getElementById('system-log-table-body');
-            const countBadge = document.getElementById('log-total-count');
-            const todayCountBadge = document.getElementById('log-today-count');
-            if (!tbody) return;
-
-            if (countBadge) countBadge.innerText = `${this.logs.length} รายการ`;
-
-            const todayIso = new Date().toISOString().split('T')[0];
-            const todayCount = this.logs.filter(l => {
-                const d = new Date(l.timestamp || Date.now());
-                return d.toISOString().split('T')[0] === todayIso;
-            }).length;
-            if (todayCountBadge) todayCountBadge.innerText = `${todayCount} รายการ`;
-
-            const filterCategory = document.getElementById('log-filter-category')?.value || 'ALL';
-            const searchQuery = (document.getElementById('log-filter-search')?.value || '').toLowerCase();
-
-            const filtered = this.logs.filter(item => {
-                if (filterCategory !== 'ALL' && item.category !== filterCategory) return false;
-                if (searchQuery) {
-                    const text = `${item.action} ${item.details} ${item.dateTimeStr} ${item.page} ${item.device || ''}`.toLowerCase();
-                    return text.includes(searchQuery);
-                }
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:#94a3b8;"><i class="fa-solid fa-folder-open text-2xl mb-2"></i><div>ไม่พบรายการ Log ตามเงื่อนไขที่เลือก</div></td></tr>`;
-                return;
-            }
-
-            let html = '';
-            filtered.forEach((item) => {
-                let catBadge = '';
-                switch(item.category) {
-                    case 'CREATE': catBadge = '<span style="background:rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🟢 เพิ่มข้อมูล</span>'; break;
-                    case 'UPDATE': catBadge = '<span style="background:rgba(59,130,246,0.2); color:#93c5fd; border:1px solid rgba(59,130,246,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🔵 แก้ไข</span>'; break;
-                    case 'DELETE': catBadge = '<span style="background:rgba(244,63,94,0.2); color:#fda4af; border:1px solid rgba(244,63,94,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🔴 ลบข้อมูล</span>'; break;
-                    case 'OCR':    catBadge = '<span style="background:rgba(168,85,247,0.2); color:#c084fc; border:1px solid rgba(168,85,247,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🤖 AI/OCR</span>'; break;
-                    case 'EXPORT': catBadge = '<span style="background:rgba(245,158,11,0.2); color:#fcd34d; border:1px solid rgba(245,158,11,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">📄 ออกรายงาน</span>'; break;
-                    default:       catBadge = '<span style="background:rgba(99,102,241,0.2); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">⚙️ ระบบ</span>'; break;
-                }
-
-                const deviceTag = item.device ? `<span style="background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3); padding:1px 6px; border-radius:4px; font-size:0.65rem;">${item.device}</span>` : '';
-
-                html += `
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); font-size:0.8rem; transition: background 0.15s;" onmouseover="this.style.background='rgba(30,41,59,0.5)'" onmouseout="this.style.background='transparent'">
-                        <td style="padding:10px 8px; white-space:nowrap; color:#94a3b8; font-size:0.76rem;">
-                            <div><i class="fa-regular fa-clock text-slate-500 mr-1"></i>${item.dateTimeStr}</div>
-                            <div style="font-size:0.68rem; color:#64748b; margin-top:3px; display:flex; align-items:center; gap:6px;">
-                                <span>🌐 ${item.page}</span>
-                                ${deviceTag}
-                            </div>
-                        </td>
-                        <td style="padding:10px 8px; text-align:center;">${catBadge}</td>
-                        <td style="padding:10px 8px; font-weight:600; color:#f8fafc; display:flex; align-items:center; gap:6px;">
-                            <i class="${item.icon}"></i> ${item.action}
-                        </td>
-                        <td style="padding:10px 8px; color:#cbd5e1; font-size:0.78rem; word-break:break-word;">
-                            ${item.details}
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-    };
-
-    function openSystemLogModal() {
-        const modal = document.getElementById('system-log-modal');
-        if (modal) {
-            modal.classList.add('active');
-            modal.style.display = 'flex';
-            SystemLogger.renderLogModalUI();
-        }
-    }
-
-    function closeSystemLogModal() {
-        const modal = document.getElementById('system-log-modal');
-        if (modal) {
-            modal.classList.remove('active');
-            modal.style.display = 'none';
-        }
-    }
 
     function handleLogout() {
         if (!confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) return;
@@ -1230,7 +1016,9 @@
     let allRecords = [];
 
     function initApp() {
-        SystemLogger.init();
+        if (typeof SystemLogger !== 'undefined') {
+            SystemLogger.init();
+        }
         const today = new Date().toISOString().split('T')[0];
         const inputDate = document.getElementById('input-date');
         if (inputDate) {
@@ -1239,9 +1027,16 @@
             inputDate.addEventListener('change', updateThaiDatePreview);
         }
         
-        // 1. Immediately render local records so user never sees blank or stuck screen!
+        // 1. Immediately render local records + IndexedDB records so user never sees blank screen
         const localRecs = loadLocalCommuteRecords();
         syncCombinedRecords(localRecs);
+        if (typeof CommuteStorage !== 'undefined') {
+            CommuteStorage.loadAllLocalAsync((idbRecs) => {
+                if (idbRecs && idbRecs.length) {
+                    syncCombinedRecords(idbRecs);
+                }
+            });
+        }
         
         // 2. Status badge updater helper
         const updateStatusBadge = (text, isConnected) => {
@@ -1501,9 +1296,49 @@
     }
 
     function saveLocalCommuteRecords(records) {
-        try {
-            localStorage.setItem('parliament_commute_local', JSON.stringify(records));
-        } catch(e) {}
+        if (typeof CommuteStorage !== 'undefined') {
+            CommuteStorage.saveLocalSafe(records);
+        } else {
+            try {
+                localStorage.setItem('parliament_commute_local', JSON.stringify(records));
+            } catch(e) {}
+        }
+    }
+
+    function handleImportBackupJSON(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const parsed = JSON.parse(evt.target.result);
+                const imported = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.records) ? parsed.records : []);
+                if (!imported.length) {
+                    alert('ไม่พบรายการข้อมูลในไฟล์สำรองนี้');
+                    return;
+                }
+                const localRecs = loadLocalCommuteRecords();
+                const mergedMap = new Map();
+                [...localRecs, ...imported].forEach(item => {
+                    if (item && (item.id || item.timestamp)) {
+                        if (!item.id) item.id = 'local_' + item.timestamp;
+                        mergedMap.set(item.id, item);
+                    }
+                });
+                const mergedList = Array.from(mergedMap.values());
+                saveLocalCommuteRecords(mergedList);
+                syncCombinedRecords(mergedList);
+                if (typeof SystemLogger !== 'undefined') {
+                    SystemLogger.log('CREATE', 'กู้คืนไฟล์สำรอง JSON', `นำเข้าข้อมูลสำรอง ${imported.length} รายการ`, 'fa-solid fa-file-import text-amber-400');
+                }
+                alert(`กู้คืนข้อมูลจากไฟล์สำรองเรียบร้อยแล้ว (${imported.length} รายการ)`);
+            } catch (err) {
+                alert('ไฟล์สำรองไม่ถูกต้อง: ' + err.message);
+            } finally {
+                e.target.value = '';
+            }
+        };
+        reader.readAsText(file);
     }
 
     function saveCommuteRecord(e) {

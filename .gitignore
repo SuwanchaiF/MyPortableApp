@@ -1,3 +1,6 @@
-# Ignore portable PHP binaries & auto-backups
+# Ignore portable PHP binaries, local backups, and archived copies
 PHP/
 backups/*.json
+backups/*_bk*
+backups/archive/
+backups/legacy_php/

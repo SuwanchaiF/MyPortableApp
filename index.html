@@ -1350,26 +1350,13 @@
     </div>
 </div>
 
-<!-- Firebase SDK -->
+<!-- Firebase SDK & Shared Core -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="shared-core.js"></script>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCC5-cJOhKeDpDu0YSEkE73OxlyOJ3srUM",
-        authDomain: "testprod-69c21.firebaseapp.com",
-        databaseURL: "https://testprod-69c21-default-rtdb.firebaseio.com",
-        projectId: "testprod-69c21",
-        storageBucket: "testprod-69c21.firebasestorage.app",
-        messagingSenderId: "674297674388",
-        appId: "1:674297674388:web:832dd59730e6561aab5281",
-        measurementId: "G-XLK9TQPTVX"
-    };
-
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.database();
+    const db = window.initSharedFirebase();
     const usersRef = db.ref('bootcamp_users');
     let userNotesRef = null;
     let currentUser = null;
@@ -2170,225 +2157,12 @@
 </div>
 
 <script>
-    // ==========================================
-    // SYSTEM LOGGING ENGINE (ระบบบันทึก Log กิจกรรมทั้งหมดในระบบ)
-    // ==========================================
-    const SystemLogger = {
-        logs: [],
-        
-        init: function() {
-            this.loadLocalLogs();
-            this.listenFirebaseLogs();
-        },
-
-        loadLocalLogs: function() {
-            try {
-                const raw = localStorage.getItem('system_activity_logs');
-                if (raw) this.logs = JSON.parse(raw);
-            } catch(e) {
-                this.logs = [];
-            }
-        },
-
-        saveLocalLogs: function() {
-            try {
-                if (this.logs.length > 300) {
-                    this.logs = this.logs.slice(0, 300);
-                }
-                localStorage.setItem('system_activity_logs', JSON.stringify(this.logs));
-            } catch(e) {}
-        },
-
-        listenFirebaseLogs: function() {
-            if (typeof db !== 'undefined' && db) {
-                try {
-                    const logsRef = db.ref('system_logs');
-                    logsRef.limitToLast(100).on('value', (snapshot) => {
-                        const val = snapshot.val();
-                        if (val) {
-                            const cloudLogs = Object.values(val);
-                            const combined = [...cloudLogs, ...this.logs];
-                            const uniqueMap = new Map();
-                            combined.forEach(item => {
-                                if (item && item.id) uniqueMap.set(item.id, item);
-                            });
-                            this.logs = Array.from(uniqueMap.values());
-                            this.logs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                            this.saveLocalLogs();
-                            this.renderLogModalUI();
-                        }
-                    });
-                } catch(err) {
-                    console.warn("Firebase system_logs sync fallback:", err);
-                }
-            }
-        },
-
-        getDeviceType: function() {
-            const ua = navigator.userAgent || '';
-            const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-            const isSmallScreen = window.innerWidth <= 768;
-            if (isMobileUA || isSmallScreen) {
-                if (/iPhone|iPad|iPod/i.test(ua)) return '📱 iPhone/iOS';
-                if (/Android/i.test(ua)) return '📱 Android';
-                return '📱 Mobile';
-            }
-            if (/Macintosh|Mac OS X/i.test(ua)) return '💻 Mac';
-            if (/Windows/i.test(ua)) return '💻 Windows';
-            return '💻 Desktop';
-        },
-
-        log: function(category, action, details, iconStr) {
-            const now = new Date();
-            const yearBE = now.getFullYear() + 543;
-            const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth()+1).padStart(2, '0')}/${yearBE}`;
-            
-            const logItem = {
-                id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-                timestamp: Date.now(),
-                dateTimeStr: `${dateStr} ${timeStr} น.`,
-                page: (window.location.pathname.split('/').pop() || 'index.html'),
-                category: category || 'SYSTEM',
-                action: action || 'กิจกรรมในระบบ',
-                details: details || '',
-                icon: iconStr || 'fa-solid fa-circle-info text-indigo-400',
-                device: this.getDeviceType(),
-                user: (currentUser && currentUser.username) ? currentUser.username : 'admin'
-            };
-
-            this.logs.unshift(logItem);
-            this.saveLocalLogs();
-
-            if (typeof db !== 'undefined' && db) {
-                try {
-                    db.ref('system_logs/' + logItem.id).set(logItem).catch(() => {});
-                } catch(e) {}
-            }
-
-            this.renderLogModalUI();
-        },
-
-        clearAll: function() {
-            if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการล้างประวัติ Log ทั้งหมดในระบบ?')) return;
-            this.logs = [];
-            localStorage.removeItem('system_activity_logs');
-            if (typeof db !== 'undefined' && db) {
-                try { db.ref('system_logs').remove().catch(() => {}); } catch(e) {}
-            }
-            this.renderLogModalUI();
-            alert('ล้างประวัติ Log ทั้งหมดเรียบร้อยแล้ว!');
-        },
-
-        exportCSV: function() {
-            if (!this.logs.length) {
-                alert('ยังไม่มีประวัติ Log สำหรับส่งออก');
-                return;
-            }
-            let csvContent = "\uFEFFลำดับ,วันเวลา,หมวดหมู่,กิจกรรม,รายละเอียด,หน้าเว็บ,อุปกรณ์,ผู้ใช้งาน\n";
-            this.logs.forEach((item, idx) => {
-                csvContent += `"${idx + 1}","${item.dateTimeStr}","${item.category}","${(item.action||'').replace(/"/g, '""')}","${(item.details||'').replace(/"/g, '""')}","${item.page}","${item.device||'Desktop'}","${item.user}"\n`;
-            });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `system_activity_logs_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => { if (document.body.contains(a)) document.body.removeChild(a); }, 1000);
-        },
-
-        renderLogModalUI: function() {
-            const tbody = document.getElementById('system-log-table-body');
-            const countBadge = document.getElementById('log-total-count');
-            const todayCountBadge = document.getElementById('log-today-count');
-            if (!tbody) return;
-
-            if (countBadge) countBadge.innerText = `${this.logs.length} รายการ`;
-
-            const todayIso = new Date().toISOString().split('T')[0];
-            const todayCount = this.logs.filter(l => {
-                const d = new Date(l.timestamp || Date.now());
-                return d.toISOString().split('T')[0] === todayIso;
-            }).length;
-            if (todayCountBadge) todayCountBadge.innerText = `${todayCount} รายการ`;
-
-            const filterCategory = document.getElementById('log-filter-category')?.value || 'ALL';
-            const searchQuery = (document.getElementById('log-filter-search')?.value || '').toLowerCase();
-
-            const filtered = this.logs.filter(item => {
-                if (filterCategory !== 'ALL' && item.category !== filterCategory) return false;
-                if (searchQuery) {
-                    const text = `${item.action} ${item.details} ${item.dateTimeStr} ${item.page} ${item.device || ''}`.toLowerCase();
-                    return text.includes(searchQuery);
-                }
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:#94a3b8;"><i class="fa-solid fa-folder-open text-2xl mb-2"></i><div>ไม่พบรายการ Log ตามเงื่อนไขที่เลือก</div></td></tr>`;
-                return;
-            }
-
-            let html = '';
-            filtered.forEach((item) => {
-                let catBadge = '';
-                switch(item.category) {
-                    case 'CREATE': catBadge = '<span style="background:rgba(16,185,129,0.2); color:#6ee7b7; border:1px solid rgba(16,185,129,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🟢 เพิ่มข้อมูล</span>'; break;
-                    case 'UPDATE': catBadge = '<span style="background:rgba(59,130,246,0.2); color:#93c5fd; border:1px solid rgba(59,130,246,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🔵 แก้ไข</span>'; break;
-                    case 'DELETE': catBadge = '<span style="background:rgba(244,63,94,0.2); color:#fda4af; border:1px solid rgba(244,63,94,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🔴 ลบข้อมูล</span>'; break;
-                    case 'OCR':    catBadge = '<span style="background:rgba(168,85,247,0.2); color:#c084fc; border:1px solid rgba(168,85,247,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">🤖 AI/OCR</span>'; break;
-                    case 'EXPORT': catBadge = '<span style="background:rgba(245,158,11,0.2); color:#fcd34d; border:1px solid rgba(245,158,11,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">📄 ออกรายงาน</span>'; break;
-                    default:       catBadge = '<span style="background:rgba(99,102,241,0.2); color:#a5b4fc; border:1px solid rgba(99,102,241,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">⚙️ ระบบ</span>'; break;
-                }
-
-                const deviceTag = item.device ? `<span style="background:rgba(99,102,241,0.15); color:#a5b4fc; border:1px solid rgba(99,102,241,0.3); padding:1px 6px; border-radius:4px; font-size:0.65rem;">${item.device}</span>` : '';
-
-                html += `
-                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.06); font-size:0.8rem; transition: background 0.15s;" onmouseover="this.style.background='rgba(30,41,59,0.5)'" onmouseout="this.style.background='transparent'">
-                        <td style="padding:10px 8px; white-space:nowrap; color:#94a3b8; font-size:0.76rem;">
-                            <div><i class="fa-regular fa-clock text-slate-500 mr-1"></i>${item.dateTimeStr}</div>
-                            <div style="font-size:0.68rem; color:#64748b; margin-top:3px; display:flex; align-items:center; gap:6px;">
-                                <span>🌐 ${item.page}</span>
-                                ${deviceTag}
-                            </div>
-                        </td>
-                        <td style="padding:10px 8px; text-align:center;">${catBadge}</td>
-                        <td style="padding:10px 8px; font-weight:600; color:#f8fafc; display:flex; align-items:center; gap:6px;">
-                            <i class="${item.icon}"></i> ${item.action}
-                        </td>
-                        <td style="padding:10px 8px; color:#cbd5e1; font-size:0.78rem; word-break:break-word;">
-                            ${item.details}
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-    };
-
-    function openSystemLogModal() {
-        const modal = document.getElementById('system-log-modal');
-        if (modal) {
-            modal.classList.add('active');
-            modal.style.display = 'flex';
-            SystemLogger.renderLogModalUI();
-        }
-    }
-
-    function closeSystemLogModal() {
-        const modal = document.getElementById('system-log-modal');
-        if (modal) {
-            modal.classList.remove('active');
-            modal.style.display = 'none';
-        }
-    }
-
-    // Initialize session immediately on script load
+    // Initialize session immediately on script load (SystemLogger is provided by shared-core.js)
     function initVaultApp() {
         initAuthSession();
-        SystemLogger.init();
+        if (typeof SystemLogger !== 'undefined') {
+            SystemLogger.init();
+        }
     }
 
     if (document.readyState === 'loading') {

@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "/*"
+  to = "https://suwanchaif.github.io/MyPortableApp/:splat"
+  status = 301
+  force = true

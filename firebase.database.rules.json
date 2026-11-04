@@ -1,0 +1,29 @@
+{
+  "rules": {
+    ".read": true,
+    "parliament_commute": {
+      ".write": true,
+      "$recordId": {
+        ".validate": "newData.hasChildren(['date', 'images', 'timestamp']) || !newData.exists()"
+      }
+    },
+    "bootcamp_users": {
+      ".write": true,
+      "$username": {
+        ".validate": "newData.hasChildren(['username', 'passHash'])"
+      }
+    },
+    "bootcamp_notes": {
+      ".write": true
+    },
+    "bootcamp_progress": {
+      ".write": true
+    },
+    "system_logs": {
+      ".write": true,
+      "$logId": {
+        ".validate": "newData.hasChildren(['id', 'timestamp', 'category', 'action']) || !newData.exists()"
+      }
+    }
+  }
+}

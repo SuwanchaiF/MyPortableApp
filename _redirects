@@ -1,0 +1,2 @@
+# Redirect all Netlify traffic to the canonical GitHub Pages server
+/* https://suwanchaif.github.io/MyPortableApp/:splat 301!
