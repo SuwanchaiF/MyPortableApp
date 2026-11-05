@@ -690,8 +690,8 @@
                         <div style="padding: 12px 14px; background: rgba(30, 41, 59, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; gap: 10px;">
                             <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">👨‍💻</div>
                             <div>
-                                <h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: #ffffff;">เมนูทางลัด</h4>
-                                <span style="font-size: 0.7rem; color: #a5b4fc;">ระบบบันทึกการเดินทาง</span>
+                                <h4 id="dropdown-user-name" style="margin: 0; font-size: 0.88rem; font-weight: 700; color: #ffffff;">เมนูทางลัด</h4>
+                                <span id="dropdown-user-status" style="font-size: 0.7rem; color: #a5b4fc;">ระบบบันทึกการเดินทาง</span>
                             </div>
                         </div>
                         <div style="padding: 6px;">
@@ -733,6 +733,17 @@
                     <div class="form-group">
                         <label><i class="fa-solid fa-heading text-purple-400"></i> หัวข้อ / ช่วงวันที่ (เช่น 08/06/2569)</label>
                         <input type="text" id="input-title-thai" placeholder="เช่น 08/06/2569 (เดินทางไป-กลับสภา)">
+                    </div>
+                </div>
+
+                <div class="form-row" style="margin-bottom: 12px;">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-route text-emerald-400"></i> ระยะทางขาไปเริ่มต้น (กม. · จำค่าอัตโนมัติ)</label>
+                        <input type="number" id="input-go-km" placeholder="เช่น 20" step="0.5" min="0" onchange="saveCommutePrefs(); updateStagedDefaultKm();" oninput="saveCommutePrefs(); updateStagedDefaultKm();">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-route text-sky-400"></i> ระยะทางขากลับเริ่มต้น (กม. · จำค่าอัตโนมัติ)</label>
+                        <input type="number" id="input-back-km" placeholder="เช่น 20" step="0.5" min="0" onchange="saveCommutePrefs(); updateStagedDefaultKm();" oninput="saveCommutePrefs(); updateStagedDefaultKm();">
                     </div>
                 </div>
 
@@ -816,7 +827,7 @@
                     <div style="background: rgba(15, 23, 42, 0.8); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);">
                         <div style="font-size: 0.72rem; color: #94a3b8;"><i class="fa-solid fa-coins text-amber-400 mr-1"></i> คำนวณเบิกจ่าย</div>
                         <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
-                            <input type="number" id="rate-per-km" value="4" step="0.5" min="0" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 48px; padding: 2px 4px; font-size: 0.78rem; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(250,204,21,0.4); border-radius: 6px; color: #fbbf24; text-align: center;" title="ระบุอัตราค่าเดินทาง (บาท/กิโลเมตร)">
+                            <input type="number" id="rate-per-km" value="4" step="0.5" min="0" onchange="saveCommutePrefs(); renderCommuteRecords();" oninput="saveCommutePrefs(); renderCommuteRecords();" style="width: 48px; padding: 2px 4px; font-size: 0.78rem; background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(250,204,21,0.4); border-radius: 6px; color: #fbbf24; text-align: center;" title="ระบุอัตราค่าเดินทาง (บาท/กิโลเมตร)">
                             <span style="font-size: 0.72rem; color: #cbd5e1;">฿/กม. = </span>
                             <span id="stat-total-cost" style="font-size: 1.05rem; font-weight: 700; color: #fbbf24;">0 ฿</span>
                         </div>
@@ -862,21 +873,35 @@
     </div>
 </div>
 
-<!-- Image Lightbox Modal with Full Details -->
+<!-- Image Lightbox Modal with Full Details & Edit/Delete Controls -->
 <div id="image-modal" class="modal-overlay" onclick="closeImageModal()">
     <div style="position: relative; max-width: 92vw; max-height: 90vh; display: flex; flex-direction: column; align-items: center;" onclick="event.stopPropagation()">
         <img id="modal-full-img" class="modal-content-img" src="" alt="Full Map Image">
-        <div style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 10px 18px; margin-top: 10px; color: #f8fafc; font-size: 0.88rem; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.6);">
+        <div style="background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 14px; padding: 10px 16px; margin-top: 10px; color: #f8fafc; font-size: 0.84rem; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.6);">
             <span id="modal-img-label" style="font-weight: 700; color: #a5b4fc;"><i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ภาพแผนที่</span>
-            <span id="modal-img-date" style="color: #cbd5e1;"><i class="fa-regular fa-calendar text-indigo-400 mr-1"></i> วันที่: -</span>
-            <span id="modal-img-time" style="color: #fbbf24;"><i class="fa-regular fa-clock text-amber-400 mr-1"></i> เวลา: -</span>
             
-            <div id="modal-distance-wrapper" style="display: flex; align-items: center; gap: 6px; background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.4); padding: 4px 10px; border-radius: 8px;">
-                <i class="fa-solid fa-route text-emerald-400"></i>
-                <span style="color: #6ee7b7; font-size: 0.8rem; font-weight: 600;">ระบุระยะทาง:</span>
-                <input type="number" id="modal-img-distance-input" placeholder="0" step="0.5" min="0" onchange="saveModalDistance(this.value)" oninput="saveModalDistance(this.value)" style="width: 55px; padding: 2px 4px; font-size: 0.88rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(74,222,128,0.5); border-radius: 6px; color: #4ade80; font-weight: bold; text-align: center;" title="ระบุระยะทางกิโลเมตรของภาพนี้">
-                <span style="color: #4ade80; font-size: 0.8rem; font-weight: 600;">กม.</span>
+            <div style="display: flex; align-items: center; gap: 5px; background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.35); padding: 3px 8px; border-radius: 8px;">
+                <i class="fa-regular fa-calendar text-indigo-400"></i>
+                <span style="color: #cbd5e1; font-size: 0.76rem;">วันที่ (พ.ศ.):</span>
+                <input type="text" id="modal-img-date-input" placeholder="วว/ดด/ปปปป" onchange="saveModalDateTime()" style="width: 88px; padding: 2px 5px; font-size: 0.8rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(99,102,241,0.45); border-radius: 5px; color: #e0e7ff; text-align: center;" title="แก้ไขวันที่ของภาพนี้ (รูปแบบ วว/ดด/ปปปป พ.ศ.)">
             </div>
+
+            <div style="display: flex; align-items: center; gap: 5px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); padding: 3px 8px; border-radius: 8px;">
+                <i class="fa-regular fa-clock text-amber-400"></i>
+                <span style="color: #cbd5e1; font-size: 0.76rem;">เวลา:</span>
+                <input type="text" id="modal-img-time-input" placeholder="08:30:00 น." onchange="saveModalDateTime()" style="width: 92px; padding: 2px 5px; font-size: 0.8rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(245,158,11,0.45); border-radius: 5px; color: #fde68a; text-align: center;" title="แก้ไขเวลาของภาพนี้ (เช่น 08:30:00 น.)">
+            </div>
+            
+            <div id="modal-distance-wrapper" style="display: flex; align-items: center; gap: 6px; background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.4); padding: 3px 10px; border-radius: 8px;">
+                <i class="fa-solid fa-route text-emerald-400"></i>
+                <span style="color: #6ee7b7; font-size: 0.78rem; font-weight: 600;">ระยะทาง:</span>
+                <input type="number" id="modal-img-distance-input" placeholder="0" step="0.5" min="0" onchange="saveModalDistance(this.value)" oninput="saveModalDistance(this.value)" style="width: 55px; padding: 2px 4px; font-size: 0.85rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(74,222,128,0.5); border-radius: 6px; color: #4ade80; font-weight: bold; text-align: center;" title="ระบุระยะทางกิโลเมตรของภาพนี้">
+                <span style="color: #4ade80; font-size: 0.78rem; font-weight: 600;">กม.</span>
+            </div>
+
+            <button type="button" id="modal-btn-delete-photo" onclick="deleteCurrentModalPhoto()" style="background: rgba(244, 63, 94, 0.2); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.45); padding: 5px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;" title="ลบเฉพาะรูปภาพนี้">
+                <i class="fa-solid fa-trash-can"></i> ลบรูปนี้
+            </button>
         </div>
         <button type="button" onclick="closeImageModal()" style="position: absolute; top: -14px; right: -14px; background: #f43f5e; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
             <i class="fa-solid fa-xmark"></i>
@@ -1014,8 +1039,68 @@
 
     let stagedImages = [];
     let allRecords = [];
+    let currentUser = null;
+
+    function initUserAuthBadge() {
+        try {
+            const raw = localStorage.getItem('vault_auth_user');
+            if (raw) {
+                currentUser = JSON.parse(raw);
+                const nameEl = document.getElementById('dropdown-user-name');
+                const statusEl = document.getElementById('dropdown-user-status');
+                const avatarEl = document.getElementById('user-avatar');
+                if (currentUser && currentUser.username) {
+                    if (nameEl) nameEl.innerText = currentUser.displayName || currentUser.username;
+                    if (statusEl) statusEl.innerText = '🟢 ล็อกอินแล้ว (' + currentUser.username + ')';
+                    if (avatarEl && currentUser.avatar) avatarEl.innerText = currentUser.avatar;
+                }
+            } else {
+                const statusEl = document.getElementById('dropdown-user-status');
+                if (statusEl) statusEl.innerText = '⚪ โหมดทั่วไป (ยังไม่ได้ล็อกอิน)';
+            }
+        } catch (e) {}
+    }
+
+    function loadCommutePrefs() {
+        try {
+            const savedRate = localStorage.getItem('commute_pref_rate_km');
+            const savedGoKm = localStorage.getItem('commute_pref_go_km');
+            const savedBackKm = localStorage.getItem('commute_pref_back_km');
+            const rateEl = document.getElementById('rate-per-km');
+            const goEl = document.getElementById('input-go-km');
+            const backEl = document.getElementById('input-back-km');
+            if (rateEl && savedRate !== null && savedRate !== '') rateEl.value = savedRate;
+            if (goEl && savedGoKm !== null && savedGoKm !== '') goEl.value = savedGoKm;
+            if (backEl && savedBackKm !== null && savedBackKm !== '') backEl.value = savedBackKm;
+        } catch (e) {}
+    }
+
+    function saveCommutePrefs() {
+        try {
+            const rateEl = document.getElementById('rate-per-km');
+            const goEl = document.getElementById('input-go-km');
+            const backEl = document.getElementById('input-back-km');
+            if (rateEl) localStorage.setItem('commute_pref_rate_km', rateEl.value);
+            if (goEl) localStorage.setItem('commute_pref_go_km', goEl.value);
+            if (backEl) localStorage.setItem('commute_pref_back_km', backEl.value);
+        } catch (e) {}
+    }
+
+    function checkDeleteAuthorization(promptMsg) {
+        if (currentUser && currentUser.username) {
+            return confirm(promptMsg);
+        }
+        const typed = prompt(promptMsg + '\n\n(คุณยังไม่ได้ล็อกอิน กรุณาพิมพ์คำว่า DELETE เพื่อยืนยันการลบ):');
+        if (typed !== 'DELETE') {
+            if (typed !== null) alert('ยกเลิกการลบ (กรุณาพิมพ์ DELETE หรือเข้าสู่ระบบที่หน้าคลังโน้ตก่อน)');
+            return false;
+        }
+        return true;
+    }
 
     function initApp() {
+        initUserAuthBadge();
+        loadCommutePrefs();
         if (typeof SystemLogger !== 'undefined') {
             SystemLogger.init();
         }
@@ -1399,18 +1484,80 @@
         renderCommuteRecords();
     }
 
-    function deleteRecord(id) {
-        if (!confirm('ยืนยันลบรายการบันทึกนี้หรือไม่?')) return;
-        SystemLogger.log('DELETE', 'ลบบันทึกการเดินทาง', `ลบรายการบันทึก ID: ${id}`, 'fa-solid fa-trash-can text-rose-400');
+    function deleteRecordByIdInternal(id) {
         if (id && id.startsWith('local_')) {
             let localRecs = loadLocalCommuteRecords();
             localRecs = localRecs.filter(r => r.id !== id);
             saveLocalCommuteRecords(localRecs);
             allRecords = allRecords.filter(r => r.id !== id);
-            renderCommuteRecords();
-        } else {
+        } else if (id) {
             commuteRef.child(id).remove();
+            allRecords = allRecords.filter(r => r.id !== id);
         }
+    }
+
+    function deleteRecord(id) {
+        if (!checkDeleteAuthorization('ยืนยันลบรายการบันทึกนี้หรือไม่?')) return;
+        SystemLogger.log('DELETE', 'ลบบันทึกการเดินทาง', `ลบรายการบันทึก ID: ${id}`, 'fa-solid fa-trash-can text-rose-400');
+        deleteRecordByIdInternal(id);
+        renderCommuteRecords();
+    }
+
+    function deleteSinglePhoto(recordId, origIdx, skipConfirm) {
+        if (!skipConfirm && !checkDeleteAuthorization('ยืนยันลบเฉพาะรูปภาพแผนที่นี้หรือไม่?')) return false;
+        const rec = allRecords.find(r => r.id === recordId);
+        if (!rec) return false;
+
+        let imgs = Array.isArray(rec.images) ? [...rec.images] : (rec.images && typeof rec.images === 'object' ? Object.values(rec.images) : []);
+        if (origIdx < 0 || origIdx >= imgs.length) return false;
+
+        const removedImg = imgs[origIdx];
+        imgs.splice(origIdx, 1);
+
+        SystemLogger.log('DELETE', 'ลบรูปภาพแผนที่ (รายภาพ)', `ลบภาพวันที่ ${removedImg?.date || rec.titleThai || rec.date} เวลา ${removedImg?.time || '-'}`, 'fa-solid fa-trash-can text-rose-400');
+
+        if (imgs.length === 0) {
+            deleteRecordByIdInternal(recordId);
+        } else {
+            rec.images = imgs;
+            if (recordId && !recordId.startsWith('local_')) {
+                commuteRef.child(recordId).child('images').set(imgs);
+            } else {
+                saveLocalCommuteRecords(allRecords.filter(r => r.id && r.id.startsWith('local_')));
+            }
+        }
+        renderCommuteRecords();
+        return true;
+    }
+
+    function deleteDateSection(dateDisplay) {
+        if (!checkDeleteAuthorization(`ยืนยันลบรูปภาพแผนที่ทั้งหมดของวันที่ ${dateDisplay} หรือไม่?`)) return;
+        SystemLogger.log('DELETE', 'ลบข้อมูลรายวัน', `ลบรูปภาพทั้งหมดของวันที่ ${dateDisplay}`, 'fa-solid fa-trash-can text-rose-400');
+
+        const affectedRecords = [...allRecords];
+        affectedRecords.forEach(rec => {
+            const defaultDateStr = rec.titleThai || formatThaiDateString(rec.date);
+            let rawImgs = Array.isArray(rec.images) ? [...rec.images] : (rec.images && typeof rec.images === 'object' ? Object.values(rec.images) : []);
+            const remainingImgs = rawImgs.filter((imgRaw, idx) => {
+                const norm = normalizeImageObj(imgRaw, defaultDateStr, idx);
+                const imgDateKey = norm.date || defaultDateStr;
+                return imgDateKey !== dateDisplay;
+            });
+
+            if (remainingImgs.length !== rawImgs.length) {
+                if (remainingImgs.length === 0) {
+                    deleteRecordByIdInternal(rec.id);
+                } else {
+                    rec.images = remainingImgs;
+                    if (rec.id && !rec.id.startsWith('local_')) {
+                        commuteRef.child(rec.id).child('images').set(remainingImgs);
+                    }
+                }
+            }
+        });
+
+        saveLocalCommuteRecords(allRecords.filter(r => r.id && r.id.startsWith('local_')));
+        renderCommuteRecords();
     }
 
     function normalizeImageObj(imgRaw, dateStr, idx) {
@@ -1747,7 +1894,10 @@
                     `;
 
                     imgsHtml += `
-                        <div class="map-image-wrapper" onclick="openImageModal('${safeUrl}', '${safeDate}', '${safeTime}', '${safeLabel}', '${img.recordId}', ${img.origIdx}, ${imgKm}, false, null)">
+                        <div class="map-image-wrapper" style="position: relative;" onclick="openImageModal('${safeUrl}', '${safeDate}', '${safeTime}', '${safeLabel}', '${img.recordId}', ${img.origIdx}, ${imgKm}, false, null)">
+                            <button type="button" onclick="event.stopPropagation(); deleteSinglePhoto('${img.recordId}', ${img.origIdx});" style="position: absolute; top: 8px; right: 8px; z-index: 5; background: rgba(15, 23, 42, 0.82); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.45); width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 0.72rem; display: flex; align-items: center; justify-content: center;" title="ลบเฉพาะรูปภาพนี้">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                             <img src="${safeUrl}" alt="Map ${dateDisplay}">
                             <div class="image-caption" style="display: flex; justify-content: space-between; align-items: center;">
                                 <span><i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ${safeLabel}</span>
@@ -1766,8 +1916,8 @@
                             <div class="date-badge">
                                 <i class="fa-solid fa-calendar-day"></i> ${dateDisplay}
                             </div>
-                            <button type="button" onclick="deleteRecord('${section.recordId}')" style="background: rgba(244,63,94,0.15); color: #fda4af; border: 1px solid rgba(244,63,94,0.3); padding: 4px 10px; border-radius: 8px; font-size: 0.76rem; cursor: pointer;">
-                                <i class="fa-solid fa-trash-can"></i> ลบ
+                            <button type="button" onclick="deleteDateSection('${dateDisplay.replace(/'/g, "\\'")}')" style="background: rgba(244,63,94,0.15); color: #fda4af; border: 1px solid rgba(244,63,94,0.3); padding: 4px 10px; border-radius: 8px; font-size: 0.76rem; cursor: pointer;" title="ลบรูปภาพทั้งหมดในวันนี้">
+                                <i class="fa-solid fa-trash-can"></i> ลบทั้งวัน
                             </button>
                         </div>
 
@@ -1790,8 +1940,10 @@
     function openImageModal(imgUrl, dateStr, timeStr, labelStr, recordId, origIdx, imgKm, isStaged, stagedIdx) {
         document.getElementById('modal-full-img').src = imgUrl;
         document.getElementById('modal-img-label').innerHTML = `<i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ${labelStr || 'ภาพแผนที่'}`;
-        document.getElementById('modal-img-date').innerHTML = `<i class="fa-regular fa-calendar text-indigo-400 mr-1"></i> วันที่: ${dateStr || '-'}`;
-        document.getElementById('modal-img-time').innerHTML = `<i class="fa-regular fa-clock text-amber-400 mr-1"></i> เวลา: ${timeStr || '-'}`;
+        const dateInput = document.getElementById('modal-img-date-input');
+        const timeInput = document.getElementById('modal-img-time-input');
+        if (dateInput) dateInput.value = dateStr || '';
+        if (timeInput) timeInput.value = timeStr || '';
         
         const distInput = document.getElementById('modal-img-distance-input');
         if (distInput) {
@@ -1800,6 +1952,56 @@
 
         currentModalTarget = { recordId, origIdx, isStaged, stagedIdx };
         document.getElementById('image-modal').classList.add('active');
+    }
+
+    function saveModalDateTime() {
+        if (!currentModalTarget) return;
+        const newDate = (document.getElementById('modal-img-date-input')?.value || '').trim();
+        const newTime = (document.getElementById('modal-img-time-input')?.value || '').trim();
+
+        if (currentModalTarget.isStaged) {
+            const st = stagedImages[currentModalTarget.stagedIdx];
+            if (st) {
+                if (newDate) st.date = newDate;
+                if (newTime) st.time = newTime;
+                renderStagedImagePreviews();
+            }
+            return;
+        }
+
+        const { recordId, origIdx } = currentModalTarget;
+        const rec = allRecords.find(r => r.id === recordId);
+        if (rec && rec.images && rec.images[origIdx] !== undefined) {
+            if (typeof rec.images[origIdx] === 'string') {
+                rec.images[origIdx] = { url: rec.images[origIdx], date: newDate, time: newTime, distance: 0 };
+            } else {
+                if (newDate) rec.images[origIdx].date = newDate;
+                if (newTime) rec.images[origIdx].time = newTime;
+            }
+            SystemLogger.log('UPDATE', 'แก้ไขวันเวลาของรูปภาพ', `ปรับเป็นวันที่ ${newDate} เวลา ${newTime}`, 'fa-regular fa-clock text-amber-400');
+            if (recordId && !recordId.startsWith('local_')) {
+                commuteRef.child(recordId).child('images').child(origIdx).update({
+                    date: rec.images[origIdx].date || '',
+                    time: rec.images[origIdx].time || ''
+                });
+            } else {
+                saveLocalCommuteRecords(allRecords.filter(r => r.id && r.id.startsWith('local_')));
+            }
+            renderCommuteRecords();
+        }
+    }
+
+    function deleteCurrentModalPhoto() {
+        if (!currentModalTarget) return;
+        if (currentModalTarget.isStaged) {
+            removeStagedImage(currentModalTarget.stagedIdx);
+            closeImageModal();
+            return;
+        }
+        const deleted = deleteSinglePhoto(currentModalTarget.recordId, currentModalTarget.origIdx, false);
+        if (deleted) {
+            closeImageModal();
+        }
     }
 
     function saveModalDistance(val) {
