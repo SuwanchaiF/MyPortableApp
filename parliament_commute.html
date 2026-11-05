@@ -726,9 +726,12 @@
 
             <form id="commute-form" onsubmit="saveCommuteRecord(event)">
                 <div class="form-row">
-                    <div class="form-group">
-                        <label><i class="fa-regular fa-calendar text-indigo-400"></i> วันที่เดินทาง *</label>
-                        <input type="date" id="input-date" required>
+                    <div class="form-group" style="position: relative;">
+                        <label><i class="fa-regular fa-calendar text-indigo-400"></i> วันที่เดินทาง (พ.ศ.) *</label>
+                        <div style="position: relative;">
+                            <input type="text" id="input-date" class="thai-datepicker-input" placeholder="วว/ดด/ปปปป (พ.ศ.)" autocomplete="off" required style="padding-right: 34px; cursor: pointer;">
+                            <i class="fa-regular fa-calendar-days" onclick="ThaiDatePicker.openFor('input-date', event)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #818cf8; cursor: pointer; pointer-events: auto;"></i>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label><i class="fa-solid fa-heading text-purple-400"></i> หัวข้อ / ช่วงวันที่ (เช่น 08/06/2569)</label>
@@ -783,13 +786,19 @@
             </div>
 
             <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px;">
-                <div style="flex: 1; min-width: 130px;">
-                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">📅 จากวันที่ (Start Date)</label>
-                    <input type="date" id="filter-start-date" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 100%; padding: 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff;">
+                <div style="flex: 1; min-width: 145px; position: relative;">
+                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">📅 จากวันที่ (พ.ศ.)</label>
+                    <div style="position: relative;">
+                        <input type="text" id="filter-start-date" class="thai-datepicker-input" placeholder="วว/ดด/ปปปป (พ.ศ.)" autocomplete="off" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 100%; padding: 7px 32px 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff; cursor: pointer;">
+                        <i class="fa-regular fa-calendar-days" onclick="ThaiDatePicker.openFor('filter-start-date', event)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #818cf8; font-size: 0.82rem; cursor: pointer;"></i>
+                    </div>
                 </div>
-                <div style="flex: 1; min-width: 130px;">
-                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">📅 ถึงวันที่ (End Date)</label>
-                    <input type="date" id="filter-end-date" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 100%; padding: 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff;">
+                <div style="flex: 1; min-width: 145px; position: relative;">
+                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">📅 ถึงวันที่ (พ.ศ.)</label>
+                    <div style="position: relative;">
+                        <input type="text" id="filter-end-date" class="thai-datepicker-input" placeholder="วว/ดด/ปปปป (พ.ศ.)" autocomplete="off" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 100%; padding: 7px 32px 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff; cursor: pointer;">
+                        <i class="fa-regular fa-calendar-days" onclick="ThaiDatePicker.openFor('filter-end-date', event)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #818cf8; font-size: 0.82rem; cursor: pointer;"></i>
+                    </div>
                 </div>
                 <div style="flex: 1.5; min-width: 170px;">
                     <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">🔍 ค้นหาวันที่/ข้อความ</label>
@@ -1098,7 +1107,283 @@
         return true;
     }
 
+    // =========================================================
+    // THAI BUDDHIST ERA (พ.ศ.) DATE PICKER ENGINE
+    // =========================================================
+    const ThaiDatePicker = {
+        monthsFull: ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'],
+        daysShort: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
+        activeInput: null,
+        viewYearAD: new Date().getFullYear(),
+        viewMonth: new Date().getMonth(),
+        popupEl: null,
+        nativeValDesc: Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value'),
+
+        isoToThaiBE: function(isoStr) {
+            if (!isoStr) return '';
+            const m = String(isoStr).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (!m) return isoStr;
+            const yBE = parseInt(m[1], 10) + 543;
+            return `${m[3]}/${m[2]}/${yBE}`;
+        },
+
+        anyToIsoAD: function(str) {
+            if (!str) return '';
+            const s = String(str).trim();
+            let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (m) {
+                let y = parseInt(m[1], 10);
+                if (y > 2400) y -= 543;
+                return `${y}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
+            }
+            m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (m) {
+                const d = parseInt(m[1], 10);
+                const mo = parseInt(m[2], 10);
+                let y = parseInt(m[3], 10);
+                if (y > 2400) y -= 543;
+                if (mo >= 1 && mo <= 12 && d >= 1 && d <= 31) {
+                    return `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                }
+            }
+            return '';
+        },
+
+        setRawDisplay: function(el, text) {
+            if (this.nativeValDesc && this.nativeValDesc.set) {
+                this.nativeValDesc.set.call(el, text);
+            } else {
+                el.setAttribute('value', text);
+            }
+        },
+
+        getRawDisplay: function(el) {
+            if (this.nativeValDesc && this.nativeValDesc.get) {
+                return this.nativeValDesc.get.call(el);
+            }
+            return el.getAttribute('value') || '';
+        },
+
+        attach: function(el) {
+            if (!el || el.dataset.thaiPickerAttached === '1') return;
+            el.dataset.thaiPickerAttached = '1';
+            const self = this;
+
+            Object.defineProperty(el, 'value', {
+                configurable: true,
+                enumerable: true,
+                get: function() {
+                    return this.dataset.isoValue || '';
+                },
+                set: function(val) {
+                    const iso = self.anyToIsoAD(val);
+                    this.dataset.isoValue = iso;
+                    self.setRawDisplay(this, iso ? self.isoToThaiBE(iso) : '');
+                }
+            });
+
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                self.open(el);
+            });
+
+            el.addEventListener('blur', function() {
+                const typed = self.getRawDisplay(el).trim();
+                if (!typed) {
+                    el.dataset.isoValue = '';
+                    self.triggerChange(el);
+                    return;
+                }
+                const iso = self.anyToIsoAD(typed);
+                if (iso) {
+                    el.dataset.isoValue = iso;
+                    self.setRawDisplay(el, self.isoToThaiBE(iso));
+                    self.triggerChange(el);
+                } else {
+                    self.setRawDisplay(el, el.dataset.isoValue ? self.isoToThaiBE(el.dataset.isoValue) : '');
+                }
+            });
+
+            el.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const typed = self.getRawDisplay(el).trim();
+                    const iso = self.anyToIsoAD(typed);
+                    if (iso) {
+                        e.preventDefault();
+                        el.dataset.isoValue = iso;
+                        self.setRawDisplay(el, self.isoToThaiBE(iso));
+                        self.close();
+                        self.triggerChange(el);
+                    }
+                } else if (e.key === 'Escape') {
+                    self.close();
+                }
+            });
+        },
+
+        triggerChange: function(el) {
+            if (!el) return;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+        },
+
+        ensurePopup: function() {
+            if (this.popupEl) return this.popupEl;
+            const pop = document.createElement('div');
+            pop.id = 'thai-be-datepicker-popup';
+            pop.style.cssText = 'display:none; position:absolute; z-index:999999; width:280px; background:rgba(15,23,42,0.98); backdrop-filter:blur(16px); border:1px solid rgba(99,102,241,0.45); border-radius:14px; padding:12px; color:#f8fafc; box-shadow:0 20px 35px rgba(0,0,0,0.75); user-select:none; font-family:inherit;';
+            pop.addEventListener('click', function(e) { e.stopPropagation(); });
+            document.body.appendChild(pop);
+            this.popupEl = pop;
+
+            const self = this;
+            document.addEventListener('click', function() {
+                self.close();
+            });
+            return pop;
+        },
+
+        openFor: function(id, evt) {
+            if (evt) evt.stopPropagation();
+            const el = document.getElementById(id);
+            if (el) this.open(el);
+        },
+
+        open: function(el) {
+            this.activeInput = el;
+            const iso = el.dataset.isoValue || new Date().toISOString().split('T')[0];
+            const parts = iso.split('-');
+            this.viewYearAD = parseInt(parts[0], 10) || new Date().getFullYear();
+            this.viewMonth = (parseInt(parts[1], 10) || (new Date().getMonth() + 1)) - 1;
+
+            const pop = this.ensurePopup();
+            this.renderPopup();
+            pop.style.display = 'block';
+
+            const rect = el.getBoundingClientRect();
+            const scrollY = window.scrollY || document.documentElement.scrollTop;
+            const scrollX = window.scrollX || document.documentElement.scrollLeft;
+            let left = rect.left + scrollX;
+            if (left + 285 > window.innerWidth + scrollX) {
+                left = Math.max(10, window.innerWidth + scrollX - 290);
+            }
+            pop.style.top = (rect.bottom + scrollY + 6) + 'px';
+            pop.style.left = left + 'px';
+        },
+
+        close: function() {
+            if (this.popupEl) this.popupEl.style.display = 'none';
+            this.activeInput = null;
+        },
+
+        changeMonth: function(delta) {
+            this.viewMonth += delta;
+            if (this.viewMonth < 0) {
+                this.viewMonth = 11;
+                this.viewYearAD--;
+            } else if (this.viewMonth > 11) {
+                this.viewMonth = 0;
+                this.viewYearAD++;
+            }
+            this.renderPopup();
+        },
+
+        selectDate: function(yearAD, monthZero, day) {
+            if (!this.activeInput) return;
+            const iso = `${yearAD}-${String(monthZero + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const target = this.activeInput;
+            target.value = iso;
+            this.close();
+            this.triggerChange(target);
+        },
+
+        clearValue: function() {
+            if (!this.activeInput) return;
+            const target = this.activeInput;
+            target.value = '';
+            this.close();
+            this.triggerChange(target);
+        },
+
+        selectToday: function() {
+            const now = new Date();
+            this.selectDate(now.getFullYear(), now.getMonth(), now.getDate());
+        },
+
+        renderPopup: function() {
+            const pop = this.ensurePopup();
+            const yearBE = this.viewYearAD + 543;
+            const firstDay = new Date(this.viewYearAD, this.viewMonth, 1).getDay();
+            const daysInMonth = new Date(this.viewYearAD, this.viewMonth + 1, 0).getDate();
+            const selectedIso = this.activeInput ? (this.activeInput.dataset.isoValue || '') : '';
+            const todayIso = new Date().toISOString().split('T')[0];
+
+            let monthOpts = '';
+            this.monthsFull.forEach((mName, idx) => {
+                const sel = idx === this.viewMonth ? 'selected' : '';
+                monthOpts += `<option value="${idx}" ${sel}>${mName}</option>`;
+            });
+
+            let yearOpts = '';
+            const curYearAD = new Date().getFullYear();
+            for (let y = curYearAD - 5; y <= curYearAD + 5; y++) {
+                const sel = y === this.viewYearAD ? 'selected' : '';
+                yearOpts += `<option value="${y}" ${sel}>พ.ศ. ${y + 543}</option>`;
+            }
+
+            let dayHeaders = '';
+            this.daysShort.forEach(d => {
+                dayHeaders += `<div style="text-align:center; font-size:0.72rem; font-weight:700; color:#94a3b8; padding:4px 0;">${d}</div>`;
+            });
+
+            let cells = '';
+            for (let i = 0; i < firstDay; i++) {
+                cells += `<div></div>`;
+            }
+            for (let d = 1; d <= daysInMonth; d++) {
+                const cellIso = `${this.viewYearAD}-${String(this.viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const isSelected = cellIso === selectedIso;
+                const isToday = cellIso === todayIso;
+                const bg = isSelected ? 'linear-gradient(135deg,#6366f1,#8b5cf6)' : (isToday ? 'rgba(99,102,241,0.2)' : 'transparent');
+                const border = isToday && !isSelected ? '1px solid rgba(129,140,248,0.6)' : '1px solid transparent';
+                const color = isSelected ? '#ffffff' : (isToday ? '#a5b4fc' : '#e2e8f0');
+                const fw = (isSelected || isToday) ? '700' : '500';
+                cells += `<button type="button" onclick="ThaiDatePicker.selectDate(${this.viewYearAD}, ${this.viewMonth}, ${d})" style="height:32px; border-radius:8px; background:${bg}; border:${border}; color:${color}; font-weight:${fw}; font-size:0.8rem; cursor:pointer; transition:all 0.12s;" onmouseover="if('${isSelected}'!=='true')this.style.background='rgba(255,255,255,0.1)'" onmouseout="if('${isSelected}'!=='true')this.style.background='${isToday ? 'rgba(99,102,241,0.2)' : 'transparent'}'">${d}</button>`;
+            }
+
+            pop.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid rgba(255,255,255,0.1);">
+                    <button type="button" onclick="ThaiDatePicker.changeMonth(-1)" style="width:28px; height:28px; border-radius:8px; background:rgba(30,41,59,0.9); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-chevron-left" style="font-size:0.75rem;"></i></button>
+                    <div style="display:flex; gap:4px; flex:1; justify-content:center;">
+                        <select onchange="ThaiDatePicker.viewMonth=parseInt(this.value,10); ThaiDatePicker.renderPopup();" style="padding:3px 6px; font-size:0.78rem; font-weight:600; background:rgba(30,41,59,0.95); border:1px solid rgba(99,102,241,0.35); border-radius:6px; color:#f8fafc; cursor:pointer;">${monthOpts}</select>
+                        <select onchange="ThaiDatePicker.viewYearAD=parseInt(this.value,10); ThaiDatePicker.renderPopup();" style="padding:3px 6px; font-size:0.78rem; font-weight:600; background:rgba(30,41,59,0.95); border:1px solid rgba(99,102,241,0.35); border-radius:6px; color:#a5b4fc; cursor:pointer;">${yearOpts}</select>
+                    </div>
+                    <button type="button" onclick="ThaiDatePicker.changeMonth(1)" style="width:28px; height:28px; border-radius:8px; background:rgba(30,41,59,0.9); border:1px solid rgba(255,255,255,0.12); color:#cbd5e1; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i></button>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:2px; margin-bottom:4px;">
+                    ${dayHeaders}
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:3px;">
+                    ${cells}
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.1);">
+                    <button type="button" onclick="ThaiDatePicker.clearValue()" style="background:rgba(244,63,94,0.15); border:1px solid rgba(244,63,94,0.35); color:#fda4af; font-size:0.75rem; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;">ล้างค่า</button>
+                    <span style="font-size:0.72rem; color:#94a3b8;">ปฏิทิน พ.ศ. (${yearBE})</span>
+                    <button type="button" onclick="ThaiDatePicker.selectToday()" style="background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.4); color:#6ee7b7; font-size:0.75rem; font-weight:600; padding:4px 10px; border-radius:6px; cursor:pointer;">วันนี้</button>
+                </div>
+            `;
+        },
+
+        initAll: function() {
+            ['input-date', 'filter-start-date', 'filter-end-date'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) this.attach(el);
+            });
+        }
+    };
+
     function initApp() {
+        ThaiDatePicker.initAll();
         initUserAuthBadge();
         loadCommutePrefs();
         if (typeof SystemLogger !== 'undefined') {

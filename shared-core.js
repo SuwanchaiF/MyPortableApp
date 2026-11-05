@@ -466,4 +466,191 @@
             }
         }
     };
+
+    // =========================================================
+    // 5. USER MANAGEMENT & PASSWORD RESET MODAL (bootcamp_users)
+    // =========================================================
+    async function sha256Hex(text) {
+        var encoder = new TextEncoder();
+        var data = encoder.encode(text);
+        var hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        var hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+
+    window.UserManager = {
+        modalEl: null,
+        usersList: [],
+
+        ensureModal: function () {
+            if (this.modalEl) return this.modalEl;
+            var overlay = document.createElement('div');
+            overlay.id = 'user-management-modal';
+            overlay.style.cssText = 'display:none; position:fixed; inset:0; background:rgba(2,6,23,0.85); backdrop-filter:blur(12px); z-index:999999; align-items:center; justify-content:center; padding:16px;';
+            overlay.onclick = function () { window.UserManager.closeModal(); };
+
+            overlay.innerHTML =
+                '<div style="position:relative; width:95vw; max-width:820px; max-height:90vh; background:rgba(15,23,42,0.98); border:1px solid rgba(99,102,241,0.35); border-radius:20px; padding:20px; color:#f8fafc; display:flex; flex-direction:column; box-shadow:0 25px 50px -12px rgba(0,0,0,0.85); box-sizing:border-box;" onclick="event.stopPropagation()">' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.1);">' +
+                        '<div>' +
+                            '<h3 style="margin:0; font-size:1.12rem; color:#a5b4fc; display:flex; align-items:center; gap:8px;">' +
+                                '<i class="fa-solid fa-users-gear text-indigo-400"></i> จัดการผู้ใช้งาน & รหัสผ่าน (Registered Users)' +
+                            '</h3>' +
+                            '<p style="margin:4px 0 0 0; font-size:0.76rem; color:#94a3b8;">ดูรายชื่อสมาชิกที่สมัครในระบบ ตั้งรหัสผ่านใหม่ (SHA-256) หรือเปิดดู Firebase Console</p>' +
+                        '</div>' +
+                        '<button type="button" onclick="window.UserManager.closeModal()" style="background:rgba(244,63,94,0.2); color:#fda4af; border:1px solid rgba(244,63,94,0.4); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center;">' +
+                            '<i class="fa-solid fa-xmark"></i>' +
+                        '</button>' +
+                    '</div>' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; background:rgba(30,41,59,0.65); padding:10px 14px; border-radius:12px; margin-bottom:12px; border:1px solid rgba(255,255,255,0.06);">' +
+                        '<div style="font-size:0.82rem; color:#cbd5e1;">ผู้ใช้งานทั้งหมด: <strong id="um-total-users" style="color:#34d399;">0 บัญชี</strong></div>' +
+                        '<div style="display:flex; gap:8px; flex-wrap:wrap;">' +
+                            '<a href="https://console.firebase.google.com/project/testprod-69c21/database/testprod-69c21-default-rtdb/data" target="_blank" rel="noopener" style="background:rgba(245,158,11,0.18); border:1px solid rgba(245,158,11,0.4); color:#fcd34d; font-size:0.75rem; font-weight:600; padding:5px 10px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">' +
+                                '<i class="fa-solid fa-fire text-amber-400"></i> เปิด Firebase Console' +
+                            '</a>' +
+                            '<a href="https://testprod-69c21-default-rtdb.firebaseio.com/bootcamp_users.json" target="_blank" rel="noopener" style="background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.35); color:#7dd3fc; font-size:0.75rem; font-weight:600; padding:5px 10px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">' +
+                                '<i class="fa-solid fa-code text-sky-400"></i> ดู JSON (bootcamp_users)' +
+                            '</a>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="overflow-y:auto; flex:1; border:1px solid rgba(255,255,255,0.08); border-radius:12px; background:rgba(15,23,42,0.45);">' +
+                        '<table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.8rem;">' +
+                            '<thead style="position:sticky; top:0; background:rgba(30,41,59,0.96); color:#a5b4fc; font-size:0.76rem;">' +
+                                '<tr style="border-bottom:1px solid rgba(255,255,255,0.12);">' +
+                                    '<th style="padding:10px 8px;">ผู้ใช้งาน (Username)</th>' +
+                                    '<th style="padding:10px 8px;">สิทธิ์</th>' +
+                                    '<th style="padding:10px 8px;">วันที่สมัคร (พ.ศ.)</th>' +
+                                    '<th style="padding:10px 8px;">รหัสผ่าน (SHA-256 Hash)</th>' +
+                                    '<th style="padding:10px 8px; text-align:right;">จัดการ</th>' +
+                                '</tr>' +
+                            '</thead>' +
+                            '<tbody id="um-users-tbody">' +
+                                '<tr><td colspan="5" style="text-align:center; padding:24px; color:#94a3b8;">กำลังโหลดข้อมูลผู้ใช้งาน...</td></tr>' +
+                            '</tbody>' +
+                        '</table>' +
+                    '</div>' +
+                '</div>';
+
+            document.body.appendChild(overlay);
+            this.modalEl = overlay;
+            return overlay;
+        },
+
+        formatThaiDateTime: function (isoStr) {
+            if (!isoStr) return '-';
+            var d = new Date(isoStr);
+            if (isNaN(d.getTime())) return isoStr;
+            var yBE = d.getFullYear() + 543;
+            var datePart = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + yBE;
+            var timePart = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            return datePart + ' ' + timePart + ' น.';
+        },
+
+        openModal: function () {
+            var modal = this.ensureModal();
+            modal.style.display = 'flex';
+            this.loadUsers();
+        },
+
+        closeModal: function () {
+            if (this.modalEl) this.modalEl.style.display = 'none';
+        },
+
+        loadUsers: function () {
+            var self = this;
+            var database = window.SystemLogger.getDb();
+            var tbody = document.getElementById('um-users-tbody');
+            if (!database) {
+                if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#f43f5e;">ไม่สามารถเชื่อมต่อ Firebase ได้</td></tr>';
+                return;
+            }
+            database.ref('bootcamp_users').once('value').then(function (snap) {
+                var val = snap.val() || {};
+                var keys = Object.keys(val);
+                var countEl = document.getElementById('um-total-users');
+                if (countEl) countEl.innerText = keys.length + ' บัญชี';
+
+                if (!keys.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">ไม่พบบัญชีผู้ใช้งาน</td></tr>';
+                    return;
+                }
+
+                var html = '';
+                keys.forEach(function (k) {
+                    var u = val[k] || {};
+                    var cleanKey = u.cleanUsername || k;
+                    var roleBadge = (u.role === 'admin' || cleanKey === 'admin')
+                        ? '<span style="background:rgba(245,158,11,0.2); color:#fcd34d; border:1px solid rgba(245,158,11,0.4); padding:2px 8px; border-radius:6px; font-size:0.7rem;">👑 Admin</span>'
+                        : '<span style="background:rgba(99,102,241,0.18); color:#a5b4fc; border:1px solid rgba(99,102,241,0.35); padding:2px 8px; border-radius:6px; font-size:0.7rem;">👤 User</span>';
+                    var shortHash = (u.passHash || '').substring(0, 14) + '...';
+
+                    html += '<tr style="border-bottom:1px solid rgba(255,255,255,0.06);">' +
+                        '<td style="padding:10px 8px; font-weight:600; color:#ffffff;">' +
+                            '<span style="margin-right:6px;">' + escapeHtml(u.avatar || '👨‍💻') + '</span>' +
+                            escapeHtml(u.username || k) +
+                            '<div style="font-size:0.68rem; color:#64748b;">ID: ' + escapeHtml(cleanKey) + '</div>' +
+                        '</td>' +
+                        '<td style="padding:10px 8px;">' + roleBadge + '</td>' +
+                        '<td style="padding:10px 8px; color:#cbd5e1; font-size:0.75rem;">' + escapeHtml(self.formatThaiDateTime(u.createdAt)) + '</td>' +
+                        '<td style="padding:10px 8px; font-family:monospace; color:#94a3b8; font-size:0.72rem;" title="' + escapeHtml(u.passHash || '') + '">' + escapeHtml(shortHash) + '</td>' +
+                        '<td style="padding:10px 8px; text-align:right; white-space:nowrap;">' +
+                            '<button type="button" onclick="window.UserManager.resetPassword(\'' + escapeHtml(cleanKey) + '\', \'' + escapeHtml(u.username || k) + '\')" style="background:rgba(16,185,129,0.18); color:#6ee7b7; border:1px solid rgba(16,185,129,0.4); padding:4px 9px; border-radius:6px; font-size:0.72rem; font-weight:600; cursor:pointer; margin-right:5px;">' +
+                                '<i class="fa-solid fa-key"></i> ตั้งรหัสใหม่' +
+                            '</button>' +
+                            (cleanKey !== 'admin' ? '<button type="button" onclick="window.UserManager.deleteUser(\'' + escapeHtml(cleanKey) + '\')" style="background:rgba(244,63,94,0.18); color:#fda4af; border:1px solid rgba(244,63,94,0.4); padding:4px 8px; border-radius:6px; font-size:0.72rem; cursor:pointer;" title="ลบบัญชีนี้"><i class="fa-solid fa-trash-can"></i></button>' : '') +
+                        '</td>' +
+                    '</tr>';
+                });
+                tbody.innerHTML = html;
+            });
+        },
+
+        resetPassword: async function (cleanKey, displayUser) {
+            var newPass = prompt('ระบุรหัสผ่านใหม่สำหรับผู้ใช้ "' + displayUser + '" (อย่างน้อย 4 ตัวอักษร):');
+            if (newPass === null) return;
+            if (newPass.length < 4) {
+                alert('รหัสผ่านต้องมีความยาวอย่างน้อย 4 ตัวอักษร');
+                return;
+            }
+            var hash = await sha256Hex(newPass);
+            var database = window.SystemLogger.getDb();
+            if (!database) return;
+            await database.ref('bootcamp_users/' + cleanKey).update({ passHash: hash });
+            window.SystemLogger.log('UPDATE', 'รีเซ็ตรหัสผ่านผู้ใช้', 'ตั้งรหัสผ่านใหม่ให้บัญชี ' + displayUser, 'fa-solid fa-key text-emerald-400');
+            alert('ตั้งรหัสผ่านใหม่ให้ "' + displayUser + '" เรียบร้อยแล้ว!');
+            this.loadUsers();
+        },
+
+        deleteUser: async function (cleanKey) {
+            if (!confirm('ยืนยันลบบัญชีผู้ใช้งาน "' + cleanKey + '" หรือไม่?')) return;
+            var database = window.SystemLogger.getDb();
+            if (!database) return;
+            await database.ref('bootcamp_users/' + cleanKey).remove();
+            window.SystemLogger.log('DELETE', 'ลบบัญชีผู้ใช้', 'ลบบัญชี ' + cleanKey, 'fa-solid fa-user-xmark text-rose-400');
+            this.loadUsers();
+        },
+
+        injectMenuLink: function () {
+            var links = document.querySelectorAll('a[onclick*="openSystemLogModal"]');
+            links.forEach(function (logLink) {
+                if (logLink.parentElement && !logLink.parentElement.querySelector('.um-injected-link')) {
+                    var umLink = logLink.cloneNode(true);
+                    umLink.classList.add('um-injected-link');
+                    umLink.setAttribute('onclick', 'openUserManagementModal(); if(typeof toggleUserDropdown==="function") toggleUserDropdown(event); if(typeof closeUserDropdown==="function") closeUserDropdown();');
+                    umLink.innerHTML = '<i class="fa-solid fa-users-gear text-amber-400"></i> จัดการผู้ใช้งาน (Users)';
+                    logLink.insertAdjacentElement('afterend', umLink);
+                }
+            });
+        }
+    };
+
+    window.openUserManagementModal = function () {
+        window.UserManager.openModal();
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () { window.UserManager.injectMenuLink(); });
+    } else {
+        setTimeout(function () { window.UserManager.injectMenuLink(); }, 50);
+    }
 })();
