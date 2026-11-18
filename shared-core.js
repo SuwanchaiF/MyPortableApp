@@ -630,17 +630,234 @@
             this.loadUsers();
         },
 
-        injectMenuLink: function () {
-            var links = document.querySelectorAll('a[onclick*="openSystemLogModal"]');
-            links.forEach(function (logLink) {
-                if (logLink.parentElement && !logLink.parentElement.querySelector('.um-injected-link')) {
-                    var umLink = logLink.cloneNode(true);
-                    umLink.classList.add('um-injected-link');
-                    umLink.setAttribute('onclick', 'openUserManagementModal(); if(typeof toggleUserDropdown==="function") toggleUserDropdown(event); if(typeof closeUserDropdown==="function") closeUserDropdown();');
-                    umLink.innerHTML = '<i class="fa-solid fa-users-gear text-amber-400"></i> จัดการผู้ใช้งาน (Users)';
-                    logLink.insertAdjacentElement('afterend', umLink);
-                }
-            });
+        injectSharedStyles: function () {
+            if (document.getElementById('shared-core-icon-styles')) return;
+            var style = document.createElement('style');
+            style.id = 'shared-core-icon-styles';
+            style.textContent = [
+                '.text-indigo-400 { color: #818cf8 !important; }',
+                '.text-purple-400 { color: #c084fc !important; }',
+                '.text-emerald-400 { color: #34d399 !important; }',
+                '.text-amber-400 { color: #fbbf24 !important; }',
+                '.text-sky-400 { color: #38bdf8 !important; }',
+                '.text-rose-400 { color: #fb7185 !important; }',
+                '.text-blue-400 { color: #60a5fa !important; }',
+                '.text-slate-400 { color: #94a3b8 !important; }',
+                '.mr-1 { margin-right: 0.25rem !important; }',
+                '.mr-2 { margin-right: 0.5rem !important; }',
+                '.shared-dd-link { display: flex !important; align-items: center !important; gap: 10px !important; width: 100% !important; padding: 8px 12px !important; color: #cbd5e1 !important; font-size: 0.82rem !important; font-weight: 500 !important; border-radius: 8px !important; text-decoration: none !important; background: transparent !important; border: none !important; cursor: pointer !important; transition: background 0.15s ease, color 0.15s ease !important; box-sizing: border-box !important; text-align: left !important; }',
+                '.shared-dd-link:hover { background: rgba(30, 41, 59, 0.85) !important; color: #ffffff !important; }',
+                '.shared-dd-link i { width: 18px !important; text-align: center !important; font-size: 0.9rem !important; }',
+                '.shared-dd-logout { color: #fb7185 !important; font-weight: 600 !important; }',
+                '.shared-dd-logout:hover { background: rgba(244, 63, 94, 0.15) !important; color: #fda4af !important; }'
+            ].join('\n');
+            (document.head || document.documentElement).appendChild(style);
+        },
+
+        renderUnifiedDropdown: function () {
+            this.injectSharedStyles();
+            var menu = document.getElementById('userDropdownMenu');
+            if (!menu) return;
+
+            var userObj = null;
+            try {
+                var raw = localStorage.getItem('vault_auth_user');
+                if (raw) userObj = JSON.parse(raw);
+            } catch (e) {}
+
+            var uname = (userObj && (userObj.displayName || userObj.username)) ? (userObj.displayName || userObj.username) : 'เมนูทางลัด';
+            var uavatar = (userObj && userObj.avatar) ? userObj.avatar : '👨‍💻';
+            var ustatus = (userObj && userObj.username)
+                ? '🟢 ล็อกอินแล้ว (' + userObj.username + ')'
+                : '⚪ โหมดทั่วไป (ยังไม่ได้ล็อกอิน)';
+
+            var topAvatarEl = document.getElementById('user-avatar');
+            if (topAvatarEl && userObj && userObj.avatar) {
+                topAvatarEl.innerText = userObj.avatar;
+            }
+            var portalNameEl = document.getElementById('portal-user-name');
+            var portalAvatarEl = document.getElementById('portal-user-avatar');
+            if (portalNameEl && userObj) portalNameEl.innerText = userObj.displayName || userObj.username;
+            if (portalAvatarEl && userObj && userObj.avatar) portalAvatarEl.innerText = userObj.avatar;
+
+            var currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+            var closeJs = 'if(typeof toggleUserDropdown==="function") toggleUserDropdown(event); if(typeof closeUserDropdown==="function") closeUserDropdown();';
+
+            menu.style.width = '230px';
+            menu.style.background = 'rgba(15, 23, 42, 0.97)';
+            menu.style.backdropFilter = 'blur(16px)';
+            menu.style.border = '1px solid rgba(255, 255, 255, 0.12)';
+            menu.style.borderRadius = '16px';
+            menu.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.6)';
+            menu.style.overflow = 'hidden';
+
+            menu.innerHTML =
+                '<div style="padding: 12px 14px; background: rgba(30, 41, 59, 0.65); border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; gap: 10px;">' +
+                    '<div id="dropdown-avatar" style="width: 38px; height: 38px; flex-shrink: 0; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">' + escapeHtml(uavatar) + '</div>' +
+                    '<div style="overflow: hidden;">' +
+                        '<h4 id="dropdown-username" style="margin: 0; font-size: 0.88rem; font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtml(uname) + '</h4>' +
+                        '<span id="dropdown-role" style="font-size: 0.7rem; color: #a5b4fc; display: block; margin-top: 2px;">' + escapeHtml(ustatus) + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="padding: 6px;">' +
+                    '<a href="index.html" class="shared-dd-link">' +
+                        '<i class="fa-solid fa-table-cells-large text-indigo-400"></i> <span>หน้าหลัก Portal</span>' +
+                    '</a>' +
+                    '<a href="parliament_commute.html" class="shared-dd-link" style="' + (currentPage === 'parliament_commute.html' ? 'background:rgba(99,102,241,0.15) !important; color:#ffffff !important;' : '') + '">' +
+                        '<i class="fa-solid fa-map-location-dot text-rose-400"></i> <span>รายงานแผนที่สภา</span>' +
+                    '</a>' +
+                    '<a href="index.html?view=notes" class="shared-dd-link" style="' + (currentPage === 'index.html' && window.location.search.indexOf('view=notes') !== -1 ? 'background:rgba(99,102,241,0.15) !important; color:#ffffff !important;' : '') + '">' +
+                        '<i class="fa-solid fa-code text-sky-400"></i> <span>คลังโน้ต & Code</span>' +
+                    '</a>' +
+                    '<a href="bootcamp_master_learning_hub.html" class="shared-dd-link" style="' + (currentPage === 'bootcamp_master_learning_hub.html' ? 'background:rgba(99,102,241,0.15) !important; color:#ffffff !important;' : '') + '">' +
+                        '<i class="fa-solid fa-rocket text-purple-400"></i> <span>Roadmap 60 วัน</span>' +
+                    '</a>' +
+                    '<a href="javascript:void(0)" onclick="openSystemLogModal(); ' + closeJs + '" class="shared-dd-link">' +
+                        '<i class="fa-solid fa-list-check text-emerald-400"></i> <span>ประวัติ Log ระบบ</span>' +
+                    '</a>' +
+                    '<a href="javascript:void(0)" onclick="openUserManagementModal(); ' + closeJs + '" class="shared-dd-link">' +
+                        '<i class="fa-solid fa-users-gear text-amber-400"></i> <span>จัดการผู้ใช้งาน (Users)</span>' +
+                    '</a>' +
+                    '<a href="javascript:void(0)" onclick="openProfileSettingsModal(); ' + closeJs + '" class="shared-dd-link">' +
+                        '<i class="fa-solid fa-user-pen text-indigo-400"></i> <span>ตั้งค่าโปรไฟล์</span>' +
+                    '</a>' +
+                    '<div style="border-top: 1px solid rgba(255,255,255,0.08); margin-top: 4px; padding-top: 4px;">' +
+                        '<button type="button" onclick="handleLogout()" class="shared-dd-link shared-dd-logout">' +
+                            '<i class="fa-solid fa-right-from-bracket text-rose-400"></i> <span>ออกจากระบบ (Logout)</span>' +
+                        '</button>' +
+                    '</div>' +
+                '</div>';
+        },
+
+        profileModalEl: null,
+
+        ensureProfileModal: function () {
+            if (this.profileModalEl) return this.profileModalEl;
+            var overlay = document.createElement('div');
+            overlay.id = 'profile-settings-modal';
+            overlay.style.cssText = 'display:none; position:fixed; inset:0; background:rgba(2,6,23,0.85); backdrop-filter:blur(12px); z-index:999999; align-items:center; justify-content:center; padding:16px;';
+            overlay.onclick = function () { window.UserManager.closeProfileModal(); };
+
+            overlay.innerHTML =
+                '<div style="position:relative; width:94vw; max-width:440px; background:rgba(15,23,42,0.98); border:1px solid rgba(99,102,241,0.35); border-radius:20px; padding:22px; color:#f8fafc; display:flex; flex-direction:column; gap:14px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.85); box-sizing:border-box;" onclick="event.stopPropagation()">' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1);">' +
+                        '<h3 style="margin:0; font-size:1.08rem; color:#a5b4fc; display:flex; align-items:center; gap:8px;">' +
+                            '<i class="fa-solid fa-user-pen text-indigo-400"></i> ตั้งค่าโปรไฟล์ส่วนตัว' +
+                        '</h3>' +
+                        '<button type="button" onclick="window.UserManager.closeProfileModal()" style="background:rgba(244,63,94,0.2); color:#fda4af; border:1px solid rgba(244,63,94,0.4); width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:0.95rem; display:flex; align-items:center; justify-content:center;">' +
+                            '<i class="fa-solid fa-xmark"></i>' +
+                        '</button>' +
+                    '</div>' +
+                    '<div>' +
+                        '<label style="font-size:0.78rem; color:#94a3b8; display:block; margin-bottom:5px;"><i class="fa-solid fa-id-badge text-indigo-400 mr-1"></i> ชื่อบัญชีผู้ใช้ (Username)</label>' +
+                        '<input type="text" id="prof-username" disabled style="width:100%; padding:9px 12px; font-size:0.85rem; background:rgba(30,41,59,0.5); border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#94a3b8; box-sizing:border-box;">' +
+                    '</div>' +
+                    '<div>' +
+                        '<label style="font-size:0.78rem; color:#cbd5e1; font-weight:600; display:block; margin-bottom:5px;"><i class="fa-solid fa-signature text-sky-400 mr-1"></i> ชื่อที่แสดงบนระบบ (Display Name)</label>' +
+                        '<input type="text" id="prof-display-name" placeholder="ระบุชื่อที่ต้องการแสดง..." style="width:100%; padding:9px 12px; font-size:0.85rem; background:rgba(15,23,42,0.95); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:#ffffff; box-sizing:border-box;">' +
+                    '</div>' +
+                    '<div>' +
+                        '<label style="font-size:0.78rem; color:#cbd5e1; font-weight:600; display:block; margin-bottom:5px;"><i class="fa-solid fa-face-smile text-amber-400 mr-1"></i> ไอคอนโปรไฟล์ (Avatar)</label>' +
+                        '<select id="prof-avatar" style="width:100%; padding:9px 12px; font-size:0.88rem; background:rgba(15,23,42,0.95); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:#ffffff; box-sizing:border-box; cursor:pointer;">' +
+                            '<option value="👨‍💻">👨‍💻 Developer</option>' +
+                            '<option value="👑">👑 Admin / VIP</option>' +
+                            '<option value="🚀">🚀 Tech Explorer</option>' +
+                            '<option value="👩‍💻">👩‍💻 Coder</option>' +
+                            '<option value="🦊">🦊 Cyber Fox</option>' +
+                            '<option value="⚡">⚡ Power User</option>' +
+                            '<option value="🎓">🎓 Student Learner</option>' +
+                        '</select>' +
+                    '</div>' +
+                    '<div>' +
+                        '<label style="font-size:0.78rem; color:#cbd5e1; font-weight:600; display:block; margin-bottom:5px;"><i class="fa-solid fa-key text-emerald-400 mr-1"></i> เปลี่ยนรหัสผ่านใหม่ (เว้นว่างไว้หากไม่ต้องการเปลี่ยน)</label>' +
+                        '<input type="password" id="prof-new-pass" placeholder="รหัสผ่านใหม่อย่างน้อย 4 ตัวอักษร..." style="width:100%; padding:9px 12px; font-size:0.85rem; background:rgba(15,23,42,0.95); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:#ffffff; box-sizing:border-box;">' +
+                    '</div>' +
+                    '<div style="display:flex; justify-content:flex-end; gap:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.1);">' +
+                        '<button type="button" onclick="window.UserManager.closeProfileModal()" style="background:rgba(255,255,255,0.08); color:#cbd5e1; border:1px solid rgba(255,255,255,0.15); padding:8px 16px; border-radius:10px; font-size:0.82rem; font-weight:600; cursor:pointer;">ยกเลิก</button>' +
+                        '<button type="button" onclick="window.UserManager.saveProfileSettings()" style="background:linear-gradient(135deg,#6366f1,#4f46e5); color:#ffffff; border:none; padding:8px 18px; border-radius:10px; font-size:0.82rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 4px 12px rgba(99,102,241,0.35);">' +
+                            '<i class="fa-solid fa-floppy-disk"></i> บันทึกโปรไฟล์' +
+                        '</button>' +
+                    '</div>' +
+                '</div>';
+
+            document.body.appendChild(overlay);
+            this.profileModalEl = overlay;
+            return overlay;
+        },
+
+        openProfileModal: function () {
+            var userObj = null;
+            try {
+                var raw = localStorage.getItem('vault_auth_user');
+                if (raw) userObj = JSON.parse(raw);
+            } catch (e) {}
+
+            if (!userObj || !userObj.username) {
+                alert('กรุณาเข้าสู่ระบบก่อนตั้งค่าโปรไฟล์');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            var modal = this.ensureProfileModal();
+            document.getElementById('prof-username').value = userObj.username;
+            document.getElementById('prof-display-name').value = userObj.displayName || userObj.username;
+            document.getElementById('prof-avatar').value = userObj.avatar || '👨‍💻';
+            document.getElementById('prof-new-pass').value = '';
+            modal.style.display = 'flex';
+        },
+
+        closeProfileModal: function () {
+            if (this.profileModalEl) this.profileModalEl.style.display = 'none';
+        },
+
+        saveProfileSettings: async function () {
+            var userObj = null;
+            try {
+                var raw = localStorage.getItem('vault_auth_user');
+                if (raw) userObj = JSON.parse(raw);
+            } catch (e) {}
+            if (!userObj || !userObj.username) return;
+
+            var dispName = (document.getElementById('prof-display-name').value || '').trim() || userObj.username;
+            var avatar = document.getElementById('prof-avatar').value || '👨‍💻';
+            var newPass = document.getElementById('prof-new-pass').value || '';
+
+            if (newPass && newPass.length < 4) {
+                alert('รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร');
+                return;
+            }
+
+            userObj.displayName = dispName;
+            userObj.avatar = avatar;
+            var updates = {
+                displayName: dispName,
+                avatar: avatar
+            };
+
+            if (newPass) {
+                var newHash = await sha256Hex(newPass);
+                userObj.passHash = newHash;
+                updates.passHash = newHash;
+            }
+
+            localStorage.setItem('vault_auth_user', JSON.stringify(userObj));
+            if (typeof currentUser !== 'undefined' && currentUser) {
+                currentUser.displayName = dispName;
+                currentUser.avatar = avatar;
+            }
+
+            var cleanKey = (userObj.cleanUsername || userObj.username || '').toLowerCase().replace(/[^a-z0-9_]/g, '');
+            var database = window.SystemLogger.getDb();
+            if (database && cleanKey) {
+                try {
+                    await database.ref('bootcamp_users/' + cleanKey).update(updates);
+                } catch (e) {}
+            }
+
+            this.renderUnifiedDropdown();
+            this.closeProfileModal();
+            window.SystemLogger.log('UPDATE', 'อัปเดตโปรไฟล์ส่วนตัว', 'แก้ไขโปรไฟล์ของ ' + userObj.username + ' (' + dispName + ')', 'fa-solid fa-user-pen text-indigo-400');
+            alert('บันทึกการตั้งค่าโปรไฟล์เรียบร้อยแล้ว!');
         }
     };
 
@@ -648,9 +865,14 @@
         window.UserManager.openModal();
     };
 
+    window.openProfileSettingsModal = function () {
+        window.UserManager.openProfileModal();
+    };
+
+    window.UserManager.injectSharedStyles();
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () { window.UserManager.injectMenuLink(); });
+        document.addEventListener('DOMContentLoaded', function () { window.UserManager.renderUnifiedDropdown(); });
     } else {
-        setTimeout(function () { window.UserManager.injectMenuLink(); }, 50);
+        setTimeout(function () { window.UserManager.renderUnifiedDropdown(); }, 20);
     }
 })();

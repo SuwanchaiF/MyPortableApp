@@ -18,9 +18,6 @@
     <!-- Tesseract.js OCR Engine (อ่านตัวเลขกิโลเมตรจากรูปภาพแผนที่อัตโนมัติ) -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-    <!-- DOCX Export Library -->
-    <script src="https://unpkg.com/docx@8.2.2/build/index.umd.js"></script>
-
     <!-- Firebase App & Database (Compat SDKs) & Shared Core -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -261,7 +258,7 @@
             font-weight: 600;
         }
 
-        input[type="text"], input[type="date"], textarea {
+        input[type="text"], input[type="date"], input[type="number"], textarea {
             background: var(--input-bg);
             border: 1px solid rgba(255, 255, 255, 0.12);
             color: #ffffff;
@@ -270,12 +267,17 @@
             font-size: 0.88rem;
             font-family: inherit;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
             width: 100%;
+        }
+
+        input[type="text"]::placeholder, input[type="number"]::placeholder, textarea::placeholder {
+            color: #64748b;
         }
 
         input:focus, textarea:focus {
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
         }
 
         /* Image Dropzone */
@@ -667,10 +669,10 @@
                     <i class="fa-solid fa-map-location-dot"></i>
                 </div>
                 <div>
-                    <h1>🏛️ รายงานภาพแผนที่ การเดินทาง ไป-กลับ สภา</h1>
+                    <h1>รายงานภาพแผนที่ การเดินทาง ไป-กลับ สภา</h1>
                     <div class="live-status">
                         <span class="live-dot"></span>
-                        <span id="cloud-status-badge"> Firebase Cloud Sync • ออกรายงานได้ทั้ง Word (.docx) และ PDF</span>
+                        <span id="cloud-status-badge"> Firebase Cloud Sync • ออกรายงาน PDF</span>
                     </div>
                 </div>
             </div>
@@ -733,11 +735,17 @@
                     </div>
                     <div class="form-group">
                         <label><i class="fa-solid fa-route text-emerald-400"></i> ระยะทางขาไปเริ่มต้น (กม. · จำค่าอัตโนมัติ)</label>
-                        <input type="number" id="input-go-km" placeholder="เช่น 20" step="0.5" min="0" onchange="saveCommutePrefs(); updateStagedDefaultKm();" oninput="saveCommutePrefs(); updateStagedDefaultKm();">
+                        <div style="position: relative;">
+                            <input type="number" id="input-go-km" placeholder="พิมพ์ระยะทางขาไป เช่น 20..." step="0.5" min="0" onchange="saveCommutePrefs(); updateStagedDefaultKm();" oninput="saveCommutePrefs(); updateStagedDefaultKm();" style="padding-right: 38px;">
+                            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #4ade80; font-size: 0.78rem; font-weight: 600; pointer-events: none;">กม.</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label><i class="fa-solid fa-route text-sky-400"></i> ระยะทางขากลับเริ่มต้น (กม. · จำค่าอัตโนมัติ)</label>
-                        <input type="number" id="input-back-km" placeholder="เช่น 20" step="0.5" min="0" onchange="saveCommutePrefs(); updateStagedDefaultKm();" oninput="saveCommutePrefs(); updateStagedDefaultKm();">
+                        <div style="position: relative;">
+                            <input type="number" id="input-back-km" placeholder="พิมพ์ระยะทางขากลับ เช่น 20..." step="0.5" min="0" onchange="saveCommutePrefs(); updateStagedDefaultKm();" oninput="saveCommutePrefs(); updateStagedDefaultKm();" style="padding-right: 38px;">
+                            <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #38bdf8; font-size: 0.78rem; font-weight: 600; pointer-events: none;">กม.</span>
+                        </div>
                     </div>
                 </div>
 
@@ -769,31 +777,34 @@
                 </h3>
                 
                 <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                    <button type="button" onclick="setFilterPreset('all')" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); color: #cbd5e1; font-size: 0.76rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;">ทั้งหมด</button>
-                    <button type="button" onclick="setFilterPreset('this_month')" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #a5b4fc; font-size: 0.76rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;">เดือนนี้</button>
-                    <button type="button" onclick="setFilterPreset('last_7')" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 0.76rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;">7 วันล่าสุด</button>
-                    <button type="button" onclick="clearDateFilter()" style="background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: #fda4af; font-size: 0.76rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;"><i class="fa-solid fa-rotate-left"></i> ล้างตัวกรอง</button>
+                    <button type="button" onclick="setFilterPreset('all')" style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.15); color: #cbd5e1; font-size: 0.76rem; font-weight: 600; padding: 5px 10px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"><i class="fa-solid fa-layer-group text-slate-400"></i> ทั้งหมด</button>
+                    <button type="button" onclick="setFilterPreset('this_month')" style="background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #a5b4fc; font-size: 0.76rem; font-weight: 600; padding: 5px 10px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"><i class="fa-regular fa-calendar-check text-indigo-400"></i> เดือนนี้</button>
+                    <button type="button" onclick="setFilterPreset('last_7')" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7; font-size: 0.76rem; font-weight: 600; padding: 5px 10px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"><i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> 7 วันล่าสุด</button>
+                    <button type="button" onclick="clearDateFilter()" style="background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: #fda4af; font-size: 0.76rem; font-weight: 600; padding: 5px 10px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"><i class="fa-solid fa-rotate-left text-rose-400"></i> ล้างตัวกรอง</button>
                 </div>
             </div>
 
-            <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px;">
-                <div style="flex: 1; min-width: 145px; position: relative;">
-                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">📅 จากวันที่ (พ.ศ.)</label>
+            <div class="form-row" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 14px;">
+                <div class="form-group" style="position: relative;">
+                    <label><i class="fa-regular fa-calendar text-indigo-400"></i> จากวันที่ (พ.ศ.)</label>
                     <div style="position: relative;">
-                        <input type="text" id="filter-start-date" class="thai-datepicker-input" placeholder="วว/ดด/ปปปป (พ.ศ.)" autocomplete="off" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 100%; padding: 7px 32px 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff; cursor: pointer;">
-                        <i class="fa-regular fa-calendar-days" onclick="ThaiDatePicker.openFor('filter-start-date', event)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #818cf8; font-size: 0.82rem; cursor: pointer;"></i>
+                        <input type="text" id="filter-start-date" class="thai-datepicker-input" placeholder="วว/ดด/ปปปป (พ.ศ.)" autocomplete="off" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="padding-right: 34px; cursor: pointer;">
+                        <i class="fa-regular fa-calendar-days" onclick="ThaiDatePicker.openFor('filter-start-date', event)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #818cf8; cursor: pointer;"></i>
                     </div>
                 </div>
-                <div style="flex: 1; min-width: 145px; position: relative;">
-                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">📅 ถึงวันที่ (พ.ศ.)</label>
+                <div class="form-group" style="position: relative;">
+                    <label><i class="fa-regular fa-calendar text-indigo-400"></i> ถึงวันที่ (พ.ศ.)</label>
                     <div style="position: relative;">
-                        <input type="text" id="filter-end-date" class="thai-datepicker-input" placeholder="วว/ดด/ปปปป (พ.ศ.)" autocomplete="off" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="width: 100%; padding: 7px 32px 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff; cursor: pointer;">
-                        <i class="fa-regular fa-calendar-days" onclick="ThaiDatePicker.openFor('filter-end-date', event)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #818cf8; font-size: 0.82rem; cursor: pointer;"></i>
+                        <input type="text" id="filter-end-date" class="thai-datepicker-input" placeholder="วว/ดด/ปปปป (พ.ศ.)" autocomplete="off" onchange="renderCommuteRecords()" oninput="renderCommuteRecords()" style="padding-right: 34px; cursor: pointer;">
+                        <i class="fa-regular fa-calendar-days" onclick="ThaiDatePicker.openFor('filter-end-date', event)" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #818cf8; cursor: pointer;"></i>
                     </div>
                 </div>
-                <div style="flex: 1.5; min-width: 170px;">
-                    <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">🔍 ค้นหาวันที่/ข้อความ</label>
-                    <input type="text" id="filter-search" onkeyup="renderCommuteRecords()" oninput="renderCommuteRecords()" placeholder="พิมพ์ค้นหาวันที่..." style="width: 100%; padding: 7px 12px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; color: #ffffff;">
+                <div class="form-group" style="position: relative;">
+                    <label><i class="fa-solid fa-magnifying-glass text-sky-400"></i> ค้นหาวันที่ / ข้อความ</label>
+                    <div style="position: relative;">
+                        <input type="text" id="filter-search" onkeyup="renderCommuteRecords()" oninput="renderCommuteRecords()" placeholder="พิมพ์ค้นหาวันที่..." style="padding-right: 34px;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #38bdf8; pointer-events: none;"></i>
+                    </div>
                 </div>
             </div>
 
@@ -803,8 +814,8 @@
                     <span style="display: flex; align-items: center; gap: 6px;">
                         <i class="fa-solid fa-calculator text-emerald-400"></i> สรุปผลการคำนวณระยะทาง & ค่าน้ำมัน (ตามช่วงวันที่เลือก)
                     </span>
-                    <span style="font-size: 0.72rem; color: #94a3b8; background: rgba(15, 23, 42, 0.6); padding: 2px 8px; border-radius: 6px;">
-                        🔒 แสดงเฉพาะบนหน้าจอ (ไม่รวมในรายงาน PDF/Word)
+                    <span style="font-size: 0.72rem; color: #94a3b8; background: rgba(15, 23, 42, 0.6); padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-eye-slash text-slate-400"></i> แสดงเฉพาะบนหน้าจอ (ไม่รวมในรายงาน PDF)
                     </span>
                 </div>
 
@@ -836,27 +847,24 @@
 
                 <!-- Action Toolbar: AI OCR Scan, Fast Table Grid & JSON Backup -->
                 <div class="action-toolbar-buttons" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
-                    <button type="button" onclick="scanAllImageDistancesWithOCR()" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
-                        <i class="fa-solid fa-robot text-purple-400"></i> <span id="ocr-btn-text">🤖 สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)</span>
+                    <button type="button" onclick="scanAllImageDistancesWithOCR()" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2)); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; font-size: 0.78rem; font-weight: 600; padding: 7px 13px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                        <i class="fa-solid fa-robot text-purple-400"></i> <span id="ocr-btn-text">สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)</span>
                     </button>
-                    <button type="button" onclick="openDistanceTableModal()" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
-                        <i class="fa-solid fa-table-list text-emerald-400"></i> 📋 ตารางระบุระยะทางแบบรวม (Fast Table)
+                    <button type="button" onclick="openDistanceTableModal()" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7; font-size: 0.78rem; font-weight: 600; padding: 7px 13px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                        <i class="fa-solid fa-table-list text-emerald-400"></i> ตารางระบุระยะทางแบบรวม (Fast Table)
                     </button>
-                    <button type="button" onclick="CommuteStorage.exportBackupJSON(allRecords)" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #7dd3fc; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" title="ดาวน์โหลดข้อมูลทั้งหมดเก็บเป็นไฟล์สำรอง .json">
-                        <i class="fa-solid fa-download text-sky-400"></i> 💾 สำรองข้อมูล (.json)
+                    <button type="button" onclick="CommuteStorage.exportBackupJSON(allRecords)" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #7dd3fc; font-size: 0.78rem; font-weight: 600; padding: 7px 13px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" title="ดาวน์โหลดข้อมูลทั้งหมดเก็บเป็นไฟล์สำรอง .json">
+                        <i class="fa-solid fa-download text-sky-400"></i> สำรองข้อมูล (.json)
                     </button>
-                    <label style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fcd34d; font-size: 0.78rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" title="นำเข้าข้อมูลจากไฟล์สำรอง .json">
-                        <i class="fa-solid fa-file-import text-amber-400"></i> 📂 กู้คืนไฟล์สำรอง
+                    <label style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fcd34d; font-size: 0.78rem; font-weight: 600; padding: 7px 13px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;" title="นำเข้าข้อมูลจากไฟล์สำรอง .json">
+                        <i class="fa-solid fa-file-import text-amber-400"></i> กู้คืนไฟล์สำรอง
                         <input type="file" accept=".json,application/json" onchange="handleImportBackupJSON(event)" style="display: none;">
                     </label>
                 </div>
             </div>
 
-            <!-- Export Buttons Container (ตำแหน่งใหม่: อยู่ล่างสุดของตัวกรอง) -->
+            <!-- Export PDF Button Container -->
             <div style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 12px;">
-                <button type="button" class="btn-export-docx" onclick="exportToWordDocx()">
-                    <i class="fa-solid fa-file-word"></i> ออกรายงาน Word (.docx)
-                </button>
                 <button type="button" class="btn-export-pdf" onclick="exportToPDF()">
                     <i class="fa-solid fa-file-pdf"></i> ออกรายงาน PDF
                 </button>
@@ -922,16 +930,16 @@
         </div>
         
         <div style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 10px;">
-            💡 กดปุ่ม <kbd style="background: #334155; padding: 1px 5px; border-radius: 4px; color: #ffffff;">Tab</kbd> เพื่อพิมพ์กรอกระยะทางถัดไปได้อย่างรวดเร็วในหน้าเดียว
+            <i class="fa-regular fa-lightbulb text-amber-400 mr-1"></i> กดปุ่ม <kbd style="background: #334155; padding: 1px 5px; border-radius: 4px; color: #ffffff;">Tab</kbd> เพื่อพิมพ์กรอกระยะทางถัดไปได้อย่างรวดเร็วในหน้าเดียว
         </div>
 
         <div style="overflow-y: auto; flex: 1; margin-bottom: 14px; padding-right: 4px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
                 <thead>
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.15); text-align: left; color: #a5b4fc;">
-                        <th style="padding: 8px;">📅 วันที่ / เที่ยวเดินทาง</th>
-                        <th style="padding: 8px;">⏱️ เวลา</th>
-                        <th style="padding: 8px; text-align: center;">🛣️ ระยะทาง (กม.)</th>
+                        <th style="padding: 8px;"><i class="fa-regular fa-calendar-days text-indigo-400 mr-1"></i> วันที่ / เที่ยวเดินทาง</th>
+                        <th style="padding: 8px;"><i class="fa-regular fa-clock text-amber-400 mr-1"></i> เวลา</th>
+                        <th style="padding: 8px; text-align: center;"><i class="fa-solid fa-route text-emerald-400 mr-1"></i> ระยะทาง (กม.)</th>
                     </tr>
                 </thead>
                 <tbody id="distance-table-body">
@@ -1404,9 +1412,9 @@
             const badge = document.getElementById('cloud-status-badge');
             if (badge) {
                 if (isConnected) {
-                    badge.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-400"></i> Firebase Cloud Sync (${text}) • ออกรายงานได้ทั้ง Word (.docx) และ PDF`;
+                    badge.innerHTML = `<i class="fa-solid fa-cloud-check text-emerald-400"></i> Firebase Cloud Sync (${text}) • ออกรายงาน PDF`;
                 } else {
-                    badge.innerHTML = `<i class="fa-solid fa-hard-drive text-indigo-400"></i> โหมด Offline / อุปกรณ์ (${text}) • ออกรายงานได้ทั้ง Word (.docx) และ PDF`;
+                    badge.innerHTML = `<i class="fa-solid fa-hard-drive text-indigo-400"></i> โหมด Offline / อุปกรณ์ (${text}) • ออกรายงาน PDF`;
                 }
             }
         };
@@ -1630,9 +1638,9 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
                 <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.85); color: #fbbf24; font-size: 0.65rem; padding: 3px 4px; text-align: center;">
-                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">⏱️ ${imgObj.time}</div>
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 2px; margin-top: 2px;" onclick="event.stopPropagation()">
-                        <span style="color: #4ade80;">🛣️</span>
+                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><i class="fa-regular fa-clock mr-1"></i>${imgObj.time}</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 3px; margin-top: 2px;" onclick="event.stopPropagation()">
+                        <i class="fa-solid fa-route text-emerald-400" style="font-size: 0.62rem;"></i>
                         <input type="number" value="${kmVal}" placeholder="0" step="0.5" min="0" onchange="updateStagedDistance(${idx}, this.value)" style="width: 38px; padding: 0 2px; font-size: 0.65rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(74,222,128,0.5); color: #4ade80; border-radius: 3px; text-align: center;" title="แตะเพื่อระบุระยะทางเฉพาะภาพนี้">
                         <span style="color: #4ade80;">กม.</span>
                     </div>
@@ -2310,10 +2318,10 @@
                 rowsHtml += `
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
                         <td style="padding: 8px; color: #cbd5e1;">
-                            <strong style="color: #ffffff;">📅 ${sec.dateDisplay}</strong>
+                            <strong style="color: #ffffff;"><i class="fa-regular fa-calendar-days text-indigo-400 mr-1"></i> ${sec.dateDisplay}</strong>
                             <div style="font-size: 0.74rem; color: #94a3b8;"><i class="fa-solid fa-map-pin text-rose-400 mr-1"></i> ${img.label}</div>
                         </td>
-                        <td style="padding: 8px; color: #fbbf24; font-size: 0.78rem;">⏱️ ${img.time}</td>
+                        <td style="padding: 8px; color: #fbbf24; font-size: 0.78rem;"><i class="fa-regular fa-clock mr-1"></i> ${img.time}</td>
                         <td style="padding: 8px; text-align: center;">
                             <input type="number" value="${valDisplay}" placeholder="0" step="0.5" min="0" onchange="updatePhotoDistance('${img.recordId}', ${img.origIdx}, this.value)" style="width: 65px; padding: 4px 6px; font-size: 0.85rem; background: rgba(15,23,42,0.9); border: 1px solid rgba(74,222,128,0.5); border-radius: 6px; color: #4ade80; font-weight: bold; text-align: center;">
                         </td>
@@ -2399,191 +2407,10 @@
         }
 
         console.warn = origWarn; // Restore original console.warn
-        if (btnText) btnText.innerText = "🤖 สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)";
+        if (btnText) btnText.innerText = "สแกนอ่านระยะทางจากรูปภาพด้วย AI (OCR)";
         SystemLogger.log('OCR', 'สแกนอ่านระยะทางด้วย AI (OCR)', `ดึงข้อมูลสำเร็จ ${countSuccess} / ${totalScanned} ภาพ`, 'fa-solid fa-robot text-purple-400');
         alert(`สแกนอ่านระยะทางเสร็จสิ้น! ดึงตัวเลขกิโลเมตรสำเร็จ ${countSuccess} / ${totalScanned} ภาพ`);
         renderCommuteRecords();
-    }
-
-    function getDocxImageRun(imgUrl, width, height) {
-        if (!imgUrl || typeof imgUrl !== 'string') return null;
-        let base64 = imgUrl.trim();
-        if (base64.includes(',')) {
-            base64 = base64.split(',')[1];
-        }
-        base64 = base64.replace(/[\r\n\s]/g, '');
-        if (!base64) return null;
-
-        try {
-            const binaryStr = window.atob(base64);
-            const len = binaryStr.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryStr.charCodeAt(i);
-            }
-
-            return new docx.ImageRun({
-                data: bytes,
-                transformation: {
-                    width: width,
-                    height: height
-                }
-            });
-        } catch(err) {
-            console.error("Base64 DOCX image conversion error:", err);
-            return null;
-        }
-    }
-
-    // ==========================================
-    // EXPORT TO DOCX (Microsoft Word Document)
-    // ==========================================
-    async function exportToWordDocx() {
-        if (!allRecords.length) {
-            alert('ยังไม่มีข้อมูลสำหรับออกรายงาน กรุณาเพิ่มข้อมูลบันทึกก่อนออกรายงาน');
-            return;
-        }
-
-        const grouped = (currentFilteredSections && currentFilteredSections.length > 0) ? currentFilteredSections : groupImagesByRealDate(allRecords);
-
-        if (!grouped || grouped.length === 0) {
-            alert('ไม่พบรายการภาพแผนที่ตามช่วงวันที่ที่เลือก กรุณาปรับเปลี่ยนตัวกรองวันที่ก่อนออกรายงาน');
-            return;
-        }
-
-        if (typeof docx === 'undefined') {
-            alert('กำลังโหลดไลบรารี DOCX กรุณาลองใหม่อีกครั้ง');
-            return;
-        }
-
-        SystemLogger.log('EXPORT', 'ออกรายงาน Word (.docx)', `ดาวน์โหลดเอกสาร Word (.docx) รวม ${grouped.length} ช่วงวันที่`, 'fa-solid fa-file-word text-blue-400');
-
-        const { Document, Packer, Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, AlignmentType, HeadingLevel, WidthType, BorderStyle } = docx;
-
-        const noBorders = {
-            top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-            bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-            left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
-            right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" }
-        };
-
-        const children = [
-            new Paragraph({
-                text: "รายงานภาพแผนที่การเดินทาง ไป-กลับ สภา",
-                heading: HeadingLevel.HEADING_1,
-                alignment: AlignmentType.CENTER,
-                spacing: { after: 250 }
-            })
-        ];
-
-        for (const section of grouped) {
-            const dateTitle = section.dateDisplay;
-            
-            // Add Date Header Paragraph
-            children.push(
-                new Paragraph({
-                    children: [
-                        new TextRun({
-                            text: `วันที่ ${dateTitle}`,
-                            bold: true,
-                            size: 24,
-                            color: "1E293B"
-                        })
-                    ],
-                    spacing: { before: 200, after: 100 }
-                })
-            );
-
-            // Construct 2-column image table for Word DOCX layout (2 or 4 images per page)
-            const rawImgs = section.images;
-            const tableRows = [];
-
-            for (let i = 0; i < rawImgs.length; i += 2) {
-                const rowCells = [];
-                
-                // Cell 1
-                const imgObj1 = rawImgs[i];
-                const imgRun1 = getDocxImageRun(imgObj1.url, 255, 170);
-
-                rowCells.push(
-                    new TableCell({
-                        children: [
-                            new Paragraph({
-                                children: imgRun1 ? [imgRun1] : [new TextRun({ text: "ภาพแผนที่ 1", color: "94A3B8" })],
-                                alignment: AlignmentType.CENTER
-                            })
-                        ],
-                        width: { size: 50, type: WidthType.PERCENTAGE },
-                        borders: noBorders
-                    })
-                );
-
-                // Cell 2 (if present)
-                if (i + 1 < rawImgs.length) {
-                    const imgObj2 = rawImgs[i+1];
-                    const imgRun2 = getDocxImageRun(imgObj2.url, 255, 170);
-
-                    rowCells.push(
-                        new TableCell({
-                            children: [
-                                new Paragraph({
-                                    children: imgRun2 ? [imgRun2] : [new TextRun({ text: "ภาพแผนที่ 2", color: "94A3B8" })],
-                                    alignment: AlignmentType.CENTER
-                                })
-                            ],
-                            width: { size: 50, type: WidthType.PERCENTAGE },
-                            borders: noBorders
-                        })
-                    );
-                } else {
-                    // Empty cell to maintain 2-column grid alignment
-                    rowCells.push(
-                        new TableCell({
-                            children: [new Paragraph({ text: "" })],
-                            width: { size: 50, type: WidthType.PERCENTAGE },
-                            borders: noBorders
-                        })
-                    );
-                }
-
-                tableRows.push(new TableRow({ children: rowCells }));
-            }
-
-            if (tableRows.length > 0) {
-                children.push(
-                    new Table({
-                        rows: tableRows,
-                        width: { size: 100, type: WidthType.PERCENTAGE }
-                    })
-                );
-            }
-        }
-
-        const doc = new Document({
-            sections: [{
-                properties: {},
-                children: children
-            }]
-        });
-
-        Packer.toBlob(doc).then(blob => {
-            const fileName = `รายงานภาพ_map_ไป-กลับสภา_${new Date().toISOString().split('T')[0]}.docx`;
-            try {
-                const blobUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = fileName;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    if (document.body.contains(a)) document.body.removeChild(a);
-                    URL.revokeObjectURL(blobUrl);
-                }, 2500);
-            } catch(e) {
-                console.error("DOCX download error:", e);
-            }
-        });
     }
 
     // ==========================================
